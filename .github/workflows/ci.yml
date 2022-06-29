@@ -82,6 +82,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          path: 'mtulio.okd_installer'
           fetch-depth: 5
           submodules: recursive
 
@@ -114,6 +115,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          path: 'mtulio.okd_installer'
           fetch-depth: 5
           submodules: recursive
 

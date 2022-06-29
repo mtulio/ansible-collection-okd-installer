@@ -88,7 +88,7 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/*/}
+        run: echo ::set-output name=VERSION::${GITHUB_REF##*/}
 
       - name: Build Collection
         env:

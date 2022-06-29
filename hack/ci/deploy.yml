@@ -6,7 +6,7 @@
   vars:
     # This should be set via the command line at runtime.
     tag: ''
-    collection_root: "{{ playbook_dir }}/../../../"
+    collection_root: "{{ playbook_dir }}/../.."
     build_dir: "{{ collection_root }}/build"
 
   pre_tasks:

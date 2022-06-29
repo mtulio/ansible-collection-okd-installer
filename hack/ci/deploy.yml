@@ -6,13 +6,14 @@
   vars:
     # This should be set via the command line at runtime.
     tag: ''
-    build_dir: "{{ playbook_dir }}/../../build"
+    collection_root: "{{ playbook_dir }}/../.."
+    build_dir: "{{ collection_root }}/build"
 
   pre_tasks:
     - name: Verify none of the git submodules need updates.
       command: >
         git submodule update --recursive --remote
-        chdir=../
+        chdir={{ collection_root }}
       register: git_update
       failed_when: git_update.stdout != ''
       tags: build
@@ -48,19 +49,19 @@
     - name: Template out the galaxy.yml file.
       template:
         src: templates/galaxy.yml.j2
-        dest: ../../galaxy.yml
+        dest: "{{ collection_root }}/galaxy.yml"
       tags: build
 
     - name: Build the collection.
       command: >
         ansible-galaxy collection build \
           --output-path {{ build_dir }}
-        chdir=../
+        chdir={{ collection_root }}
       tags: build
 
     - name: Publish the collection.
       command: >
         ansible-galaxy collection publish \
           {{ build_dir }}/mtulio-okd_installer-{{ tag }}.tar.gz
-        chdir=../
+        chdir={{ collection_root }}
       tags: deploy

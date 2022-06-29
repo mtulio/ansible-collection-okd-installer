@@ -1,0 +1,139 @@
+---
+name: CI
+'on':
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  schedule:
+    - cron: "0 5 * * 0"
+
+defaults:
+  run:
+    working-directory: 'mtulio.okd_installer'
+
+jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          path: 'mtulio.okd_installer'
+          submodules: recursive
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install yamllint
+
+      - name: Lint code.
+        run: |
+          yamllint .
+
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    needs: [lint]
+    strategy:
+      matrix:
+        include:
+          - distro: centos7
+            playbook: converge.yml
+          - distro: debian10
+            playbook: converge.yml
+
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          path: 'mtulio.okd_installer'
+          submodules: recursive
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Run Molecule tests.
+        run: molecule test
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}
+          MOLECULE_PLAYBOOK: ${{ matrix.playbook }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [molecule]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 5
+          submodules: recursive
+
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/*/}
+
+      - name: Build Collection
+        env:
+          RELEASE_VERSION: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          echo RELEASE_VERSION=[$RELEASE_VERSION]
+          ansible-playbook hack/ci/deploy.yml \
+            -e tag="$RELEASE_VERSION" \
+            -t build
+          ls build/mtulio-okd_installer-*.tar.gz
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: mtulio-okd_installer-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          path: |
+            build
+
+  release-to-galaxy:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 5
+          submodules: recursive
+
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/*/}
+
+      - name: Deploy to Galaxy
+        env:
+          RELEASE_VERSION: ${{ steps.get_version.outputs.VERSION }}
+          ANSIBLE_GALAXY_TOKEN: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
+        run: |
+          echo VERSION=[$RELEASE_VERSION]
+          ansible-playbook hack/ci/deploy.yml \
+            -e tag="${RELEASE_VERSION}" \
+            -t build,deploy
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: mtulio-okd_installer-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          path: |
+            build

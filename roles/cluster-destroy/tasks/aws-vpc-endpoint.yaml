@@ -31,4 +31,3 @@
 #    service: "{{ item }}"
 #  with_items:
 #    - "com.amazonaws.{{ vpc_region }}.s3"
-

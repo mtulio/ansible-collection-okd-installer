@@ -18,4 +18,3 @@
   loop_control:
     loop_var: zone
   tags: dns
-

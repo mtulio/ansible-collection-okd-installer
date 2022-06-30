@@ -1,0 +1,19 @@
+---
+- include: config_load.yaml
+
+- name: OpenShift Stack Create - IAM
+  hosts: localhost
+  connection: local
+
+  vars_prompt:
+    - name: install_dir
+      prompt: What is the Installation Directory?
+      private: no
+
+  vars_files:
+    - "vars/iam/ocp-{{ provider }}.yaml"
+
+  roles:
+    - cloud_iam
+
+- include: config_dump.yaml

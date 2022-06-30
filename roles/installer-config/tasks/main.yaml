@@ -53,4 +53,3 @@
   shell: |
     {{ bin_openshift_install }} create ignition-configs --dir {{ install_dir }}
   when: not(st_out.stat.exists)
-

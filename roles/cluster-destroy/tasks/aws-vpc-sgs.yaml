@@ -38,4 +38,3 @@
   register: returned_sgs
   when: item.group_name != 'default'
   tags: vpc
-

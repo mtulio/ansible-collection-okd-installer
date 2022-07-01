@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  role_name: okd_installer_config
+  author: mtulio
+  description: Ansible Role to manager OKD/OpenShift installer configuration
+  license: Apache-2.0
+  min_ansible_version: "4.1"
+  platforms: []
+  galaxy_tags:
+    - okd
+    - openshift
+    - installer
+    - aws
+    - amazon
+    - digitalocean
+
+  cloud_platforms:
+    - amazon
+    - digitalocean
+
+dependencies: []

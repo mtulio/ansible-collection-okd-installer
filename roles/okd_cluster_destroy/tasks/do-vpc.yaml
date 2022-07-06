@@ -15,7 +15,9 @@
   register: do_vpc
   ignore_errors: true
 
-- debug: var=do_vpc
+- name: Destroy | DO | VPC | Show
+  debug:
+    var: do_vpc
 
 - name: Waiting 30s to delete VPC
   pause:

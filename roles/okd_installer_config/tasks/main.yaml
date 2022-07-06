@@ -23,12 +23,14 @@
   template:
     src: ocp-install-config.yaml.j2
     dest: "{{ install_dir }}/install-config.yaml"
+    mode: 0644
   when: not(st_out.stat.exists)
 
 - name: InstallerConfig | Backup the rendered install config
   template:
     src: ocp-install-config.yaml.j2
     dest: "{{ install_dir }}/install-config-bkp.yaml"
+    mode: 0644
   when: not(st_out.stat.exists)
 
 - name: InstallerConfig | Create manifests

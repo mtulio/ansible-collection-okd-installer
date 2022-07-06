@@ -14,9 +14,6 @@
   register: natgws_delete
   tags: vpc
 
-- debug: var=natgws_delete
-  tags: vpc
-
 - name: AWS | NAT GW delete
   ec2_vpc_nat_gateway:
     state: absent

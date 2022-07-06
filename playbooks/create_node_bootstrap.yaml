@@ -1,5 +1,5 @@
 ---
-- include: bootstrap_setup.yaml
+- import_playbook: bootstrap_setup.yaml
 
 - name: OpenShift Create Node - Bootstrap
   hosts: localhost
@@ -11,4 +11,4 @@
   roles:
     - role: cloud_compute
 
-- include: config_dump.yaml
+- import_playbook: config_dump.yaml

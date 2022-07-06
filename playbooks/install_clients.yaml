@@ -6,13 +6,13 @@
   vars_prompt:
     - name: install_workdir
       prompt: What is the Workdir Directory?
-      private: no
+      private: false
     - name: release_version
       prompt: What is the OpenShift version?
-      private: no
+      private: false
 
   vars_files:
     - vars/openshift.yaml
 
   roles:
-    - install_clients
+    - okd_install_clients

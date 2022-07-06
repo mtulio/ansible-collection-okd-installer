@@ -6,7 +6,7 @@
   vars_prompt:
     - name: install_dir
       prompt: What is the Installation Directory?
-      private: no
+      private: false
 
   tasks:
     - name: OpenShift Config Load | Get Installer data
@@ -14,7 +14,7 @@
           ocp_installer_state: "{{ lookup('file', install_dir + '/.openshift_install_state.json') }}"
           ocp_installer_metadata: "{{ lookup('file', install_dir + '/metadata.json') }}"
           ocp_ignition_bootstrap: "{{ lookup('file', install_dir + '/bootstrap.ign') }}"
-      no_log: yes
+      no_log: true
 
     - name: OpenShift Config Load | Set Defaults
       set_fact:
@@ -70,6 +70,3 @@
       when: cluster_state | length <= 0
       vars:
         query_root_ca: "storage.files[?path=='/opt/openshift/tls/root-ca.crt'].contents.source"
-
-    - debug: var=ocp_install_image
-    - debug: var=ocp_install_infraID

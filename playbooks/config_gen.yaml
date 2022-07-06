@@ -6,13 +6,13 @@
   vars_prompt:
     - name: install_dir
       prompt: What is the Installation Directory?
-      private: no
+      private: false
     - name: name
       prompt: What is the cluster name?
-      private: no
+      private: false
 
   vars_files:
     - vars/openshift.yaml
 
   roles:
-    - installer_config
+    - okd_installer_config

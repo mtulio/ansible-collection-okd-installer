@@ -1,5 +1,5 @@
 ---
-- include: openshift_config_load.yaml
+- import_playbook: config_load.yaml
 
 - hosts: localhost
   
@@ -7,16 +7,17 @@
   vars_prompt:
     - name: provider
       prompt: What is the cloud provider name?
-      private: no
+      private: false
     - name: name
       prompt: What is the network name?
-      private: no
+      private: false
 
   pre_tasks:
-    - include_vars: "vars/networks/{{ name }}-{{ provider }}-{{ region }}.yaml"
+    - name: Include network vars
+      include_vars: "vars/networks/{{ name }}-{{ provider }}-{{ region }}.yaml"
 
   roles:
     - role: cloud_network
 
 
-- include: openshift_config_dump.yaml
+- import_playbook: config_dump.yaml

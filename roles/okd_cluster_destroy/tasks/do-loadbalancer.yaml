@@ -1,16 +1,5 @@
 ---
 
-#TODO: add discovery here. Currently the info supports only given
-# LB ID, not lookup by name, it could add many extra tasks,
-# let's just ignore if absent returns errors when does not
-# exists (expected on destroy).
-#- name: Destroy | DO | VPC | Discovery by Name
-#  community.digitalocean.digital_ocean_load_balancer_info:
-#    members: true
-#    name: "{{ item_vpc.name }}"
-#  register: do_lb
-#  ignore_errors: true
-
 - name: Destroy | DO | Load Balancer
   community.digitalocean.digital_ocean_load_balancer:
     state: absent

@@ -3,6 +3,7 @@
   file:
     state: directory
     path: "{{ workdir }}"
+    mode: 0755
 
 - name: mount the binary names 
   set_fact:

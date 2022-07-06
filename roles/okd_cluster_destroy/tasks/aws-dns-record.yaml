@@ -15,9 +15,6 @@
   tags: dns
   ignore_errors: true
 
-- debug: var=rec
-  tags: dns
-
 - name: Destroy | DNS | AWS | Record Delete
   community.aws.route53:
     state: absent

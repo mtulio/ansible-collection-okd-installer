@@ -3,10 +3,15 @@ galaxy_info:
   role_name: okd_install_clients
   author: mtulio
   description: Ansible Role to Install OKD/OpenShift clients
-  # company: MTOps
   license: Apache-2.0
   min_ansible_version: "4.1"
-  platforms: []
+  platforms:
+    - name: EL
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
   galaxy_tags:
     - openshift
     - okd

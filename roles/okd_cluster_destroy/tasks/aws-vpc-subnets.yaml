@@ -11,10 +11,12 @@
   register: ret_subnets
   tags: vpc
 
-- debug: var=ret_subnets
+- name: Destroy | VPC | Subnets | Show results
+  debug:
+    var: ret_subnets
   tags: vpc
 
-- name: " AWS | Delete subnets"
+- name: Destroy | AWS | Delete subnets
   ec2_vpc_subnet:
     state: absent
     region: "{{ vpc_region }}"

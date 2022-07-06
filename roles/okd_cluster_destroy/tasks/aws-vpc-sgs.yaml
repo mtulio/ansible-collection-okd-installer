@@ -4,13 +4,16 @@
     msg: "Destroy VPC triggered"
   tags: vpc
 
-- ec2_group_facts:
+- name: Destroy | VPC | Set VPC ID
+  ec2_group_facts:
     filters:
       vpc-id: "{{ vpc_id }}"
   register: ret_sgs
   tags: vpc
 
-- debug: var=ret_sgs
+- name: Destroy | VPC | SGs | Show vpc_id
+  debug:
+    var: ret_sgs
   tags: vpc
 
 - name: AWS | SG - delete rules

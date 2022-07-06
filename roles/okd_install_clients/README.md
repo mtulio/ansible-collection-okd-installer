@@ -1,4 +1,4 @@
-okd_cluster_destroy
+okd_install_clients
 ===================
 
 A brief description of the role goes here.

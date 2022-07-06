@@ -1,4 +1,4 @@
-okd_cluster_destroy
+okd_installer_config
 ===================
 
 A brief description of the role goes here.

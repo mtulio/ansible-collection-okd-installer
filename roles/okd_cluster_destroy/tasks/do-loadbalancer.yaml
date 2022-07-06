@@ -19,4 +19,4 @@
   with_items: "{{ cloud_loadbalancers | d([]) }}"
   loop_control:
     loop_var: lb
-  ignore_errors: true
+  # ignore_errors: true

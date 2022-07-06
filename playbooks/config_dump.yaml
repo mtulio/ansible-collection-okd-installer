@@ -8,6 +8,8 @@
       debug:
         var: cluster_state
 
-    - copy:
+    - name: Save cluster state locally
+      copy:
         dest: "{{ install_dir }}/cluster_state.json"
         content: "{{ cluster_state }}"
+        mode: 0640

@@ -1,5 +1,5 @@
 ---
-- include: openshift_config_load.yaml
+- import_playbook: config_load.yaml
 
 - name: OpenShift Stack Create - Load Balancer
   hosts: localhost
@@ -8,7 +8,7 @@
   vars_prompt:
     - name: install_dir
       prompt: What is the Installation Directory?
-      private: no
+      private: false
 
   vars_files:
     - "vars/loadbalancers/ocp-{{ provider }}.yaml"
@@ -16,4 +16,4 @@
   roles:
     - cloud_load_balancer
 
-- include: openshift_config_dump.yaml
+- import_playbook: config_dump.yaml

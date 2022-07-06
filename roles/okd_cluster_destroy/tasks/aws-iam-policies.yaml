@@ -12,4 +12,4 @@
     iam_name: "{{ iam_role.name }}"
     policy_name: "{{ item.name }}"
   with_items: "{{ iam_role.custom_policies | d([]) }}"
-  ignore_errors: true
+  # ignore_errors: true

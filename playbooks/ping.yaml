@@ -1,6 +1,5 @@
 ---
-- hosts: localhost
-  become: no  
-
+- hosts: '{{ target | default("localhost") }}'
+  become: false
   tasks:
     - ping:

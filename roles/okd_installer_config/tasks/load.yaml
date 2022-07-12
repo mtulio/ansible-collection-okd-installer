@@ -1,0 +1,61 @@
+---
+- name: Load variables from installer assets
+  set_fact:
+      ocp_installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"
+      ocp_installer_metadata: "{{ lookup('file', config_install_dir + '/metadata.json') }}"
+      ocp_ignition_bootstrap: "{{ lookup('file', config_install_dir + '/bootstrap.ign') }}"
+  no_log: true
+
+- name: OpenShift Config Load | Set defaults short vars
+  set_fact:
+    base_domain: "{{ ocp_installer_state[\"*installconfig.InstallConfig\"][\"config\"][\"baseDomain\"] }}"
+    tags: {}
+
+- name: Check if cluster_state file exists
+  stat:
+    path: "{{ config_install_dir + '/cluster_state.json' }}"
+  register: st_out
+
+- name: Load local cluster_state
+  set_fact:
+    cluster_state: "{{ lookup('file', config_install_dir + '/cluster_state.json', errors='ignore') }}"
+  when: st_out.stat.exists
+
+- block:
+  - name: Create initial cluster_state
+    set_fact:
+      cluster_state:
+        cluster_name: "{{ ocp_installer_metadata.clusterName }}"
+        cluster_id: "{{ ocp_installer_metadata.clusterID }}"
+        infra_id: "{{ ocp_installer_metadata.infraID }}"
+        tags: "{% set x=tags.__setitem__('kubernetes.io/cluster/'+ocp_installer_metadata.infraID, 'owned' ) %}{{ tags }}"
+        region: "{{ config_cluster_region | d(lookup('env', 'CONFIG_REGION')) }}"
+        platform:
+          provider: "{{ provider | d('NA') }}"
+          integratoin: "{{ config_platform | d('none') }}"
+        zones:
+          base: "{{ base_domain }}"
+          base_id: ''
+          cluster: "{{ ocp_installer_metadata.clusterName }}.{{ base_domain }}"
+          cluster_id: ''
+          registers: []
+        network:
+          vpc_id: ''
+          subnets: []
+        loadbalancers: {}
+        compute:
+          image_id: "{{ custom_image_id | d(ocp_installer_state[\"*rhcos.Image\"]) }}"
+          iam_profile_bootstrap: "{{ ocp_installer_metadata.infraID }}-instance-bootstrap"
+          iam_profile_compute: "{{ ocp_installer_metadata.infraID }}-instance-compute"
+          iam_profile_controlplane: "{{ ocp_installer_metadata.infraID }}-instance-controlPlane"
+        certificates:
+          root_ca: "{{ ocp_ignition_bootstrap | json_query(query_root_ca) | join('') }}"
+        iam:
+          profile_bootstrap: "{{ ocp_installer_metadata.infraID }}-instance-bootstrap"
+          profile_controlplane: "{{ ocp_installer_metadata.infraID }}-instance-controlplane"
+          profile_compute: "{{ ocp_installer_metadata.infraID }}-instance-compute"
+    vars:
+      query_root_ca: "storage.files[?path=='/opt/openshift/tls/root-ca.crt'].contents.source"
+  when: not(st_out.stat.exists)
+
+- include: save-state.yaml

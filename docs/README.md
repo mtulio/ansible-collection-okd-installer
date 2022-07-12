@@ -4,6 +4,12 @@ Ansible Collection OKD Installer
 
 ## Setup
 
+Install ansible and dependencies:
+
+```bash
+pip install -r hack/requirements.txt
+```
+
 Clone the project
 ```bash
 ansible-galaxy collection install mtulio.okd_installer

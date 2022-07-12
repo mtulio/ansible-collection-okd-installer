@@ -20,5 +20,7 @@ config_metadata_name: "{{ cluster_name | d(lookup('ansible.builtin.env', 'CONFIG
 ## export CONFIG_BASE_DOMAIN=devcluster.openshift.com
 config_base_domain: "'{{ lookup('ansible.builtin.env', 'CONFIG_BASE_DOMAIN') }}'"
 
+config_cluster_region: "'{{ lookup('ansible.builtin.env', 'CONFIG_CLUSTER_REGION') }}'"
+
 # Network Defaults
 okd_net_default_cidr: 10.0.0.0/16

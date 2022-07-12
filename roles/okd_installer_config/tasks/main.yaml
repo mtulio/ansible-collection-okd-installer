@@ -1,4 +1,3 @@
 ---
 
-
 - include: "{{ mode | d('check') }}.yaml"

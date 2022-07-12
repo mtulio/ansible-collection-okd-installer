@@ -1,5 +1,7 @@
 ---
 
+- include: check-vars.yaml
+
 # Check create install dir
 - name: InstallerConfig | Assert directories exists
   file:

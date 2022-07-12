@@ -1,4 +1,18 @@
 ---
+
+- name: InstallerConfig | Assert directories exists
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}"
+  register: st_dir
+
+- name: Check installer dir is present
+  ansible.builtin.assert:
+    that:
+      - st_dir.stat.exists
+      - st_dir.stat.isdir
+    fail_msg: "installer dir [{{ config_install_dir }}] is not present. Create config first."
+    #success_msg: "'my_param' is between 0 and 100"
+
 - name: Load variables from installer assets
   set_fact:
       ocp_installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"

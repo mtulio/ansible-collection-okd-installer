@@ -1,7 +1,7 @@
 apiVersion: v1
 
-{% if config_baseDomain is defined %}
-baseDomain: {{ config_baseDomain }}
+{% if config_base_domain is defined %}
+baseDomain: {{ config_base_domain }}
 {% endif %}
 
 compute:
@@ -28,6 +28,6 @@ platform: {{ config_platform }}
 
 
 publish: {{ config_publish }}
-pullSecret: '{{ lookup("file", config_pullSecret_file) }}'
+pullSecret: '{{ lookup("file", config_pull_secret_file) }}'
 sshKey: |
-    {{ config_sshKey }}
+    {{ config_ssh_key }}

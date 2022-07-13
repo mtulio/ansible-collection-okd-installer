@@ -75,15 +75,15 @@ cloud_networks:
     carrier_gateway: true
     nat_gateways:
       - name: "{{ cluster_state.infra_id }}-natgw-1a"
-        subnet: "{{ cluster_state.infra_id }}-net-public-use1-1a"
+        subnet: "{{ cluster_state.infra_id }}-net-public-1a"
         tags: "{{ cluster_state.tags | d({}) }}"
         wait: false
       - name: "{{ cluster_state.infra_id }}-natgw-1b"
-        subnet: "{{ cluster_state.infra_id }}-net-public-use1-1b"
+        subnet: "{{ cluster_state.infra_id }}-net-public-1b"
         tags: "{{ cluster_state.tags | d({}) }}"
         wait: false
       - name: "{{ cluster_state.infra_id }}-natgw-1c"
-        subnet: "{{ cluster_state.infra_id }}-net-public-use1-1c"
+        subnet: "{{ cluster_state.infra_id }}-net-public-1c"
         tags: "{{ cluster_state.tags | d({}) }}"
         wait: true
 
@@ -117,59 +117,58 @@ cloud_networks:
             gw_type: cagw
 
     subnets:
-      - name: "{{ cluster_state.infra_id }}-net-public-use1-1a"
+      - name: "{{ cluster_state.infra_id }}-net-public-1a"
         az: us-east-1a
         cidr: 10.0.16.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
-      - name: "{{ cluster_state.infra_id }}-net-public-use1-1b"
+      - name: "{{ cluster_state.infra_id }}-net-public-1b"
         az: us-east-1b
         cidr: 10.0.20.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
-      - name: "{{ cluster_state.infra_id }}-net-public-use1-1c"
+      - name: "{{ cluster_state.infra_id }}-net-public-1c"
         az: us-east-1c
         cidr: 10.0.24.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
 
-      - name: "{{ cluster_state.infra_id }}-net-private-use1-1a"
+      - name: "{{ cluster_state.infra_id }}-net-private-1a"
         az: us-east-1a
         cidr: 10.0.48.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1a"
         map_public: false
-      - name: "{{ cluster_state.infra_id }}-net-private-use1-1b"
+      - name: "{{ cluster_state.infra_id }}-net-private-1b"
         az: us-east-1b
         cidr: 10.0.52.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1b"
         map_public: false
-      - name: "{{ cluster_state.infra_id }}-net-private-use1-1c"
+      - name: "{{ cluster_state.infra_id }}-net-private-1c"
         az: us-east-1c
         cidr: 10.0.56.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1c"
         map_public: false
 
       # Edge (Local Zone) subnets
-      - name: "{{ cluster_state.infra_id }}-net-public-use1-nyc-lz-1a"
+      - name: "{{ cluster_state.infra_id }}-net-public-nyc-lz-1a"
         az: us-east-1-nyc-1a
         cidr: 10.0.60.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
 
-      - name: "{{ cluster_state.infra_id }}-net-private-use1-nyc-lz-1a"
+      - name: "{{ cluster_state.infra_id }}-net-private-nyc-lz-1a"
         az: us-east-1-nyc-1a
         cidr: 10.0.64.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1a"
         map_public: false
 
       # Edge (Wavelength) subnets
-      - name: "{{ cluster_state.infra_id }}-net-public-use1-nyc-wlz-1"
+      - name: "{{ cluster_state.infra_id }}-net-public-nyc-wlz-1"
         az: us-east-1-wl1-nyc-wlz-1
         cidr: 10.0.68.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public-edge"
         map_public: false
 
-    # END(refact)
     endpoint_services:
       - name: s3
         service: com.amazonaws.us-east-1.s3

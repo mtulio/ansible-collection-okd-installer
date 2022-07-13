@@ -77,10 +77,21 @@ ansible-playbook mtulio.okd_installer.config \
 
 #### Create the network stack
 
+- Create the network stack with default variables
+
 ```bash
 ansible-playbook mtulio.okd_installer.stack_network \
     -e cluster_name=mycluster \
     -e provider=aws
+```
+
+- Create the network stack with custom variables
+
+```bash
+ansible-playbook mtulio.okd_installer.stack_network \
+    -e cluster_name=mycluster \
+    -e provider=aws \
+    -e var_file=${PWD}/vars/networks/aws-usw2.yaml
 ```
 
 

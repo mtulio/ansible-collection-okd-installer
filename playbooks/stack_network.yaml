@@ -21,3 +21,4 @@
 - import_playbook: config.yaml
   vars:
     mode: save-state
+    cluster_state: "{{ cluster_state | combine({'network': cloud_networks_state}) }}"

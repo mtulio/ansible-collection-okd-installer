@@ -10,6 +10,11 @@
   connection: local
 
   pre_tasks:
+    - name: Include User Provided Network Variables
+      include_vars:
+        file: "{{ var_file }}"
+      when: var_file is defined
+
     - name: Include Network Variables
       include_vars:
         file: "./vars/{{ provider }}/network.yaml"

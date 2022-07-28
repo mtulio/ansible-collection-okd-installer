@@ -31,8 +31,8 @@
       - config_pull_secret_file is defined
     fail_msg: "'config_pull_secret_file' is not defined. Check the env var CONFIG_PULL_SECRET_FILE"
 
-- name: Check required variables - config_region
+- name: Check required variables - config_cluster_region
   ansible.builtin.assert:
     that:
-      - config_region is defined
-    fail_msg: "'config_region' is not defined. Check the env var CONFIG_CLUSTER_REGION"
+      - config_cluster_region is defined
+    fail_msg: "'config_cluster_region' is not defined. Check the env var CONFIG_CLUSTER_REGION"

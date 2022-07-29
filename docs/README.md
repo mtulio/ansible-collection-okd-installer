@@ -24,8 +24,9 @@ ansible-galaxy collection install mtulio.okd_installer
 Create `.env` file or just export it to your session:
 ```bash
 cat <<EOF> .env
-export CONFIG_BASE_DOMAIN=mydomain.openshift.com
 export CONFIG_CLUSTER_NAME=mrbans
+export CONFIG_PROVIDER=aws
+export CONFIG_BASE_DOMAIN=mydomain.openshift.com
 export CONFIG_CLUSTER_REGION=us-east-1
 export CONFIG_PULL_SECRET_FILE=/home/mtulio/.openshift/pull-secret-latest.json
 export CONFIG_SSH_KEY="$(cat ~/.ssh/id_rsa.pub)"
@@ -42,7 +43,7 @@ Check if all required variables has been set:
 ```bash
 ansible-playbook  mtulio.okd_installer.config \
     -e mode=check-vars \
-    -e cluster_name=test1
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
 #### Install the clients
@@ -70,7 +71,7 @@ To generate the install config, you must set variables (defined above) and the c
 ```bash
 ansible-playbook mtulio.okd_installer.config \
     -e mode=create \
-    -e cluster_name=mycluster
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
 ### Network Stack
@@ -81,18 +82,32 @@ ansible-playbook mtulio.okd_installer.config \
 
 ```bash
 ansible-playbook mtulio.okd_installer.stack_network \
-    -e provider=aws \
-    -e cluster_name=mycluster
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
-- Create the network stack with custom variables file
+- Create the network stack with custom variables file (AWS Example)
 
 ```bash
 ansible-playbook mtulio.okd_installer.stack_network \
-    -e provider=aws \
-    -e cluster_name=mycluster \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
     -e var_file=${PWD}/vars/networks/aws-usw2.yaml
 ```
+
+- A more customizaded environment variable setting the CIDR block:
+
+```bash
+ansible-playbook mtulio.okd_installer.stack_network \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e var_file=${PWD}/vars/networks/aws-use1-single-AZ-peer.yaml \
+    -e resource_prefix=singleaz \
+    -e cidr_block_16=10.100.0.0/16 -e cidr_prefix_16=10.100
+```
+
+___
+REFACT>
 
 ## Build-in Use Cases
 

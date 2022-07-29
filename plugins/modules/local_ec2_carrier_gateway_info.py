@@ -6,14 +6,15 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = r'''
+DOCUMENTATION = '''
 ---
-module: ec2_vpc_cagw_info
-version_added: 1.0.0
+module: ec2_carrier_gateway_info
+version_added: 5.0.0
 short_description: Gather information about carrier gateways in AWS
 description:
-    - Gather information about carrier gateways in AWS.
-author: "Marco Braga (@mtulio)"
+  - Gather information about carrier gateways in AWS.
+author:
+  - "Marco Braga (@mtulio)"
 options:
   filters:
     description:
@@ -22,48 +23,38 @@ options:
     type: dict
   carrier_gateway_ids:
     description:
-      - Get details of specific Carrier Gateway ID. Provide this value as a list.
+      - Get details of specific Carrier Gateway ID.
     type: list
     elements: str
-  convert_tags:
-    description:
-      - Convert tags from boto3 format (list of dictionaries) to the standard dictionary format.
-      - Prior to release 4.0.0 this defaulted to C(False).
-    default: True
-    type: bool
-    version_added: 1.3.0
 extends_documentation_fragment:
-- amazon.aws.aws
-- amazon.aws.ec2
+  - amazon.aws.aws
+  - amazon.aws.ec2
 
 '''
 
-EXAMPLES = r'''
+EXAMPLES = '''
 # # Note: These examples do not set authentication details, see the AWS Guide for details.
 
 - name: Gather information about all Carrier Gateways for an account or profile
-  amazon.aws.ec2_vpc_cagw_info:
+  community.aws.ec2_carrier_gateway_info:
     region: ap-southeast-2
-    profile: production
   register: cagw_info
 
 - name: Gather information about a filtered list of Carrier Gateways
-  amazon.aws.ec2_vpc_cagw_info:
+  community.aws.ec2_carrier_gateway_info:
     region: ap-southeast-2
-    profile: production
     filters:
         "tag:Name": "cagw-123"
   register: cagw_info
 
 - name: Gather information about a specific carrier gateway by CarrierGatewayId
-  amazon.aws.ec2_vpc_cagw_info:
+  community.aws.ec2_carrier_gateway_info:
     region: ap-southeast-2
-    profile: production
     carrier_gateway_ids: cagw-c1231234
   register: cagw_info
 '''
 
-RETURN = r'''
+RETURN = '''
 changed:
     description: True if listing the carrier gateways succeeds.
     type: bool
@@ -106,27 +97,23 @@ from ansible_collections.amazon.aws.plugins.module_utils.ec2 import ansible_dict
 from ansible_collections.amazon.aws.plugins.module_utils.ec2 import camel_dict_to_snake_dict
 
 
-def get_carrier_gateway_info(carrier_gateway, convert_tags):
-    if convert_tags:
-        tags = boto3_tag_list_to_ansible_dict(carrier_gateway['Tags'])
-        ignore_list = ["Tags"]
-    else:
-        tags = carrier_gateway['Tags']
-        ignore_list = []
+def get_carrier_gateway_info(carrier_gateway):
+    tags = carrier_gateway['Tags']
+    ignore_list = []
     carrier_gateway_info = {'CarrierGatewayId': carrier_gateway['CarrierGatewayId'],
-                             'VpcId': carrier_gateway['VpcId'],
-                             'Tags': tags}
+                            'VpcId': carrier_gateway['VpcId'],
+                            'Tags': tags}
 
-    carrier_gateway_info = camel_dict_to_snake_dict(carrier_gateway_info, ignore_list=ignore_list)
+    carrier_gateway_info = camel_dict_to_snake_dict(carrier_gateway_info,
+                                                    ignore_list=ignore_list)
     return carrier_gateway_info
 
 
 def list_carrier_gateways(connection, module):
+
     params = dict()
 
     params['Filters'] = ansible_dict_to_boto3_filter_list(module.params.get('filters'))
-    convert_tags = module.params.get('convert_tags')
-
     if module.params.get("carrier_gateway_ids"):
         params['CarrierGatewayIds'] = module.params.get("carrier_gateway_ids")
 
@@ -137,7 +124,7 @@ def list_carrier_gateways(connection, module):
     except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as e:  # pylint: disable=duplicate-except
         module.fail_json_aws(e, 'Unable to describe carrier gateways')
 
-    return [get_carrier_gateway_info(cagw, convert_tags)
+    return [get_carrier_gateway_info(cagw)
             for cagw in all_carrier_gateways['CarrierGateways']]
 
 
@@ -145,7 +132,6 @@ def main():
     argument_spec = dict(
         filters=dict(type='dict', default=dict()),
         carrier_gateway_ids=dict(type='list', default=None, elements='str'),
-        convert_tags=dict(type='bool', default=True),
     )
 
     module = AnsibleAWSModule(argument_spec=argument_spec, supports_check_mode=True)

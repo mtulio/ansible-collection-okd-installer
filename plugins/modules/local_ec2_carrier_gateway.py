@@ -8,45 +8,49 @@ __metaclass__ = type
 
 DOCUMENTATION = '''
 ---
-module: ec2_vpc_cagw
-version_added: 1.0.0
+module: ec2_carrier_gateway
+version_added: 5.0.0
 short_description: Manage an AWS VPC Carrier gateway
 description:
-    - Manage an AWS VPC Carrier gateway
-author: "Marco Braga (@mtulio)"
+  - Manage an AWS VPC Carrier gateway.
+author:
+  - "Marco Braga (@mtulio)"
 options:
   vpc_id:
     description:
       - The VPC ID for the VPC in which to manage the Carrier Gateway.
     required: true
     type: str
+  carrier_gateway_id:
+    description:
+      - The Carrier Gateway ID to manage the Carrier Gateway.
+    required: false
+    type: str
   state:
     description:
-      - Create or terminate the CAGW
+      - Create or terminate the Carrier Gateway.
     default: present
     choices: [ 'present', 'absent' ]
     type: str
-notes:
-- Support for I(purge_tags) was added in release 1.3.0.
 extends_documentation_fragment:
-- amazon.aws.aws
-- amazon.aws.ec2
-- amazon.aws.tags
+  - amazon.aws.aws
+  - amazon.aws.ec2
+  - amazon.aws.tags
 '''
 
 EXAMPLES = '''
 # Note: These examples do not set authentication details, see the AWS Guide for details.
 
 # Ensure that the VPC has an Carrier Gateway.
-# The Carrier Gateway ID is can be accessed via {{cagw.carrier_gateway_id}} for use in setting up NATs etc.
+# The Carrier Gateway ID can be accessed via {{cagw.carrier_gateway_id}} for use in setting up Route tables etc.
 - name: Create Carrier gateway
-  community.aws.ec2_vpc_cagw:
+  community.aws.ec2_carrier_gateway:
     vpc_id: vpc-abcdefgh
     state: present
   register: cagw
 
 - name: Create Carrier gateway with tags
-  community.aws.ec2_vpc_cagw:
+  community.aws.ec2_carrier_gateway:
     vpc_id: vpc-abcdefgh
     state: present
     tags:
@@ -55,9 +59,10 @@ EXAMPLES = '''
   register: cagw
 
 - name: Delete Carrier gateway
-  community.aws.ec2_vpc_cagw:
-    state: absent
+  community.aws.ec2_carrier_gateway:
     vpc_id: vpc-abcdefgh
+    carrier_gateway_id: "cagw-123"
+    state: absent
   register: vpc_cagw_delete
 '''
 
@@ -95,11 +100,13 @@ except ImportError:
     pass  # caught by AnsibleAWSModule
 
 from ansible_collections.amazon.aws.plugins.module_utils.core import AnsibleAWSModule
+from ansible_collections.amazon.aws.plugins.module_utils.core import is_boto3_error_message
 from ansible_collections.amazon.aws.plugins.module_utils.ec2 import AWSRetry
 from ansible_collections.amazon.aws.plugins.module_utils.ec2 import camel_dict_to_snake_dict
 from ansible_collections.amazon.aws.plugins.module_utils.ec2 import ensure_ec2_tags
 from ansible_collections.amazon.aws.plugins.module_utils.ec2 import ansible_dict_to_boto3_filter_list
 from ansible_collections.amazon.aws.plugins.module_utils.tagging import boto3_tag_list_to_ansible_dict
+
 
 @AWSRetry.jittered_backoff(retries=10, delay=10)
 def describe_cagws_with_backoff(connection, **params):
@@ -197,6 +204,8 @@ class AnsibleEc2Cagw():
                 response = self._connection.create_carrier_gateway(VpcId=vpc_id, aws_retry=True)
                 cagw = camel_dict_to_snake_dict(response['CarrierGateway'])
                 self._results['changed'] = True
+            except is_boto3_error_message("You must be opted into a wavelength zone to create a carrier gateway.") as e:
+                self._module.fail_json(msg="You must be opted into a wavelength zone to create a carrier gateway")
             except botocore.exceptions.WaiterError as e:
                 self._module.fail_json_aws(e, msg="No Carrier Gateway exists.")
             except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as e:
@@ -220,7 +229,7 @@ class AnsibleEc2Cagw():
 def main():
     argument_spec = dict(
         carrier_gateway_id=dict(required=False),
-        vpc_id=dict(required=False),
+        vpc_id=dict(required=True),
         state=dict(default='present', choices=['present', 'absent']),
         tags=dict(required=False, type='dict', aliases=['resource_tags']),
         purge_tags=dict(default=True, type='bool'),
@@ -228,6 +237,7 @@ def main():
 
     module = AnsibleAWSModule(
         argument_spec=argument_spec,
+        required_one_of=[['vpc_id', 'carrier_gateway_id']],
         supports_check_mode=True,
     )
     results = dict(

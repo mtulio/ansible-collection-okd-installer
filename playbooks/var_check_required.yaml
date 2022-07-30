@@ -1,0 +1,10 @@
+---
+- hosts: '{{target|default("localhost")}}'
+
+  vars_prompt:
+    - name: provider
+      prompt: What is the Cloud Provider name?
+      private: false
+    - name: cluster_name
+      prompt: What is the Cluster Name?
+      private: false

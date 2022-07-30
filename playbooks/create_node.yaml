@@ -1,0 +1,15 @@
+---
+- import_playbook: config_load.yaml
+
+- name: OpenShift Create Node
+  hosts: localhost
+  connection: local
+
+  pre_tasks:
+    - name: Include compute vars
+      include_vars: "vars/compute/{{ name }}-{{ provider }}.yaml"
+
+  roles:
+    - role: cloud_compute
+
+- import_playbook: config_dump.yaml

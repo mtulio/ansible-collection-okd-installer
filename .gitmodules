@@ -1,0 +1,15 @@
+[submodule "roles/cloud_compute"]
+	path = roles/cloud_compute
+	url = git@github.com:mtulio/ansible-role-cloud-compute.git
+[submodule "roles/cloud_network"]
+	path = roles/cloud_network
+	url = git@github.com:mtulio/ansible-role-cloud-network.git
+[submodule "roles/cloud_iam"]
+	path = roles/cloud_iam
+	url = git@github.com:mtulio/ansible-role-cloud-iam.git
+[submodule "roles/cloud_load_balancer"]
+	path = roles/cloud_load_balancer
+	url = git@github.com:mtulio/ansible-role-cloud-load-balancer.git
+[submodule "roles/cloud_dns"]
+	path = roles/cloud_dns
+	url = git@github.com:mtulio/ansible-role-cloud-dns.git

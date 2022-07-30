@@ -1,0 +1,8 @@
+---
+- name: OpenShift Config Load
+  hosts: '{{target|default("localhost")}}'
+  connection: local
+
+  roles:
+    - role: okd_installer_config
+      mode: load

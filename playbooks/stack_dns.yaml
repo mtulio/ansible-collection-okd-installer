@@ -1,0 +1,19 @@
+---
+- import_playbook: config_load.yaml
+
+- name: OpenShift Stack Create - DNS
+  hosts: localhost
+  connection: local
+
+  vars_prompt:
+    - name: install_dir
+      prompt: What is the Installation Directory?
+      private: false
+
+  vars_files:
+    - "vars/dns/ocp-{{ provider }}.yaml"
+
+  roles:
+    - cloud_dns
+
+- import_playbook: config_dump.yaml

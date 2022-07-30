@@ -1,0 +1,14 @@
+---
+- import_playbook: bootstrap_setup.yaml
+
+- name: OpenShift Create Node - Bootstrap
+  hosts: localhost
+  connection: local
+
+  vars_files:
+    - "vars/compute/ocp-bootstrap-{{ provider }}.yaml"
+
+  roles:
+    - role: cloud_compute
+
+- import_playbook: config_dump.yaml

@@ -1,0 +1,7 @@
+---
+- name: OKD Install Config
+  hosts: localhost
+  connection: local
+
+  roles:
+    - okd_installer_config

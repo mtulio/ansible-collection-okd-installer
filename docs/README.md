@@ -2,6 +2,10 @@
 
 Ansible Collection OKD Installer
 
+## Requirements
+
+- Python 3.8 or later
+
 ## Setup
 
 Install ansible and dependencies:
@@ -61,7 +65,7 @@ ansible-playbook mtulio.okd_installer.clients
 To install the clients you can run set the version and run:
 
 ```bash
-ansible-playbook  mtulio.okd_installer.clients -e version=4.11.0-rc.1
+ansible-playbook mtulio.okd_installer.clients -e version=4.11.0
 ```
 
 ### Config
@@ -106,8 +110,17 @@ ansible-playbook mtulio.okd_installer.stack_network \
     -e cidr_block_16=10.100.0.0/16 -e cidr_prefix_16=10.100
 ```
 
+### IAM Stack
+
+
+```bash
+ansible-playbook mtulio.okd_installer.stack_iam -vvv \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
+```
+
 ___
-REFACT>
+REFACT WIP>
 
 ## Build-in Use Cases
 

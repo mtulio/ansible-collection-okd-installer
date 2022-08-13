@@ -128,6 +128,15 @@ ansible-playbook mtulio.okd_installer.stack_dns \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
+### Load Balancer Stack
+
+
+```bash
+ansible-playbook mtulio.okd_installer.stack_loadbalancer \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
+```
+
 ___
 REFACT WIP>
 

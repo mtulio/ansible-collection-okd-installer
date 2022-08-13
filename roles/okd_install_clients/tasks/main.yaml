@@ -1,100 +1,127 @@
 ---
-- name: Create Workdir
+- name: create workdir
   file:
     state: directory
-    path: "{{ workdir }}"
+    path: "{{ item }}"
     mode: 0755
+  with_items:
+    - "{{ collection_tmp_dir }}"
+    - "{{ collection_bin_dir }}"
 
 - name: mount the binary names 
   set_fact:
-    bin_installer: "{{ workdir }}/openshift-install-{{ client_os }}-{{ release_version }}"
-    bin_client: "{{ workdir }}/openshift-client-{{ client_os }}-{{ release_version }}"
-    bin_oc: "{{ workdir }}/oc-{{ client_os }}-{{ release_version }}"
-    bin_kubectl: "{{ workdir }}/kubectl-{{ client_os }}-{{ release_version }}"
+    bin_installer: "openshift-install-{{ client_os }}-{{ version|d(release_version) }}"
+    bin_clients: "openshift-client-{{ client_os }}-{{ version|d(release_version) }}"
+    bin_oc: "oc-{{ client_os }}-{{ version|d(release_version) }}"
+    bin_kubectl: "kubectl-{{ client_os }}-{{ version|d(release_version) }}"
 
-- name: check if openshift_installer is present
+- name: check if openshift-install binary is present
   stat:
-    path: "{{ bin_installer }}"
+    path: "{{ collection_bin_dir }}/{{ bin_installer }}"
   register: check_bin_inst
 
-- name: check if openshift_installer tarball is present
-  stat:
-    path: "{{ bin_installer }}.tar.gz"
-  register: check_tar_inst
+- name: eownload and unarchive openshift-install utility
+  block:
 
-- name: extract the clients from release image
-  shell: |
-    oc adm release extract \
-      -a {{ config_pullSecret_file }} \
-      --tools {{ release_image }}:{{ release_version }}-{{ release_arch }}
-  when:
-    - not(check_tar_inst.stat.exists)
-  args:
-    chdir: "{{ workdir }}"
+  - name: check if openshift_installer tarball is present
+    stat:
+      path: "{{ collection_tmp_dir }}/{{ bin_installer }}.tar.gz"
+    register: check_tar_inst
 
-- block:
+  - name: extract the clients from release image
+    shell: |
+      oc adm release extract \
+        -a {{ config_pull_secret_file }} \
+        --tools {{ release_image }}:{{ version|d(release_version) }}-{{ release_arch }}
+    when:
+      - not(check_tar_inst.stat.exists)
+    args:
+      chdir: "{{ collection_tmp_dir }}"
+
   - name: extract the clients from tarball - installer
     ansible.builtin.unarchive:
-      src: "{{ bin_installer }}.tar.gz"
-      dest: "{{ workdir }}"
+      src: "{{ collection_tmp_dir }}/{{ bin_installer }}.tar.gz"
+      dest: "{{ collection_tmp_dir }}"
     when:
       - not(check_bin_inst.stat.exists)
     register: ext_bin_inst
 
   - name: extract the clients from tarball - installer
     copy:
-      src: "{{ workdir }}/openshift-install"
-      dest: "{{ bin_installer }}"
+      src: "{{ collection_tmp_dir }}/openshift-install"
+      dest: "{{ collection_bin_dir }}/{{ bin_installer }}"
       mode: 0755
     when: ext_bin_inst.changed
 
-  - name: extract the clients from tarball - installer
+  - name: remove extracted installer utility
     file:
       state: absent
-      path: "{{ workdir }}/openshift-install"
+      path: "{{ collection_tmp_dir }}/openshift-install"
     when: ext_bin_inst.changed
 
   when: not(check_bin_inst.stat.exists)
 
-
 - name: check if openshift client is present
   stat:
-    path: "{{ bin_oc }}"
+    path: "{{ collection_bin_dir }}/{{ bin_oc }}"
   register: check_bin_cli
 
-- name: Check if clients are present (oc and kubectl)
+- name: check if clients are present (oc and kubectl)
   block:
   - name: extract the clients from tarball - oc
     ansible.builtin.unarchive:
-      src: "{{ bin_client }}.tar.gz"
-      dest: "{{ workdir }}"
+      src: "{{ collection_tmp_dir }}/{{ bin_clients }}.tar.gz"
+      dest: "{{ collection_tmp_dir }}"
     when: not(check_bin_cli.stat.exists)
     register: ext_bin_cli
 
-  - name: "copy to correct name - oc ({{ bin_client }})"
+  - name: "copy to correct name - oc ({{ bin_clients }})"
     copy:
-      src: "{{ workdir }}/oc"
-      dest: "{{ bin_oc }}"
+      src: "{{ collection_tmp_dir }}/oc"
+      dest: "{{ collection_bin_dir }}/{{ bin_oc }}"
       mode: 0755
     when: ext_bin_cli.changed
 
   - name: remove old file - client
     file:
       state: absent
-      path: "{{ workdir }}/oc"
+      path: "{{ collection_tmp_dir }}/oc"
     when: ext_bin_cli.changed
 
   - name: "copy to correct name - kubectl"
     copy:
-      src: "{{ workdir }}/kubectl"
-      dest: "{{ bin_kubectl }}"
+      src: "{{ collection_tmp_dir }}/kubectl"
+      dest: "{{ collection_bin_dir }}/{{ bin_kubectl }}"
       mode: 0755
     when: ext_bin_cli.changed
 
   - name: remove old file - kubectl
     file:
       state: absent
-      path: "{{ workdir }}/kubectl"
+      path: "{{ collection_tmp_dir }}/kubectl"
     when: ext_bin_cli.changed
-
   when: not(check_bin_cli.stat.exists)
+
+- name: ensure Utility Links are updated
+  ansible.builtin.file:
+    state: link
+    src: "{{ collection_bin_dir }}/{{ item.src }}"
+    dest: "{{ collection_bin_dir }}/{{ item.link }}"
+  with_items:
+    - src: "{{ bin_installer }}"
+      link: openshift-install
+    - src: "{{ bin_oc }}"
+      link: oc
+    - src: "{{ bin_kubectl }}"
+      link: kubectl
+
+- name: "show utilities name located on bin path [{{ collection_bin_dir }}]"
+  debug:
+    msg: "binary=[{{ item.src }}] link=[{{ item.link }}]"
+  with_items:
+    - src: "{{ bin_installer }}"
+      link: openshift-install
+    - src: "{{ bin_oc }}"
+      link: oc
+    - src: "{{ bin_kubectl }}"
+      link: kubectl

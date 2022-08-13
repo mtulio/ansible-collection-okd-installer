@@ -59,13 +59,13 @@ The binary path of the clients used by installer is `${HOME}/.ansible/okd-instal
 To check if the clients used by installer is present, run the client check:
 
 ```bash
-ansible-playbook mtulio.okd_installer.clients
+ansible-playbook mtulio.okd_installer.install_clients
 ```
 
 To install the clients you can run set the version and run:
 
 ```bash
-ansible-playbook mtulio.okd_installer.clients -e version=4.11.0
+ansible-playbook mtulio.okd_installer.install_clients -e version=4.11.0
 ```
 
 ### Config

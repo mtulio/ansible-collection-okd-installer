@@ -1,19 +1,29 @@
 ---
-- import_playbook: config_load.yaml
+- import_playbook: var_check_required.yaml
 
-- name: OpenShift Stack Create - IAM
-  hosts: localhost
+- import_playbook: config.yaml
+  vars:
+    mode: load
+
+- name: OKD Stack IAM
+  hosts: '{{target|default("localhost")}}'
   connection: local
 
-  vars_prompt:
-    - name: install_dir
-      prompt: What is the Installation Directory?
-      private: false
+  pre_tasks:
+    - name: Include User Provided IAM Variables
+      include_vars:
+        file: "{{ var_file }}"
+      when: var_file is defined
 
-  vars_files:
-    - "vars/iam/ocp-{{ provider }}.yaml"
+    - name: Include IAM Variables
+      include_vars:
+        file: "./vars/{{ provider }}/iam.yaml"
+      when: cloud_iam is not defined
 
   roles:
     - cloud_iam
 
-- import_playbook: config_dump.yaml
+- import_playbook: config.yaml
+  vars:
+    mode: save-state
+    cluster_state: "{{ cluster_state | combine({'iam': cloud_iam_state}) }}"

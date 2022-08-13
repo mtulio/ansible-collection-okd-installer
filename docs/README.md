@@ -114,7 +114,16 @@ ansible-playbook mtulio.okd_installer.stack_network \
 
 
 ```bash
-ansible-playbook mtulio.okd_installer.stack_iam -vvv \
+ansible-playbook mtulio.okd_installer.stack_iam \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
+```
+
+### DNS Stack
+
+
+```bash
+ansible-playbook mtulio.okd_installer.stack_dns \
     -e provider=${CONFIG_PROVIDER} \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```

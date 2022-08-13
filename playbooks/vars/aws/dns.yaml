@@ -1,0 +1,14 @@
+---
+
+#AWS: https://docs.ansible.com/ansible/latest/collections/community/aws/route53_module.html
+cloud_dns_zones:
+  # public
+  - name: "{{ cluster_state.dns.base_domain }}"
+    provider: aws
+
+  # private
+  - name: "{{ cluster_state.dns.cluster_domain }}"
+    provider: aws
+    vpc_name: "{{ cluster_state.infra_id }}-vpc"
+    vpc_region: "{{ config_cluster_region }}"
+    private_zone: yes

@@ -47,11 +47,11 @@
         platform:
           provider: "{{ provider | d('NA') }}"
           integratoin: "{{ config_platform | d('none') }}"
-        zones:
-          base: "{{ base_domain }}"
-          base_id: ''
-          cluster: "{{ ocp_installer_metadata.clusterName }}.{{ base_domain }}"
-          cluster_id: ''
+        dns:
+          base_domain: "{{ base_domain }}"
+          base_domain_id: ''
+          cluster_domain: "{{ ocp_installer_metadata.clusterName }}.{{ base_domain }}"
+          cluster_domain_id: ''
           registers: []
         network:
           vpc_id: ''

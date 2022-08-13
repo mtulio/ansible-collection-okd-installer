@@ -3,16 +3,5 @@
   hosts: localhost
   connection: local
 
-  vars_prompt:
-    - name: install_workdir
-      prompt: What is the Workdir Directory?
-      private: false
-    - name: release_version
-      prompt: What is the OpenShift version?
-      private: false
-
-  vars_files:
-    - vars/openshift.yaml
-
   roles:
     - okd_install_clients

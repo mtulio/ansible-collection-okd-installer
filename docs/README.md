@@ -177,15 +177,22 @@ for i in $(oc get csr --no-headers  | \
 done
 ```
 
-<!-- ## Load Balancer for default router (non-integrated platform)
+## Load Balancer for default router (non-integrated platform)
 
 
 ```bash
-ansible-playbook mtulio.okd_installer.create_ingress_lb \
+ansible-playbook mtulio.okd_installer.stack_loadbalancer \
     -e provider=${CONFIG_PROVIDER} \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
-``` -->
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e var_file="./vars/${CONFIG_PROVIDER}/loadbalancer-router-default.yaml"
+```
 
+## Review the installation
+
+```bash
+export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/auth/kubeconfig
+oc get clusteroperators
+```
 
 ___
 REFACT WIP>

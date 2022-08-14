@@ -1,0 +1,19 @@
+--- # Setup S3 Bucket when provider ir AWS
+
+- name: Create bucket
+  s3_bucket:
+    name: "{{ openshift_bootstrap_bucket }}"
+    state: present
+
+# TODO: Make it indepotent
+- name: Upload bootstrap.ign
+  amazon.aws.aws_s3:
+    bucket: "{{ openshift_bootstrap_bucket }}"
+    object: "/bootstrap.ign"
+    src: "{{ config_install_dir + '/bootstrap.ign' }}"
+    mode: put
+  register: s3_put
+
+- name: Dump the S3 PUT result
+  debug:
+    var: s3_put

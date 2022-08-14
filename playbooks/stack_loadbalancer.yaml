@@ -18,7 +18,7 @@
     - name: Include Locad Balancer Variables
       include_vars:
         file: "./vars/{{ provider }}/loadbalancer.yaml"
-      when: cloud_load_balancers is not defined
+      when: cloud_loadbalancers is not defined
 
   roles:
     - cloud_load_balancer

@@ -1,15 +1,36 @@
 ---
-- import_playbook: config_load.yaml
+- import_playbook: var_check_required.yaml
 
-- name: OpenShift Create Node
-  hosts: localhost
+- import_playbook: config.yaml
+  vars:
+    mode: load
+
+- name: OKD Stack Compute
+  hosts: '{{target|default("localhost")}}'
   connection: local
 
+  vars_prompt:
+    - name: role
+      prompt: What is the Compute Node Role to be created [bootstrap,controlplace,compute]?
+      private: false
+
   pre_tasks:
-    - name: Include compute vars
-      include_vars: "vars/compute/{{ name }}-{{ provider }}.yaml"
+    - name: Include User Provided Compute Variables
+      include_vars:
+        file: "{{ var_file }}"
+      when: var_file is defined
+
+    - name: Include Compute Variables
+      include_vars:
+        file: "./vars/{{ provider }}/node-{{ role }}.yaml"
+      when: cloud_networks is not defined
 
   roles:
+    - role: okd_bootstrap
+      when: role|d('') == 'bootstrap'
     - role: cloud_compute
 
-- import_playbook: config_dump.yaml
+- import_playbook: config.yaml
+  vars:
+    mode: save-state
+    cluster_state: "{{ cluster_state | combine({'compute': cloud_compute_state}) }}"

@@ -137,6 +137,56 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
+### Compute Stack
+
+- Create the Bootstrap Node
+
+```bash
+ansible-playbook mtulio.okd_installer.create_node \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e role=bootstrap
+```
+
+- Create the Control Plane nodes
+
+```bash
+ansible-playbook mtulio.okd_installer.create_node \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e role=controlplane
+```
+
+- Create the Compute nodes
+
+```bash
+ansible-playbook mtulio.okd_installer.create_node \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e role=compute
+```
+
+- Approve the certificates
+
+```bash
+export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/auth/kubeconfig
+for i in $(oc get csr --no-headers  | \
+            grep -i pending         | \
+            awk '{ print $1 }')     ; do \
+    oc adm certificate approve $i; \
+done
+```
+
+<!-- ## Load Balancer for default router (non-integrated platform)
+
+
+```bash
+ansible-playbook mtulio.okd_installer.create_ingress_lb \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
+``` -->
+
+
 ___
 REFACT WIP>
 

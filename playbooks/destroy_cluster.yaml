@@ -1,25 +1,47 @@
 ---
-- import_playbook: config_load.yaml
-  tags: always
+- import_playbook: var_check_required.yaml
 
-- name: OpenShift Destroy Cluster
-  hosts: localhost
+- import_playbook: config.yaml
+  vars:
+    mode: load
+
+- name: OKD Destroy Cluster
+  hosts: '{{target|default("localhost")}}'
   connection: local
 
-  vars_prompt:
-    - name: install_dir
-      prompt: What is the Installation Directory?
-      private: false
-    - name: provider
-      prompt: What is the Provider the cluster was installed?
-      private: false
-
   vars_files:
-    - "vars/openshift.yaml"
-    - "vars/loadbalancers/ocp-{{ config |d(ocp_config_provider) | d(provider) }}.yaml"
-    - "vars/iam/ocp-{{ ocp_config_provider | d(provider) }}.yaml"
-    - "vars/dns/ocp-{{ ocp_config_provider | d(provider) }}.yaml"
-    - "vars/networks/ocp-{{ ocp_config_provider | d(provider) }}-{{ ocp_config_region | d(region) }}.yaml"
+    - "./vars/{{ provider }}/iam.yaml"
+    - "./vars/{{ provider }}/dns.yaml"
+    - "./vars/{{ provider }}/network.yaml"
+
+  pre_tasks:
+    - name: Destroy | Preparing the list of Load Balancers
+      ansible.builtin.set_fact:
+        load_balancers_all: []
+
+    - name: Destroy | Loading Router Default Load Balancers
+      include_vars:
+        file: "./vars/{{ provider }}/loadbalancer-router-default.yaml"
+
+    - name: Destroy | Saving Default Router to the List
+      ansible.builtin.set_fact:
+        load_balancers_all: "{{ load_balancers_all + cloud_loadbalancers }}"
+
+    - name: Destroy | Loading ControlPlane Load Balancers
+      include_vars:
+        file: "./vars/{{ provider }}/loadbalancer.yaml"
+
+    - name: Destroy | Saving Default Router to the List
+      ansible.builtin.set_fact:
+        load_balancers_all: "{{ load_balancers_all + cloud_loadbalancers }}"
+
+    - name: Destroy | Saving the final list of Load Balancers
+      ansible.builtin.set_fact:
+        cloud_loadbalancers: "{{ load_balancers_all }}"
+
+    - name: Destroy | Saving the final list of Load Balancers
+      ansible.builtin.debug:
+        msg: "Found {{ cloud_loadbalancers |length }} Load Balancers on the Configuration"
 
   roles:
     - role: okd_cluster_destroy

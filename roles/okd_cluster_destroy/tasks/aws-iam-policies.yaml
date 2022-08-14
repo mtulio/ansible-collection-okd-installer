@@ -4,7 +4,6 @@
     msg: "Destroy IAM triggered"
 
 # TODO discovery if role exists before try to delete policy
-
 - name: Deleting IAM Policies
   iam_policy:
     state: absent
@@ -12,4 +11,4 @@
     iam_name: "{{ iam_role.name }}"
     policy_name: "{{ item.name }}"
   with_items: "{{ iam_role.custom_policies | d([]) }}"
-  # ignore_errors: true
+  ignore_errors: true

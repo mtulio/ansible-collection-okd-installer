@@ -13,7 +13,7 @@
 
 - name: DNS | AWS | Delete Zone
   include: aws-dns-zone.yaml
-  when: zone.openshift_type == 'cluster'
+  when: zone.private_zone | d(false)
   with_items: "{{ cloud_dns_zones }}"
   loop_control:
     loop_var: zone

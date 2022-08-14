@@ -14,3 +14,4 @@
     state: absent
     name: "{{ item.name }}"
   with_items: "{{ iam_roles }}"
+  ignore_errors: true

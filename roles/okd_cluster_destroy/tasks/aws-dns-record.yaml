@@ -1,13 +1,13 @@
 ---
 - name: Destroy | DNS | AWS | Record
   debug:
-    msg: "Destroy DNS Record triggered: {{ record }}"
+    msg: "Destroy DNS Record: {{ record }}"
   tags: dns
 
 - name: Destroy | DNS | AWS | Record Get
   community.aws.route53:
     state: get
-    zone: "{{ zone.zone }}"
+    zone: "{{ zone.name }}"
     record: "{{ record }}"
     private_zone: "{{ zone.private_zone|d('no') }}"
     type: A
@@ -15,10 +15,14 @@
   tags: dns
   ignore_errors: true
 
+- name: Destroy | DNS | AWS | Record Show
+  debug:
+    var: rec
+
 - name: Destroy | DNS | AWS | Record Delete
   community.aws.route53:
     state: absent
-    zone: "{{ zone.zone }}"
+    zone: "{{ zone.name }}"
     record: "{{ rec.set.record }}"
     type: "{{ rec.set.type }}"
     value: "{{ rec.set.value }}"
@@ -28,4 +32,6 @@
     private_zone: "{{ zone.private_zone|d('no') }}"
   tags: dns
   when: 
-    - (rec is defined) and not(rec.failed)
+    - (rec is defined) 
+    - not(rec.failed)
+    - rec.set | length > 0

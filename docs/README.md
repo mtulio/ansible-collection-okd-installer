@@ -1,6 +1,40 @@
 # cloud-iac
 
-Ansible Collection OKD Installer
+Ansible Collection to install OKD clusters.
+
+The okd_install Ansible Collection was created to be distributed, reusing the existing resources (modules and roles) from the Ansible community, implementing only the OKD specific roles only, but packaging together all necessary Roles.
+
+The infrastructure provisioning was distributed into Stacks, then the Playbooks orchestrate the Stack provisioning by sending the correct embeeded/user-provided variables to the Roles. In general there is one Ansible Role for each stack, wich is distributed. The Ansible Roles for Infrastructure stacks are not OKD specific, so it can be reused in other projects, and easily maintained by the community. The 'topologies' for each Roles are defined as variables included on OKD Ansible Collection.
+
+For example, these components are used on the Network Stack to provision the VPC on AWS:
+
+- Playbook `playbooks/vars/aws/stack_network.yaml` implements the orchestration to create the VPC and required resources (Subnets, Nat and Internet Gateways, security groups, etc), then calls the Ansible Role `cloud_network`
+- Var file `playbooks/vars/aws/network.yaml`: Defines the topology of the Network declaring the variable `cloud_networks` (required by role `cloud_network`). Can be replaced when setting `var_file`
+- Ansible Role `cloud_network`: Resolve the dependencies and create the resources using community/vendor Ansible Modules, according the `cloud_networks` definition.
+- Ansible modules from Community/Vendor: it is distributed as Collection. For AWS the community.aws and amazon.aws are used inside the Ansible Role `cloud_network`
+
+### Content
+
+External Roles (included on this Collection):
+
+- cloud_network
+- cloud_compute
+- cloud_dns
+- cloud_iam
+- cloud_load_balancer
+
+Internal Roles:
+
+- okd_bootstrap
+- okd_cluster_destroy
+- okd_install_clients
+- okd_installer_config
+
+
+Playbooks:
+
+- ...
+
 
 ## Requirements
 
@@ -193,6 +227,15 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
 export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/auth/kubeconfig
 oc get clusteroperators
 ```
+
+## Destroy cluster
+
+```bash
+ansible-playbook mtulio.okd_installer.destroy_cluster \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
+```
+
 
 ___
 REFACT WIP>

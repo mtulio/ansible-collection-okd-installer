@@ -1,7 +1,7 @@
 ---
 - name: Destroy | DNS | AWS
   debug:
-    msg: "Destroy DNS Zone triggered: {{ zone.zone }} - {{ zone.vpc_name|d(zone.vpc_id) }}"
+    msg: "Destroy DNS Zone: {{ zone.name }} - {{ zone.vpc_name|d(zone.vpc_id) }}"
   tags: dns
 
 - name: DNS | AWS | Get VPC by Name
@@ -11,6 +11,12 @@
   when: zone.vpc_name is defined
   register: vpc_info
   tags: dns
+
+- name: DNS | AWS | Check required VPC results
+  ansible.builtin.assert:
+    that:
+      - vpc_info.vpcs|length > 0
+    fail_msg: "VPC Name '{{ zone.vpc_name }}' was not found to setup DNS Domain '{{ zone.name }}'"
 
 - name: DNS | AWS | Set VPC Id for Zone name
   set_fact:
@@ -23,8 +29,10 @@
 - name: DNS | AWS | Delete Zone for OpenShift
   community.aws.route53_zone:
     state: absent
-    zone: "{{ zone.zone }}"
+    zone: "{{ zone.name }}"
     vpc_id: "{{ vpc_id | d(zone.vpc_id) }}"
     vpc_region: "{{ zone.vpc_region }}"
-  when: zone.openshift_type == 'cluster'
+  when:
+    - vpc_id is defined
+    - vpc_id|length > 0
   tags: dns

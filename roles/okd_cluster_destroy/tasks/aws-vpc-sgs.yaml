@@ -5,7 +5,7 @@
   tags: vpc
 
 - name: Destroy | VPC | Set VPC ID
-  ec2_group_facts:
+  ec2_group_info:
     filters:
       vpc-id: "{{ vpc_id }}"
   register: ret_sgs

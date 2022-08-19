@@ -36,16 +36,16 @@ Playbooks distributed on this Ansible Collection:
 
 Supported Cloud Platforms* and installation types:
 
-| Provider | IPI | UPI | None** |
-| -- | -- | -- |
+| Platform/Install Type | IPI | UPI | Agnostic* |
+| -- | -- | -- | -- |
 | AWS | No | Yes | Yes |
 | Azure | No | No | No |
 | GCP | No | No | No |
 | AlibabaCloud | No | No | No |
-| DigitalOcean | N/A | N/A | Yes |
+| DigitalOcean | N/A | N/A | WIP |
 | Vultr | N/A | N/A | No |
-| OracleCLoud | N/A | N/A | No |
+| Ionos | N/A | N/A | No |
 
 
-*The "supported" is not connected with Red Hat or OCP integration, but means the ability to use this Ansible Collection to create/install clusters on the provider.
+*Agnostic installation means that OKD there's no native integration with the Platform.
 **None means there is support to install OKD on this platform, but no native integration will be available on the OKD, which means every controller to interact with the Cloud Resource should be added separatelly.

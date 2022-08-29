@@ -6,4 +6,3 @@
       - cluster_name is defined
       - config_metadata_name is defined
     fail_msg: "'cluster_name' is not defined"
-    #success_msg: "'my_param' is between 0 and 100"

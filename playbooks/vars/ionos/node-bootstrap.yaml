@@ -1,0 +1,44 @@
+---
+compute_resources:
+    # Module 'machine' options:
+    # https://github.com/ionos-cloud/module-ansible/blob/master/plugins/modules/server.py
+    - provider: ionos
+      type: machine
+      name: "{{ cluster_state.infra_id }}-bootstrap"
+
+      datacenter_name: "{{ cluster_state.infra_id }}"
+      #lan_name: "{{ cluster_state.infra_id }}-net-priv-nodes"
+      #lan_lb: "{{ cluster_state.infra_id }}-net-priv-lb"
+      spec:
+        cores: 2
+        ram: 1024
+        volume_size: 24
+        cpu_family: INTEL_SKYLAKE
+        #image: ubuntu:latest
+        image: "rhcos-4.10.3-x86_64-qemu.x86_64.qcow2"
+        location: de/txl
+        availability_zone: ZONE_1
+        volume_availability_zone: ZONE_1 
+        assign_public_ip: true
+        nat: true
+        user_data: "{{ lookup('template', 'ocp-bootstrap-user-data.j2') |to_nice_json | string }}"
+        #image: 
+        image_password: 123qweA8c32551k
+        ssh_keys:
+          - "openshift-dev"
+        #lan:
+        # nic_ips:
+        #   - 10.0.0.9
+      nics:
+        - name: "{{ cluster_state.infra_id }}-nic-nodes"
+          lan_name: "{{ cluster_state.infra_id }}-net-priv-nodes"
+          dhcp: false
+          firewall_active: false
+          ips:
+            - 10.0.0.9
+        # - name: "{{ cluster_state.infra_id }}-nic-lb"
+        #   lan_name: "{{ cluster_state.infra_id }}-net-priv-lb"
+        #   dhcp: false
+        #   firewall_active: false
+        #   ips:
+        #     - 10.0.128.9

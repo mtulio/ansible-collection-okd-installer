@@ -1,6 +1,13 @@
 ---
 release_arch: x86_64
+
 release_version: 4.11.0
+#release_version: 4.11.0-0.okd-2022-08-20-022919
+
+# https://amd64.origin.releases.ci.openshift.org/
 release_image: "quay.io/openshift-release-dev/ocp-release"
+#release_image: "quay.io/openshift/okd"
+#release_image_version_arch: "quay.io/openshift/okd:4.11.0-0.okd-2022-08-20-022919"
+
 workdir: "{{ lookup('env', 'HOME') }}/.ansible/okd-installer"
 client_os: linux

@@ -1,0 +1,43 @@
+---
+compute_resources:
+    # Module 'machine' options:
+    # https://github.com/ionos-cloud/module-ansible/blob/master/plugins/modules/server.py
+    - provider: ionos
+      type: machine
+      name: "{{ cluster_state.infra_id }}-controlplane-01"
+
+      datacenter_name: "{{ cluster_state.infra_id }}"
+      #lan_name: "{{ cluster_state.infra_id }}-net-priv-nodes"
+      #lan_lb: "{{ cluster_state.infra_id }}-net-priv-lb"
+      spec:
+        cores: 2
+        ram: 1024
+        volume_size: 24
+        cpu_family: INTEL_SKYLAKE
+        image: ubuntu:latest
+        location: de/txl
+        availability_zone: ZONE_1
+        volume_availability_zone: ZONE_1 
+        assign_public_ip: true
+        nat: true
+        #user_data: ""
+        #image: 
+        image_password: 123qweA8c32551k
+        ssh_keys:
+          - "openshift-dev"
+        #lan:
+        # nic_ips:
+        #   - 10.0.0.9
+      nics:
+        - name: "{{ cluster_state.infra_id }}-nic-nodes"
+          lan_name: "{{ cluster_state.infra_id }}-net-priv-nodes"
+          dhcp: false
+          firewall_active: false
+          ips:
+            - 10.0.0.10
+        # - name: "{{ cluster_state.infra_id }}-nic-lb"
+        #   lan_name: "{{ cluster_state.infra_id }}-net-priv-lb"
+        #   dhcp: false
+        #   firewall_active: false
+        #   ips:
+        #     - 10.0.128.9

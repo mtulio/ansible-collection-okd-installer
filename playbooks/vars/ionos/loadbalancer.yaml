@@ -1,0 +1,137 @@
+---
+
+# https://github.com/ionos-cloud/module-ansible/blob/master/plugins/modules/network_load_balancer.py
+cloud_loadbalancers:
+  - name: "{{ cluster_state.infra_id }}-ext"
+    provider: ionos
+    type: network
+    scheme: internet-facing
+    state: present
+
+    #tags: "{{ cluster_state.tags | d({}) }}"
+    region: de/txl
+    datacenter_name: "{{ cluster_state.infra_id }}"
+    listener_lan_name: "{{ cluster_state.infra_id }}-net-public"
+    target_lan_name: "{{ cluster_state.infra_id }}-net-priv-nodes"
+
+    ip_block_name: "{{ cluster_state.infra_id }}-lb"
+    ip_block_index: 0
+    lb_private_ips:
+      - "10.0.0.5/24"
+
+    targets:
+      - name: kube-api
+        algorithm: "ROUND_ROBIN"
+        protocol: "TCP"
+        listener_ip_block_index: 0
+        listener_port: "6443"
+        targets:
+        - ip: "10.0.0.9"
+          port: "6443"
+          weight: "1"
+        - ip: "10.0.0.10"
+          port: "6443"
+          weight: "1"
+        - ip: "10.0.0.11"
+          port: "6443"
+          weight: "1"
+        - ip: "10.0.0.12"
+          port: "6443"
+          weight: "1"
+      - name: mcs
+        algorithm: "ROUND_ROBIN"
+        protocol: "TCP"
+        listener_ip_block_index: 0
+        listener_port: "22623"
+        targets:
+        - ip: "10.0.0.9"
+          port: "22623"
+          weight: "1"
+        - ip: "10.0.0.10"
+          port: "22623"
+          weight: "1"
+        - ip: "10.0.0.11"
+          port: "22623"
+          weight: "1"
+        - ip: "10.0.0.12"
+          port: "22623"
+          weight: "1"
+      - name: router-http
+        algorithm: "ROUND_ROBIN"
+        protocol: "TCP"
+        listener_ip_block_index: 0
+        listener_port: "80"
+        targets:
+        - ip: "10.0.0.20"
+          port: "80"
+          weight: "1"
+        - ip: "10.0.0.21"
+          port: "80"
+          weight: "1"
+      - name: router-https
+        algorithm: "ROUND_ROBIN"
+        protocol: "TCP"
+        listener_ip_block_index: 0
+        listener_port: "443"
+        targets:
+        - ip: "10.0.0.20"
+          port: "443"
+          weight: "1"
+        - ip: "10.0.0.21"
+          port: "443"
+          weight: "1"
+
+  # - name: "{{ cluster_state.infra_id }}-int"
+  #   provider: ionos
+  #   type: network
+  #   scheme: private
+  #   state: present
+
+  #   #tags: "{{ cluster_state.tags | d({}) }}"
+  #   region: de/txl
+  #   datacenter_name: "{{ cluster_state.infra_id }}"
+  #   listener_lan_name: "{{ cluster_state.infra_id }}-net-priv-lb"
+  #   target_lan_name: "{{ cluster_state.infra_id }}-net-priv-nodes"
+
+  #   ips:
+  #     - "10.0.128.5"
+  #     - "10.0.128.6"
+  #     - "10.0.128.7"
+
+  #   targets:
+  #     - name: kube-api
+  #       algorithm: "ROUND_ROBIN"
+  #       protocol: "TCP"
+  #       #listener_ip_block_index: 0
+  #       listener_port: "6443"
+  #       targets:
+  #       - ip: "10.0.0.9"
+  #         port: "6443"
+  #         weight: "1"
+  #       - ip: "10.0.0.10"
+  #         port: "6443"
+  #         weight: "1"
+  #       - ip: "10.0.0.11"
+  #         port: "6443"
+  #         weight: "1"
+  #       - ip: "10.0.0.12"
+  #         port: "6443"
+  #         weight: "1"
+  #     - name: mcs
+  #       algorithm: "ROUND_ROBIN"
+  #       protocol: "TCP"
+  #       #listener_ip_block_index: 0
+  #       listener_port: "22623"
+  #       targets:
+  #       - ip: "10.0.0.9"
+  #         port: "22623"
+  #         weight: "1"
+  #       - ip: "10.0.0.10"
+  #         port: "22623"
+  #         weight: "1"
+  #       - ip: "10.0.0.11"
+  #         port: "22623"
+  #         weight: "1"
+  #       - ip: "10.0.0.12"
+  #         port: "22623"
+  #         weight: "1"

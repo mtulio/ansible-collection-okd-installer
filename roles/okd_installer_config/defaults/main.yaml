@@ -6,6 +6,10 @@
 config_default_architecture: amd64
 config_default_hyperthreading: Enabled
 
+config_valid_providers:
+  - aws
+  - ionos
+
 # Compute
 config_compute_replicas: 3
 config_compute_platform: {}

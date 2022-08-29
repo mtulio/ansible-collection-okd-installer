@@ -1,5 +1,11 @@
 ---
 
+- name: Check required variables - provider
+  ansible.builtin.assert:
+    that:
+      - provider is in config_valid_providers
+    fail_msg: "'provider' is not a valid provider {{ config_valid_providers }}"
+
 - name: InstallerConfig | Assert directories exists
   ansible.builtin.stat:
     path: "{{ config_install_dir }}"

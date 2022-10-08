@@ -6,6 +6,8 @@
     - name: provider
       prompt: What is the Cloud Provider name?
       private: false
+      # when: provider is not defined
     - name: cluster_name
       prompt: What is the Cluster Name?
       private: false
+      # when: cluster_name is not defined

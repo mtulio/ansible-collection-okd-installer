@@ -1,0 +1,16 @@
+---
+- name: Destroy | Compute | AWS
+  debug:
+    msg: "Destroy Compute triggered"
+
+- name: EC2 | Destroying instance(s)
+  ec2_instance:
+    state: absent
+    filters:
+      "tag:Name": "{{ machine.name }}"
+      instance-state-name: running
+    wait: "{{ machine.wait | d('no') }}"
+    wait_timeout: "{{ machine.wait_timeout |d(omit) }}"
+  with_items: "{{ okd_cluster_destroy_instances }}"
+  loop_control:
+    loop_var: machine

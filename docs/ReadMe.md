@@ -118,7 +118,7 @@ ansible-playbook mtulio.okd_installer.install_clients
 To install the clients you can run set the version and run:
 
 ```bash
-ansible-playbook mtulio.okd_installer.install_clients -e version=4.11.0
+ansible-playbook mtulio.okd_installer.install_clients -e version=4.11.5
 ```
 
 ### Config
@@ -143,13 +143,14 @@ ansible-playbook mtulio.okd_installer.stack_network \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
-- Create the network stack with custom variables file (AWS Example)
+- Create the network stack with custom variables file (AWS edge example)
 
 ```bash
+OKD_COLLECTION_PATH=${PWD}/collections/ansible_collections/mtulio/okd_installer
 ansible-playbook mtulio.okd_installer.stack_network \
     -e provider=${CONFIG_PROVIDER} \
     -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e var_file=${PWD}/vars/networks/aws-usw2.yaml
+    -e var_file=${OKD_COLLECTION_PATH}/playbooks/vars/aws/networks/aws-use1-edge-full.yaml
 ```
 
 - A more customizaded environment variable setting the CIDR block:

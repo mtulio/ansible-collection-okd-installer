@@ -1,3 +1,7 @@
-ansible>=2.11
+ansible==6.2
 molecule
 ansible-lint
+jmespath==1.0.1
+
+# provider: AWS
+boto3==1.24.55

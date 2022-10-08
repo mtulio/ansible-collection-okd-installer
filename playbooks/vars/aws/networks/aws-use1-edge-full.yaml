@@ -1,6 +1,6 @@
 ################################
 # AWS Networks
-# AWS us-west-2: 10.0.0.0/16 (to 10.0.255.255/16)
+# AWS us-east-1: 10.0.0.0/16 (to 10.0.255.255/16)
 # AWS <unassigned>: 10.23.0.0/16 (to 10.23.255.255/19)
 
 #########################
@@ -67,12 +67,12 @@ cloud_networks:
   - name: "{{ cluster_state.infra_id }}-vpc"
     block: "{{ okd_net_default_cidr }}"
     provider: aws
-    region: us-west-2
+    region: us-east-1
     security_groups: "{{ security_groups | d([]) }}"
     tags: "{{ cluster_state.tags | d({}) }}"
 
     internet_gateway: true
-    carrier_gateway: no
+    carrier_gateway: true
     nat_gateways:
       - name: "{{ cluster_state.infra_id }}-natgw-1a"
         subnet: "{{ cluster_state.infra_id }}-net-public-1a"
@@ -118,72 +118,84 @@ cloud_networks:
 
     subnets:
       - name: "{{ cluster_state.infra_id }}-net-public-1a"
-        az: us-west-2a
+        az: us-east-1a
         cidr: 10.0.16.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
       - name: "{{ cluster_state.infra_id }}-net-public-1b"
-        az: us-west-2b
+        az: us-east-1b
         cidr: 10.0.20.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
       - name: "{{ cluster_state.infra_id }}-net-public-1c"
-        az: us-west-2c
+        az: us-east-1c
         cidr: 10.0.24.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
 
       - name: "{{ cluster_state.infra_id }}-net-private-1a"
-        az: us-west-2a
+        az: us-east-1a
         cidr: 10.0.48.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1a"
         map_public: false
       - name: "{{ cluster_state.infra_id }}-net-private-1b"
-        az: us-west-2b
+        az: us-east-1b
         cidr: 10.0.52.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1b"
         map_public: false
       - name: "{{ cluster_state.infra_id }}-net-private-1c"
-        az: us-west-2c
+        az: us-east-1c
         cidr: 10.0.56.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1c"
         map_public: false
 
       # Edge (Local Zone) subnets
-      - name: "{{ cluster_state.infra_id }}-net-public-lax-lz-1a"
-        az: us-west-2-lax-1a
+      - name: "{{ cluster_state.infra_id }}-net-public-nyc-lz-1a"
+        az: us-east-1-nyc-1a
         cidr: 10.0.60.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
 
-      - name: "{{ cluster_state.infra_id }}-net-private-lax-lz-1a"
-        az: us-west-2-lax-1a
+      - name: "{{ cluster_state.infra_id }}-net-private-nyc-lz-1a"
+        az: us-east-1-nyc-1a
         cidr: 10.0.64.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1a"
         map_public: false
 
-      - name: "{{ cluster_state.infra_id }}-net-public-lax-lz-1b"
-        az: us-west-2-lax-1b
+      - name: "{{ cluster_state.infra_id }}-net-public-mia-lz-1a"
+        az: us-east-1-mia-1a
         cidr: 10.0.68.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
 
-      - name: "{{ cluster_state.infra_id }}-net-private-lax-lz-1b"
-        az: us-west-2-lax-1b
+      - name: "{{ cluster_state.infra_id }}-net-private-mia-lz-1a"
+        az: us-east-1-mia-1a
         cidr: 10.0.72.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1b"
         map_public: false
 
-      ## Edge (Wavelength) subnets
-      - name: "{{ cluster_state.infra_id }}-net-public-lax-wlz-1"
-        az: us-west-2-wl1-lax-wlz-1
+      - name: "{{ cluster_state.infra_id }}-net-public-bos-lz-1a"
+        az: us-east-1-bos-1a
+        cidr: 10.0.80.0/22
+        route_table: "{{ cluster_state.infra_id }}-rt-public"
+        map_public: true
+
+      - name: "{{ cluster_state.infra_id }}-net-private-bos-lz-1a"
+        az: us-east-1-bos-1a
+        cidr: 10.0.84.0/22
+        route_table: "{{ cluster_state.infra_id }}-rt-private-1c"
+        map_public: false
+
+      # Edge (Wavelength) subnets
+      - name: "{{ cluster_state.infra_id }}-net-public-nyc-wlz-1"
+        az: us-east-1-wl1-nyc-wlz-1
         cidr: 10.0.76.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public-edge"
         map_public: false
 
     endpoint_services:
       - name: s3
-        service: com.amazonaws.us-west-2.s3
+        service: com.amazonaws.us-east-1.s3
         route_tables:
           - "{{ cluster_state.infra_id }}-rt-public"
           - "{{ cluster_state.infra_id }}-rt-private-1a"

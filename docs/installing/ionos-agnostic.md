@@ -121,6 +121,6 @@ ansible-playbook mtulio.okd_installer.create_node \
 ansible-playbook mtulio.okd_installer.create_node \
     -e provider=${CONFIG_PROVIDER} \
     -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e role=master
+    -e role=controlplane
 ```
 

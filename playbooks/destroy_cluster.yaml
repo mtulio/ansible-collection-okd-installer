@@ -1,7 +1,7 @@
 ---
-- import_playbook: var_check_required.yaml
+- ansible.builtin.import_playbook: var_check_required.yaml
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
@@ -10,9 +10,9 @@
   connection: local
 
   vars_files:
-    - "./vars/{{ provider }}/iam.yaml"
-    - "./vars/{{ provider }}/dns.yaml"
-    - "./vars/{{ provider }}/network.yaml"
+    - "./vars/{{ config_provider }}/iam.yaml"
+    - "./vars/{{ config_provider }}/dns.yaml"
+    - "./vars/{{ config_provider }}/network.yaml"
 
   pre_tasks:
     - name: Destroy | Preparing the list of Load Balancers
@@ -20,16 +20,16 @@
         load_balancers_all: []
 
     - name: Destroy | Loading Router Default Load Balancers
-      include_vars:
-        file: "./vars/{{ provider }}/loadbalancer-router-default.yaml"
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/loadbalancer-router-default.yaml"
 
     - name: Destroy | Saving Default Router to the List
       ansible.builtin.set_fact:
         load_balancers_all: "{{ load_balancers_all + cloud_loadbalancers }}"
 
     - name: Destroy | Loading ControlPlane Load Balancers
-      include_vars:
-        file: "./vars/{{ provider }}/loadbalancer.yaml"
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/loadbalancer.yaml"
 
     - name: Destroy | Saving Default Router to the List
       ansible.builtin.set_fact:

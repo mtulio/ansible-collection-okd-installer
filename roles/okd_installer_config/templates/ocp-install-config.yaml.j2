@@ -21,11 +21,12 @@ networking:
 {% endif %}
 
 {% if (config_platform is not defined) or (config_platform |length <= 0) %}
-platform: {{ config_platform_default }}
+platform:
+  {{ config_platform_default }}: {{ config_platform_spec_default }}
 {% else %}
-platform: {{ config_platform }}
+platform:
+  {{ config_platform }}: {{ config_platform_spec }}
 {% endif %}
-
 
 publish: {{ config_publish }}
 pullSecret: '{{ lookup("file", config_pull_secret_file) }}'

@@ -22,5 +22,14 @@ config_base_domain: "'{{ lookup('ansible.builtin.env', 'CONFIG_BASE_DOMAIN') }}'
 
 config_cluster_region: "{{ lookup('ansible.builtin.env', 'CONFIG_CLUSTER_REGION') }}"
 
+# Provider: is the Cloud Provider. Examples: aws, do, MomPopCloud
+## Provider should be supported by Collection okd-installer
+config_provider: "{{ provider | d(lookup('ansible.builtin.env', 'CONFIG_PROVIDER', default='aws')) }}"
+
+# Platform: is the OCP Platform Integration. Exmaples: aws, none, azure
+## Platform should be one supported by OpenShift, even using 'none'
+config_platform: "{{ lookup('ansible.builtin.env', 'CONFIG_PLATFORM', default='none') }}"
+config_platform_spec: "{{ lookup('ansible.builtin.env', 'CONFIG_PLATFORM_SPEC', default={'region':config_cluster_region}) }}"
+
 # Network Defaults
 okd_net_default_cidr: 10.0.0.0/16

@@ -46,6 +46,9 @@
     - include: aws-vpc-igw.yaml
       tags: vpc
 
+    - include: aws-vpc-cagw.yaml
+      tags: vpc
+
     - name: AWS | VPC delete
       ec2_vpc_net:
         state: absent

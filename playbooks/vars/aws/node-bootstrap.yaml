@@ -27,8 +27,13 @@ _def:
   state: present
   tags: "{{ openshift_tags }}"
   termination_protection: no
+  volumes:
+  - device_name: /dev/xvda
+    ebs:
+      volume_size: 128
+      volume_type: gp3
+      delete_on_termination: true
 
-  #volumes: []
   #vpc_subnet_id: "{{ openshift_subnet_id }}"
   vpc_subnet_name: "{{ openshift_subnet_name }}"
   wait: yes

@@ -1,7 +1,7 @@
 ---
-- import_playbook: var_check_required.yaml
+- ansible.builtin.import_playbook: var_check_required.yaml
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
@@ -11,19 +11,19 @@
 
   pre_tasks:
     - name: Include User Provided Network Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: "{{ var_file }}"
       when: var_file is defined
 
     - name: Include Network Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/network.yaml"
       when: cloud_networks is not defined
 
   roles:
     - cloud_network
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state
     cluster_state: "{{ cluster_state | combine({'network': cloud_networks_state}) }}"

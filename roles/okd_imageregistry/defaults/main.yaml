@@ -1,0 +1,5 @@
+---
+imageregistry_config_spec:
+  managementState: Managed
+  storage:
+    emptyDir: {}

@@ -46,8 +46,8 @@ config_networking_serviceNetwork:
   - 172.30.0.0/16
 
 # Platform
-config_platform_default:
-  none: {}
+config_platform_default: none
+config_platform_spec_default: {}
 
 # Publish
 config_publish: External

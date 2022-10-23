@@ -52,7 +52,7 @@
         region: "{{ config_cluster_region | d(lookup('env', 'CONFIG_REGION')) }}"
         platform:
           provider: "{{ provider | d('NA') }}"
-          integratoin: "{{ config_platform | d('none') }}"
+          platform: "{{ config_platform | d('none') }}"
         dns:
           base_domain: "{{ base_domain }}"
           base_domain_id: ''

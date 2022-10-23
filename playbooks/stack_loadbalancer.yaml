@@ -1,7 +1,7 @@
 ---
-- import_playbook: var_check_required.yaml
+- ansible.builtin.import_playbook: var_check_required.yaml
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
@@ -11,19 +11,20 @@
 
   pre_tasks:
     - name: Include User Provided Load Balancer Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: "{{ var_file }}"
       when: var_file is defined
 
     - name: Include Locad Balancer Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/loadbalancer.yaml"
-      when: cloud_loadbalancers is not defined
+      when:
+        - (cloud_loadbalancers is not defined) or (cloud_loadbalancers | length <= 0)
 
   roles:
     - cloud_load_balancer
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state
     cluster_state: "{{ cluster_state | combine({'load_balancers': cloud_load_balancers_state}) }}"

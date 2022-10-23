@@ -1,29 +1,30 @@
 ---
-- import_playbook: var_check_required.yaml
+- ansible.builtin.import_playbook: var_check_required.yaml
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
 - name: OKD Stack DNS
-  hosts: '{{target|default("localhost")}}'
+  hosts: '{{ target | default("localhost") }}'
   connection: local
 
   pre_tasks:
     - name: Include User Provided DNS Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: "{{ var_file }}"
       when: var_file is defined
 
     - name: Include DNS Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/dns.yaml"
-      when: cloud_networks is not defined
+      when:
+        - (cloud_dns_zones is not defined) or (cloud_dns_zones | length <= 0)
 
   roles:
     - cloud_dns
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state
     cluster_state: "{{ cluster_state | combine({'dns': cloud_dns_state}) }}"

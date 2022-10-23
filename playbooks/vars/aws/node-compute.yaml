@@ -1,7 +1,7 @@
 ---
 openshift_prefix: "{{ cluster_state.infra_id }}"
 #openshift_bootstrap_bucket: "{{ openshift_prefix }}-infra"
-openshift_instance_type: "{{ compute_instance | d('m6a.large') }}"
+openshift_instance_type: "{{ compute_instance | d('m6i.xlarge') }}"
 openshift_instance_profile: "{{ cluster_state.compute.iam_profile_compute }}"
 # TODO: fix image lookup for agnostic installations
 #openshift_image_id: "{{ cluster_state.compute.image_id }}"
@@ -19,7 +19,7 @@ openshift_userdata:
 _def:
   name: 'worker'
   detailed_monitoring: yes
-  ebs_optimized: no
+  ebs_optimized: yes
   image_id: "{{ openshift_image_id }}"
   instance_role: "{{ openshift_instance_profile }}"
   instance_type: "{{ openshift_instance_type }}"
@@ -27,6 +27,12 @@ _def:
   state: present
   tags: "{{ openshift_tags }}"
   termination_protection: no
+  volumes:
+  - device_name: /dev/xvda
+    ebs:
+      volume_size: 128
+      volume_type: gp3
+      delete_on_termination: true
 
 
 # https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_instance_module.html

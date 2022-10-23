@@ -1,0 +1,10 @@
+---
+- name: approve CertificateSigningRequest
+  command: |
+    {{ oc_bin }} \
+      --kubeconfig {{ config_install_dir }}/auth/kubeconfig \
+      patch configs.imageregistry.operator.openshift.io cluster \
+      --type merge \
+      --patch '{"spec":{{ imageregistry_config_spec | to_json }}}'
+  vars:
+    oc_bin: "{{ ansible_user_dir }}/.ansible/okd-installer/bin/oc"

@@ -1,0 +1,3 @@
+---
+certs_max_retries: 3
+cert_wait_interval_sec: 10

@@ -1,36 +1,41 @@
 ---
-- import_playbook: var_check_required.yaml
+- ansible.builtin.import_playbook: var_check_required.yaml
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
 - name: OKD Stack Compute
-  hosts: '{{target|default("localhost")}}'
+  hosts: '{{ target|default("localhost") }}'
   connection: local
 
   vars_prompt:
-    - name: role
+    - name: node_role
       prompt: What is the Compute Node Role to be created [bootstrap,controlplace,compute]?
       private: false
 
   pre_tasks:
+    - name: Show node_role
+      ansible.builtin.debug:
+        msg: "node_role: {{ node_role }}"
+
     - name: Include User Provided Compute Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: "{{ var_file }}"
       when: var_file is defined
 
     - name: Include Compute Variables
-      include_vars:
-        file: "./vars/{{ provider }}/node-{{ role }}.yaml"
-      when: cloud_networks is not defined
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/node-{{ node_role }}.yaml"
+      when:
+        - (compute_resources is not defined) or (compute_resources | length <= 0)
 
   roles:
     - role: okd_bootstrap
-      when: role|d('') == 'bootstrap'
+      when: node_role|d('') == 'bootstrap'
     - role: cloud_compute
 
-- import_playbook: config.yaml
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state
     cluster_state: "{{ cluster_state | combine({'compute': cloud_compute_state}) }}"

@@ -1,0 +1,62 @@
+---
+- import_playbook: var_check_required.yaml
+
+- import_playbook: config.yaml
+  vars:
+    mode: load
+
+- name: OKD Stack Compute - Create All
+  hosts: '{{ target|default("localhost") }}'
+  connection: local
+
+  tasks:
+    - name: Include User Provided Compute Variables
+      ansible.builtin.include_vars:
+        file: "{{ var_file_bootstrap }}"
+      when: var_file_bootstrap is defined
+
+    - name: Include Compute Variables
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/node-bootstrap.yaml"
+
+    - name: Run roles to create bootstrap
+      ansible.builtin.include_role:
+        name: "{{ item }}"
+      loop:
+        - 'okd_bootstrap'
+        - 'cloud_compute'
+
+    - name: Include User Provided Compute Variables
+      ansible.builtin.include_vars:
+        file: "{{ var_file_controlplane }}"
+      when: var_file_controlplane is defined
+
+    - name: Include Compute Variables
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/node-controlplane.yaml"
+
+    - name: Run roles to create controlplane
+      ansible.builtin.include_role:
+        name: "{{ item }}"
+      loop:
+        - 'cloud_compute'      
+
+    - name: Include User Provided Compute Variables
+      ansible.builtin.include_vars:
+        file: "{{ var_file_compute }}"
+      when: var_file_controlplane is defined
+
+    - name: Include Compute Variables
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/node-compute.yaml"
+
+    - name: Run roles to create compute
+      ansible.builtin.include_role:
+        name: "{{ item }}"
+      loop:
+        - 'cloud_compute'    
+
+- import_playbook: config.yaml
+  vars:
+    mode: save-state
+    cluster_state: "{{ cluster_state | combine({'compute': cloud_compute_state}) }}"

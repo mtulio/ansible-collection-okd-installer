@@ -22,6 +22,7 @@ Create `.env` file or just export it to your session:
 cat <<EOF> .env-none
 export CONFIG_CLUSTER_NAME=mrbnone
 export CONFIG_PROVIDER=aws
+export CONFIG_PLATFORM=none
 export CONFIG_BASE_DOMAIN=devcluster.openshift.com
 export CONFIG_CLUSTER_REGION=us-east-1
 export CONFIG_PULL_SECRET_FILE=/home/mtulio/.openshift/pull-secret-latest.json
@@ -40,6 +41,7 @@ export CONFIG_PROVIDER=aws
 export CONFIG_PLATFORM=aws
 export CONFIG_BASE_DOMAIN=devcluster.openshift.com
 export CONFIG_CLUSTER_REGION=us-east-1
+export CONFIG_PLATFORM_SPEC={\'region\':\'us-east-1\'}
 export CONFIG_PULL_SECRET_FILE=/home/mtulio/.openshift/pull-secret-latest.json
 export CONFIG_SSH_KEY="$(cat ~/.ssh/id_rsa.pub)"
 EOF
@@ -182,7 +184,9 @@ ansible-playbook mtulio.okd_installer.create_node \
 ```bash
 ansible-playbook mtulio.okd_installer.create_all \
     -e provider=${CONFIG_PROVIDER} \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e certs_max_retries=3 \
+    -e cert_wait_interval_sec=60
 ```
 
 

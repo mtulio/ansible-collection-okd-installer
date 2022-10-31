@@ -1,4 +1,14 @@
 ---
+- name: OKD Destroy - Start
+  hosts: '{{ target|default("localhost") }}'
+  connection: local
+
+  tasks:
+    - name: Show date time
+      ansible.builtin.set_fact:
+        datetime_start: "{{ ansible_date_time.iso8601 }}"
+
+
 - ansible.builtin.import_playbook: var_check_required.yaml
 
 - ansible.builtin.import_playbook: config.yaml
@@ -45,3 +55,12 @@
 
   roles:
     - role: okd_cluster_destroy
+
+- name: OKD Destroy - Finish
+  hosts: '{{ target|default("localhost") }}'
+  connection: local
+
+  tasks:
+    - name: Show date time
+      ansible.builtin.debug:
+        msg: "start=[{{ datetime_start|d('') }}] end=[{{ ansible_date_time.iso8601 }}]"

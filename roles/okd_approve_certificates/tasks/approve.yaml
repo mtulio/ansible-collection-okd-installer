@@ -1,6 +1,10 @@
 ---
 
-- name: "Get an existing Certificate Signing Requests ({{ end_at }})"
+- name: "Waiting [{{ cert_wait_interval_sec }}s] to retrieve CSRs [{{ item_retry }}/{{ end_at }}]"
+  ansible.builtin.pause:
+    seconds: "{{ cert_wait_interval_sec }}"
+
+- name: "Getting existing Certificate Signing Requests"
   kubernetes.core.k8s_info:
     api_version: certificates.k8s.io/v1
     kind: CertificateSigningRequest
@@ -23,6 +27,10 @@
   retries: 3
   delay: 10
 
+- name: Show Total Pending
+  debug:
+    msg: "Total pending: {{ csr_pending|length }}"
+
 - name: approve CertificateSigningRequest
   command: |
     {{ oc_bin }} \
@@ -34,20 +42,16 @@
   loop_control:
     loop_var: csr_name
 
-- name: "Defaults for Node Certificates"
+- name: Update Total Approved
   ansible.builtin.set_fact:
     certs_approved: "{{ certs_approved|int + csr_pending|length }}"
 
-- name: Check current approved in this session
+- name: Show Total Approved
   debug:
     msg: "Total approved: {{ certs_approved }}"
 
 # - name: Check for approval
 #   debug:
-#     msg: "Skipping pause due the max expected certificates were approved: {{ certs_expected }}"
+#     msg: "Skipping pause. {{ certs_expected }}"
 #   when:
 #   - (certs_expected|int != 0) and (certs_approved|int == certs_expected|int)
-
-- name: "Wait for the next retry CSR: {{ item_retry }}/{{ end_at }}"
-  ansible.builtin.pause:
-    seconds: "{{ cert_wait_interval_sec }}"

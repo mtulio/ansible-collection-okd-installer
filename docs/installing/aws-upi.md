@@ -15,23 +15,6 @@ clusters.
 
 #### Export the environment variables used to create the cluster
 
-Create `.env` file or just export it to your session:
-
-- `platform.none: {}`
-```bash
-cat <<EOF> .env-none
-export CONFIG_CLUSTER_NAME=mrbnone
-export CONFIG_PROVIDER=aws
-export CONFIG_PLATFORM=none
-export CONFIG_BASE_DOMAIN=devcluster.openshift.com
-export CONFIG_CLUSTER_REGION=us-east-1
-export CONFIG_PULL_SECRET_FILE=/home/mtulio/.openshift/pull-secret-latest.json
-export CONFIG_SSH_KEY="$(cat ~/.ssh/id_rsa.pub)"
-EOF
-
-source ./.env-none
-```
-
 - `platform.aws: {}`
 
 ```bash
@@ -62,23 +45,9 @@ ansible-playbook  mtulio.okd_installer.config \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
-#### Install the clients
+### Create or customize the `openshift-install` binary
 
-The binary path of the clients used by installer is `${HOME}/.ansible/okd-installer/bin`*, so the utilities like `openshift-installer` should be in this path.
-
-*it will be more flexible in the future.
-
-To check if the clients used by installer is present, run the client check:
-
-```bash
-ansible-playbook mtulio.okd_installer.install_clients
-```
-
-To install the clients you can run set the version and run:
-
-```bash
-ansible-playbook mtulio.okd_installer.install_clients -e version=4.11.4
-```
+Check the Guide [Install the `openshift-install` binary](./install-openshift-install.md) if you aren't set or would like to customize the cluster version.
 
 ### Config
 
@@ -189,10 +158,11 @@ ansible-playbook mtulio.okd_installer.create_all \
     -e cert_wait_interval_sec=60
 ```
 
+#### Approve certificates
 
-#### Finalize
+The `create_all` already trigger the certificates approval with one default timeout. If the nodes was not yet joined to the cluster (`oc get nodes`) or still have pending certificates (`oc get csr`) due the short delay for approval, you can call it again with longer timeout:
 
-- Approve the certificates (playbook)
+- Approve the certificates (default execution)
 
 ```bash
 ansible-playbook mtulio.okd_installer.approve_certs \
@@ -200,7 +170,7 @@ ansible-playbook mtulio.okd_installer.approve_certs \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
-- Change the intervals to check:
+- Change the intervals to check (example 5 minutes)
 
 ```bash
 ansible-playbook mtulio.okd_installer.approve_certs \
@@ -208,70 +178,6 @@ ansible-playbook mtulio.okd_installer.approve_certs \
     -e cluster_name=${CONFIG_CLUSTER_NAME} \
     -e certs_max_retries=3 \
     -e cert_wait_interval_sec=10
-```
-
-- Approve the certificates (manually)
-
-```bash
-approve_certs() {
-    export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/auth/kubeconfig
-    for i in $(oc get csr --no-headers  | \
-                grep -i pending         | \
-                awk '{ print $1 }')     ; do \
-        echo "> Approving certificate $i"; \
-        oc adm certificate approve $i; \
-    done
-}
-while true; do approve_certs; sleep 30; done
-```
-
-## Load Balancer for default router (non-integrated platform)
-
-
-```bash
-ansible-playbook mtulio.okd_installer.stack_loadbalancer \
-    -e provider=${CONFIG_PROVIDER} \
-    -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e var_file="./vars/${CONFIG_PROVIDER}/loadbalancer-router-default.yaml"
-```
-
-## Review the installation
-
-- wait-for install complete
-
-```bash
-~/.ansible/okd-installer/bin/openshift-install \
-    wait-for install-complete \
-    --dir ~/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/ \
-    --log-level debug
-```
-
-- Review ClusterOperators
-
-```bash
-export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/auth/kubeconfig
-
-oc wait --all --for=condition=Available=True clusteroperators.config.openshift.io --timeout=10m > /dev/null
-oc wait --all --for=condition=Progressing=False clusteroperators.config.openshift.io --timeout=10m > /dev/null
-oc wait --all --for=condition=Degraded=False clusteroperators.config.openshift.io --timeout=10m > /dev/null
-
-oc get clusteroperators
-```
-
-## Alternative Day-2 Operations
-
-### Enable image-registry (non-production clusters)
-
-> [References](https://docs.openshift.com/container-platform/4.6/registry/configuring_registry_storage/configuring-registry-storage-baremetal.html)
-
-```bash
-oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
-oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
-```
-
-```bash
-ansible-playbook mtulio.okd_installer.create_imageregistry \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
 ## Destroy cluster

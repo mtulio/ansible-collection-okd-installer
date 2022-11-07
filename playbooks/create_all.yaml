@@ -50,6 +50,8 @@
   connection: local
 
   tasks:
-    - name: Show date time
+    - name: Show final message
       ansible.builtin.debug:
-        msg: "start=[{{ datetime_start|d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
+        msg:
+          - "start=[{{ datetime_start|d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
+          - "export KUBECONFIG={{ config_install_dir }}/auth/kubeconfig"

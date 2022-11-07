@@ -25,7 +25,11 @@ platform:
   {{ config_platform_default }}: {{ config_platform_spec_default }}
 {% else %}
 platform:
-  {{ config_platform }}: {{ config_platform_spec }}
+{% if (config_platform_spec is not defined) or (config_platform_spec |length <= 0) %}
+  {{ config_platform }}: {}
+{% else %}
+  {{ config_platform }}: {{ config_platform_spec|d('{}') }}
+{% endif %}
 {% endif %}
 
 publish: {{ config_publish }}

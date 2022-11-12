@@ -29,6 +29,10 @@
       ansible.builtin.set_fact:
         load_balancers_all: []
 
+    - name: Destroy | Loading Destroy Resource Names
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/destroy_resources.yaml"
+
     - name: Destroy | Loading Router Default Load Balancers
       ansible.builtin.include_vars:
         file: "./vars/{{ config_provider }}/loadbalancer-router-default.yaml"

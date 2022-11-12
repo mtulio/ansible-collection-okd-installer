@@ -3,6 +3,7 @@
 - name: "Waiting [{{ cert_wait_interval_sec }}s] to retrieve CSRs [{{ item_retry }}/{{ end_at }}]"
   ansible.builtin.pause:
     seconds: "{{ cert_wait_interval_sec }}"
+  when: item_retry|int > 1
 
 - name: "Getting existing Certificate Signing Requests"
   kubernetes.core.k8s_info:

@@ -25,8 +25,9 @@ Create and export the environment file:
 
 - `platform.none: {}`
 ```bash
-cat <<EOF> .env-none
-export CONFIG_CLUSTER_NAME=mrbnone
+CLUSTER_ID="none4103006"
+cat <<EOF> ./.env-${CLUSTER_ID}
+export CONFIG_CLUSTER_NAME=mrb${CLUSTER_ID}
 export CONFIG_PROVIDER=aws
 export CONFIG_CLUSTER_REGION=us-east-1
 export CONFIG_PLATFORM=none
@@ -35,7 +36,7 @@ export CONFIG_PULL_SECRET_FILE=/home/mtulio/.openshift/pull-secret-latest.json
 export CONFIG_SSH_KEY="$(cat ~/.ssh/id_rsa.pub)"
 EOF
 
-source ./.env-none
+source ./.env-${CLUSTER_ID}
 ```
 
 Check if all required variables has been set:
@@ -70,7 +71,7 @@ Call the playbook to create the cluster:
 ansible-playbook mtulio.okd_installer.create_all \
     -e provider=${CONFIG_PROVIDER} \
     -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e certs_max_retries=3 \
+    -e certs_max_retries=20 \
     -e cert_wait_interval_sec=60
 ```
 
@@ -84,7 +85,7 @@ The `create_all` already trigger the certificates approval with one default time
 ansible-playbook mtulio.okd_installer.approve_certs \
     -e provider=${CONFIG_PROVIDER} \
     -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e certs_max_retries=5 \
+    -e certs_max_retries=3 \
     -e cert_wait_interval_sec=60
 ```
 
@@ -131,14 +132,13 @@ oc get clusteroperators
 > [References](https://docs.openshift.com/container-platform/4.6/registry/configuring_registry_storage/configuring-registry-storage-baremetal.html)
 
 ```bash
-oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
-oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed","storage":{"emptyDir":{}}}}'
 ```
 
-```bash
+<!-- ```bash
 ansible-playbook mtulio.okd_installer.create_imageregistry \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
-```
+``` -->
 
 ### Create Load Balancer for default router <a name="review-create-ingress-lb"></a>
 

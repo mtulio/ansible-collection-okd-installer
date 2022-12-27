@@ -1,4 +1,4 @@
 ---
 - name: Destroy | Load Balancer
-  include: "aws-loadbalancer.yaml"
+  ansible.builtin.include_tasks: "aws-loadbalancer.yaml"
   tags: loadbalancer

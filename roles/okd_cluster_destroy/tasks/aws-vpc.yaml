@@ -1,11 +1,12 @@
 ---
 - name: Destroy | VPC | AWS
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy VPC triggered"
   tags: vpc
+  when: debug|d(false)
 
 - name: VPC | AWS | Set VPC Id for Zone name
-  set_fact:
+  ansible.builtin.set_fact:
     vpc_name: "{{ cloud_networks[0].name }}"
     vpc_region: "{{ cloud_networks[0].region }}"
     vpc_cidr: "{{ cloud_networks[0].block }}"
@@ -20,7 +21,7 @@
   tags: vpc
 
 - name: VPC | AWS | Set VPC Id for Zone name
-  set_fact:
+  ansible.builtin.set_fact:
     vpc_id: "{{ vpc_info.vpcs[0].vpc_id }}"
   when:
     - vpc_name is defined
@@ -28,25 +29,25 @@
   tags: vpc
 
 - block:
-    - include: aws-vpc-natgw.yaml
+    - ansible.builtin.include_tasks: aws-vpc-natgw.yaml
       tags: vpc
 
-    - include: aws-vpc-sgs.yaml
+    - ansible.builtin.include_tasks: aws-vpc-sgs.yaml
       tags: vpc
 
-    - include: aws-vpc-endpoint.yaml
+    - ansible.builtin.include_tasks: aws-vpc-endpoint.yaml
       tags: vpc
 
-    - include: aws-vpc-rtb.yaml
+    - ansible.builtin.include_tasks: aws-vpc-rtb.yaml
       tags: vpc
 
-    - include: aws-vpc-subnets.yaml
+    - ansible.builtin.include_tasks: aws-vpc-subnets.yaml
       tags: vpc
 
-    - include: aws-vpc-igw.yaml
+    - ansible.builtin.include_tasks: aws-vpc-igw.yaml
       tags: vpc
 
-    - include: aws-vpc-cagw.yaml
+    - ansible.builtin.include_tasks: aws-vpc-cagw.yaml
       tags: vpc
 
     - name: AWS | VPC delete
@@ -59,7 +60,7 @@
       tags: vpc
 
     - name: AWS | VPC | Show delete result
-      debug:
+      ansible.builtin.debug:
         var: ret_vpc
       tags: vpc
 

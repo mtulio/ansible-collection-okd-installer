@@ -1,6 +1,6 @@
 ---
 - name: Destroy | IAM | AWS
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy IAM triggered"
 
 # TODO discovery if role exists before try to delete policy

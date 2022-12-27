@@ -16,7 +16,7 @@
   ignore_errors: true
 
 - name: Destroy | DO | VPC | Show
-  debug:
+  ansible.builtin.debug:
     var: do_vpc
 
 - name: Waiting 30s to delete VPC

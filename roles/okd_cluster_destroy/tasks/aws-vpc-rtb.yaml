@@ -1,6 +1,6 @@
 ---
 - name: Destroy | VPC | AWS
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy VPC RTB triggered"
   tags: vpc
 
@@ -13,7 +13,7 @@
   tags: vpc
 
 - name: Destroy | VPC | Rtb | Set tables to delete
-  set_fact:
+  ansible.builtin.set_fact:
     route_tables_to_delete: "{{ (route_tables_to_delete | default([])) + [item.id] }}"
   when: item.associations | length == 0 or not item.associations[0].main
   loop: "{{ route_table_info.route_tables }}"

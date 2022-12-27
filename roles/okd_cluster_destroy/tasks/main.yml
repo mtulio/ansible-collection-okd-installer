@@ -1,4 +1,4 @@
 ---
 - name: Destroy | Provider
-  include: "{{ provider }}.yaml"
+  ansible.builtin.include_tasks: "{{ provider }}.yaml"
   tags: always

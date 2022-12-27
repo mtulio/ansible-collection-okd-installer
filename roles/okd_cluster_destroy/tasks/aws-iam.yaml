@@ -4,7 +4,7 @@
     msg: "Destroy IAM triggered"
 
 - name: Removing IAM Policies
-  include: aws-iam-policies.yaml
+  ansible.builtin.include_tasks: aws-iam-policies.yaml
   with_items: "{{ iam_roles }}"
   loop_control:
     loop_var: iam_role

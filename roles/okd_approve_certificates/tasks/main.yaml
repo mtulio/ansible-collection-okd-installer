@@ -1,13 +1,10 @@
 ---
-- name: "Defaults for Node Certificates"
-  ansible.builtin.set_fact:
-    certs_approved: 0
-    certs_expected: "{{ compute_resources|d([]) | length }}"
 
 - name: "Approving Node Certificates"
-  ansible.builtin.include_tasks: approve.yaml
+  ansible.builtin.include_tasks: approve-check.yaml
   with_sequence: start=1 end="{{ end_at }}"
   vars:
-    end_at: "{{ certs_max_retries|d(20) }}"
+    end_at: "{{ cert_max_retries|d(cert_default_max_retries) }}"
   loop_control:
     loop_var: item_retry
+  when: not(cert_approval_done)

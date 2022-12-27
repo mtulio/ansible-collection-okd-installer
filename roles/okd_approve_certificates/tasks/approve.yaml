@@ -1,23 +1,23 @@
 ---
-
 - name: "Waiting [{{ cert_wait_interval_sec }}s] to retrieve CSRs [{{ item_retry }}/{{ end_at }}]"
   ansible.builtin.pause:
     seconds: "{{ cert_wait_interval_sec }}"
-  when: item_retry|int > 1
+  when:
+    - item_retry|int > 1
 
-- name: "Getting existing Certificate Signing Requests"
+- name: Getting existing Certificate Signing Requests
   kubernetes.core.k8s_info:
     api_version: certificates.k8s.io/v1
     kind: CertificateSigningRequest
     kubeconfig: "{{ config_install_dir }}/auth/kubeconfig"
   register: all_csr
 
-- name: "Set default pending"
-  set_fact:
+- name: Set default pending
+  ansible.builtin.set_fact:
     csr_pending: []
 
-- name: filter pending CertificateSigningRequest
-  set_fact:
+- name: Filter pending CertificateSigningRequest
+  ansible.builtin.set_fact:
     csr_pending: "{{ csr_pending | d([]) + [ item_csr.metadata.name ] }}"
   with_items: "{{ all_csr.resources }}"
   when: "{{ item_csr.status | length <= 0 }}"
@@ -29,27 +29,28 @@
   delay: 10
 
 - name: Show Total Pending
-  debug:
+  ansible.builtin.debug:
     msg: "Total pending: {{ csr_pending|length }}"
 
-- name: approve CertificateSigningRequest
-  command: |
+- name: Approve CertificateSigningRequest
+  ansible.builtin.command: |
     {{ oc_bin }} \
       --kubeconfig {{ config_install_dir }}/auth/kubeconfig \
       adm certificate approve {{ csr_name }}
   vars:
     oc_bin: "{{ ansible_user_dir }}/.ansible/okd-installer/bin/oc"
   with_items: "{{ csr_pending }}"
+  ignore_errors: true
   loop_control:
     loop_var: csr_name
 
 - name: Update Total Approved
   ansible.builtin.set_fact:
-    certs_approved: "{{ certs_approved|int + csr_pending|length }}"
+    cert_approved: "{{ cert_approved|int + csr_pending|length }}"
 
 - name: Show Total Approved
-  debug:
-    msg: "Total approved: {{ certs_approved }}"
+  ansible.builtin.debug:
+    msg: "Total approved: {{ cert_approved }}. Total Nodes: {{ cert_nodes_count }}"
 
 # - name: Check for approval
 #   debug:

@@ -1,4 +1,16 @@
 ---
-- hosts: localhost
-  roles:
-    - okd_imageregistry
+- name: Enable Local Image Registry
+  hosts: localhost
+  tasks:
+  - name: Create Manage Image Registry emptyDir
+    kubernetes.core.k8s:
+      state: present
+      kubeconfig: "{{ config_install_dir }}/auth/kubeconfig"
+      api_version: imageregistry.operator.openshift.io/v1
+      kind: Config
+      name: cluster
+      definition:
+        spec:
+          managementState: Managed
+          storage:
+            emptyDir: {}

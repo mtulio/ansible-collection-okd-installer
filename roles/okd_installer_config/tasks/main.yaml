@@ -1,3 +1,3 @@
 ---
 
-- include: "{{ mode | d('check') }}.yaml"
+- ansible.builtin.include_tasks: "{{ mode | d('check') }}.yaml"

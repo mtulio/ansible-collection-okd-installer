@@ -1,0 +1,11 @@
+FROM quay.io/centos/centos:stream9
+
+WORKDIR /okd-installer
+
+RUN dnf install python3-pip -y && dnf clean all
+
+ADD ./requirements.* .
+RUN pip3 install --force-reinstall -r requirements.txt
+
+RUN ansible-galaxy collection install --requirements-file requirements.yml
+

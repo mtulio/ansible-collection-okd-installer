@@ -1,5 +1,5 @@
 ---
-- ansible.builtin.import_playbook: var_check_required.yaml
+# - ansible.builtin.import_playbook: var_check_required.yaml
 
 - ansible.builtin.import_playbook: config.yaml
   vars:
@@ -15,7 +15,12 @@
         file: "{{ var_file }}"
       when: var_file is defined
 
-    - name: Include Network Variables
+    - name: Include Network Variables - Pre-build topologies
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/topologies/{{ topology_network }}/network.yaml"
+      when: topology_network is defined
+
+    - name: Include Network Variables - Default
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/network.yaml"
       when: cloud_networks is not defined

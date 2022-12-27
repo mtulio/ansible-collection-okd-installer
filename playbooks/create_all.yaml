@@ -1,5 +1,5 @@
 ---
-- name: OKD Stack Compute - Start
+- name: OKD Installer - Create ALL Start
   hosts: '{{ target|default("localhost") }}'
   connection: local
 
@@ -8,44 +8,60 @@
       ansible.builtin.set_fact:
         datetime_start: "{{ ansible_date_time.iso8601 }}"
 
+# - name: OKD Installer | Create all | check required vars
+#   ansible.builtin.import_playbook: var_check_required.yaml
 
-- ansible.builtin.import_playbook: var_check_required.yaml
-
-- ansible.builtin.import_playbook: config.yaml
+- name: OKD Installer | Create all | create config
+  ansible.builtin.import_playbook: config.yaml
   vars:
     mode: create
 
-- ansible.builtin.import_playbook: stack_network.yaml
+- name: OKD Installer | Create all | create stack | network
+  ansible.builtin.import_playbook: stack_network.yaml
 
-- ansible.builtin.import_playbook: stack_iam.yaml
+- name: OKD Installer | Create all | create stack | IAM
+  ansible.builtin.import_playbook: stack_iam.yaml
 
-- ansible.builtin.import_playbook: stack_dns.yaml
+- name: OKD Installer | Create all | create stack | DNS
+  ansible.builtin.import_playbook: stack_dns.yaml
 
-- ansible.builtin.import_playbook: stack_loadbalancer.yaml
+- name: OKD Installer | Create all | create stack | Load Balancer
+  ansible.builtin.import_playbook: stack_loadbalancer.yaml
 
-- ansible.builtin.import_playbook: create_node_all.yaml
+- name: OKD Installer | Create all | create stack | Compute
+  ansible.builtin.import_playbook: create_node_all.yaml
 
-- ansible.builtin.import_playbook: stack_loadbalancer.yaml
+- name: OKD Installer | Create all | create stack | Load Balancer Router
+  ansible.builtin.import_playbook: stack_loadbalancer.yaml
   vars:
     var_file: "{{ playbook_dir }}/vars/{{ config_provider }}/loadbalancer-router-default.yaml"
   when:
     - (config_provider is defined)
     - (config_platform|d('') != "aws")
 
-- ansible.builtin.import_playbook: approve_certs.yaml
+- name: OKD Installer | Create all | create stack | approve certs
+  ansible.builtin.import_playbook: approve_certs.yaml
   vars:
-    certs_max_retries: 5
+    certs_max_retries: 8
     cert_wait_interval_sec: 60
-  when: 
+  when:
     - (config_provider == 'aws') or (config_platform == 'none')
 
 - ansible.builtin.import_playbook: create_imageregistry.yaml
-  when: 
+  when:
     - (config_provider == 'aws') or (config_platform == 'none')
     - create_registry|d('no') == 'yes'
 
+- ansible.builtin.import_playbook: config.yaml
+  vars:
+    mode: load
 
-- name: OKD Stack Compute - Finish
+- ansible.builtin.import_playbook: destroy_bootstrap.yaml
+  when:
+    - (config_provider == 'aws')
+    - destroy_bootstrap|d('no') == 'yes'
+
+- name: OKD Installer - Create ALL Finish
   hosts: '{{ target|default("localhost") }}'
   connection: local
 

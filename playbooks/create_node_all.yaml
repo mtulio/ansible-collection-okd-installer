@@ -1,5 +1,5 @@
 ---
-- import_playbook: var_check_required.yaml
+# - import_playbook: var_check_required.yaml
 
 - import_playbook: config.yaml
   vars:
@@ -10,14 +10,25 @@
   connection: local
 
   tasks:
+    # Create Compute: Bootstrap node
     - name: Include User Provided Compute Variables
       ansible.builtin.include_vars:
         file: "{{ var_file_bootstrap }}"
-      when: var_file_bootstrap is defined
+      when:
+        - var_file_bootstrap is defined
+        - topology_compute is not defined
 
-    - name: Include Compute Variables
+    - name: "Include User Provided Topology [{{ topology_compute }}] Bootstrap Variables"
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-bootstrap.yaml"
+      when:
+        - topology_compute is defined
+
+    - name: "Include Bootstrap Variables"
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/node-bootstrap.yaml"
+      when:
+        - topology_compute is not defined
 
     - name: Run roles to create bootstrap
       ansible.builtin.include_role:
@@ -26,14 +37,25 @@
         - 'okd_bootstrap'
         - 'cloud_compute'
 
+    # Create Compute: Control Plane nodes
     - name: Include User Provided Compute Variables
       ansible.builtin.include_vars:
         file: "{{ var_file_controlplane }}"
-      when: var_file_controlplane is defined
+      when:
+        - var_file_controlplane is defined
+        - topology_compute is not defined
+
+    - name: "Include User Provided Topology [{{ topology_compute }}] ControlPlane Variables"
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-controlplane.yaml"
+      when:
+        - topology_compute is defined
 
     - name: Include Compute Variables
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/node-controlplane.yaml"
+      when:
+        - topology_compute is not defined
 
     - name: Run roles to create controlplane
       ansible.builtin.include_role:
@@ -41,14 +63,25 @@
       loop:
         - 'cloud_compute'      
 
+    # Create Compute: Compute nodes
     - name: Include User Provided Compute Variables
       ansible.builtin.include_vars:
         file: "{{ var_file_compute }}"
-      when: var_file_controlplane is defined
+      when:
+        - var_file_compute is defined
+        - topology_compute is not defined
+
+    - name: "Include User Provided Topology [{{ topology_compute }}] Compute Variables"
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-compute.yaml"
+      when:
+        - topology_compute is defined
 
     - name: Include Compute Variables
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/node-compute.yaml"
+      when:
+        - topology_compute is not defined
 
     - name: Run roles to create compute
       ansible.builtin.include_role:

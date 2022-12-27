@@ -2,6 +2,7 @@
 - name: OKD Destroy - Start
   hosts: '{{ target|default("localhost") }}'
   connection: local
+  gather_facts: yes
 
   tasks:
     - name: Show date time
@@ -9,7 +10,7 @@
         datetime_start: "{{ ansible_date_time.iso8601 }}"
 
 
-- ansible.builtin.import_playbook: var_check_required.yaml
+# - ansible.builtin.import_playbook: var_check_required.yaml
 
 - ansible.builtin.import_playbook: config.yaml
   vars:
@@ -18,13 +19,25 @@
 - name: OKD Destroy Cluster
   hosts: '{{target|default("localhost")}}'
   connection: local
+  gather_facts: yes
 
   vars_files:
     - "./vars/{{ config_provider }}/iam.yaml"
     - "./vars/{{ config_provider }}/dns.yaml"
-    - "./vars/{{ config_provider }}/network.yaml"
 
   pre_tasks:
+    # Network
+    - name: Destroy | Loading Destroy Resource Names
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/topologies/{{ topology_network }}/network.yaml"
+      when: topology_network is defined
+
+    - name: Destroy | Loading Destroy Resource Names
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/network.yaml"
+      when: topology_network is not defined
+
+    # Load Balancers
     - name: Destroy | Preparing the list of Load Balancers
       ansible.builtin.set_fact:
         load_balancers_all: []

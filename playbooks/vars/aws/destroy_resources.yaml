@@ -6,8 +6,8 @@ okd_cluster_destroy_instances:
   - name: "{{ cluster_state.infra_id }}-master-3"
   - name: "{{ cluster_state.infra_id }}-worker-1"
   - name: "{{ cluster_state.infra_id }}-worker-2"
-  - name: "{{ cluster_state.infra_id }}-worker-4"
   - name: "{{ cluster_state.infra_id }}-worker-3"
+  - name: "{{ cluster_state.infra_id }}-worker-4"
     wait: yes
     wait_timeout: 120
 

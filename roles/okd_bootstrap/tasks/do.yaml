@@ -9,8 +9,9 @@
   register: do_space
 
 - name: DigitalOcean | Show Config
-  debug:
+  ansible.builtin.debug:
     var: do_space
+  when: debug|d(false)
 
 - name: DigitalOcean | Set Bucket URL
   set_fact:
@@ -26,9 +27,10 @@
   register: s3_put
 
 - name: DigitalOcean | Show pre-signed URL
-  debug:
+  ansible.builtin.debug:
     var: s3_put
+  when: debug|d(false)
 
 - name: DigitalOcean | Set the Ignition URL
-  set_fact:
+  ansible.builtin.set_fact:
     setup_bootstrap_ign_spaces_url: "{{ s3_put.url }}"

@@ -1,2 +1,2 @@
 ---
-- include: "{{ bootstrap_ignition_storage | d(provider) }}.yaml"
+- ansible.builtin.include_tasks: "{{ bootstrap_ignition_storage | d(provider) }}.yaml"

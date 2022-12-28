@@ -71,3 +71,15 @@ Supported Cloud Platforms* and installation types:
 
 *Agnostic installation means that OKD there's no native integration with the Platform.
 **None means there is support to install OKD on this platform, but no native integration will be available on the OKD, which means every controller to interact with the Cloud Resource should be added separatelly.
+
+## Contribute!
+
+You can see the value and would like to contribute?! We are open to hearing from you.
+
+See some items we need immediate contributions:
+
+- CI improvement: implement more tests; mock provider API; improve linter items
+- Documentation: Deployment documentation; Usage documentation
+- Examples: Implement example playbooks
+
+If you would like to contribute to any other item not listed above, feel free to open an issue or a Pull request. =]

@@ -1,6 +1,6 @@
 ---
 - name: Destroy | DNS | AWS | Record
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy DNS Record: {{ record }}"
   tags: dns
   when: debug|d(false)
@@ -10,14 +10,14 @@
     state: get
     zone: "{{ zone.name }}"
     record: "{{ record }}"
-    private_zone: "{{ zone.private_zone|d('no') }}"
+    private_zone: "{{ zone.private_zone | d('no') }}"
     type: A
   register: rec
   tags: dns
   ignore_errors: true
 
 - name: Destroy | DNS | AWS | Record Show
-  debug:
+  ansible.builtin.debug:
     var: rec
   when: debug|d(false)
 
@@ -31,7 +31,7 @@
     alias: "{{ rec.set.alias }}"
     alias_hosted_zone_id: "{{ rec.set.alias_hosted_zone_id }}"
     wait: false
-    private_zone: "{{ zone.private_zone|d('no') }}"
+    private_zone: "{{ zone.private_zone | d('no') }}"
   tags: dns
   when: 
     - (rec is defined) 

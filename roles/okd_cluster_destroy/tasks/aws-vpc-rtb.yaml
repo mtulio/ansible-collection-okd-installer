@@ -5,7 +5,7 @@
   tags: vpc
 
 - name: "Query for existing route table(s)"
-  ec2_vpc_route_table_info:
+  amazon.aws.ec2_vpc_route_table_info:
     region: "{{ vpc_region }}"
     filters:
       vpc-id: "{{ vpc_id }}"
@@ -20,7 +20,7 @@
   tags: vpc
 
 - name: Purge routes
-  ec2_vpc_route_table:
+  amazon.aws.ec2_vpc_route_table:
     region: "{{ vpc_region }}"
     vpc_id: "{{ vpc_id }}"
     route_table_id: "{{ item }}"
@@ -33,11 +33,12 @@
   tags: vpc
 
 - name: Destroy | VPC | Waiting 10s to propagate
-  pause: seconds=10
+  ansible.builtin.pause:
+    seconds: 10
   tags: vpc
 
 - name: "Delete route table"
-  ec2_vpc_route_table:
+  amazon.aws.ec2_vpc_route_table:
     region: "{{ vpc_region }}"
     vpc_id: "{{ vpc_id }}"
     route_table_id: "{{ item }}"

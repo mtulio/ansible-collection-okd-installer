@@ -6,7 +6,7 @@
   when: debug|d(false)
 
 - name: Get subnets in the VPC
-  ec2_vpc_subnet_info:
+  amazon.aws.ec2_vpc_subnet_info:
     filters:
       vpc-id: "{{ vpc_id }}"
   register: ret_subnets
@@ -19,7 +19,7 @@
   when: debug|d(false)
 
 - name: Destroy | AWS | Delete subnets
-  ec2_vpc_subnet:
+  amazon.aws.ec2_vpc_subnet:
     state: absent
     region: "{{ vpc_region }}"
     vpc_id: "{{ item.vpc_id }}"

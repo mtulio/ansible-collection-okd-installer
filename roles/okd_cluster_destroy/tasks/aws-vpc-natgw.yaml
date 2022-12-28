@@ -5,7 +5,7 @@
   tags: vpc
 
 - name: Get all nat gateways with specific filters
-  ec2_vpc_nat_gateway_info:
+  amazon.aws.ec2_vpc_nat_gateway_info:
     region: "{{ vpc_region }}"
     filters:
       state: ['available']
@@ -15,7 +15,7 @@
   tags: vpc
 
 - name: AWS | NAT GW delete
-  ec2_vpc_nat_gateway:
+  amazon.aws.ec2_vpc_nat_gateway:
     state: absent
     region: "{{ vpc_region }}"
     nat_gateway_id: "{{ item.nat_gateway_id }}"

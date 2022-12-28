@@ -5,7 +5,7 @@
   tags: vpc
 
 - name: "Delete internet gateway"
-  ec2_vpc_igw:
+  amazon.aws.ec2_vpc_igw:
     region: "{{ vpc_region }}"
     vpc_id: "{{ vpc_id }}"
     state: "absent"

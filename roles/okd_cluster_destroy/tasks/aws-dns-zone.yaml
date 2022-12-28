@@ -1,7 +1,7 @@
 ---
 - name: Destroy | DNS | AWS
-  debug:
-    msg: "Destroy DNS Zone: {{ zone.name }} - {{ zone.vpc_name|d(zone.vpc_id) }}"
+  ansible.builtin.debug:
+    msg: "DNS Zone: {{ zone.name }} ({{ zone.vpc_name | d(zone.vpc_id) }})"
   tags: dns
   when: debug|d(false)
 
@@ -14,15 +14,16 @@
   tags: dns
 
 - name: DNS | AWS | Check for delete
-  debug:
+  ansible.builtin.debug:
     msg: "VPC name {{ zone.vpc_name }} Not found, ignoring Zone deletion"
   when:
   - vpc_info.vpcs|length <= 0
 
 - name: DNS | AWS | Deleting tasks
+  when: vpc_info.vpcs|length > 0
   block:
   - name: DNS | AWS | Set VPC Id for Zone name
-    set_fact:
+    ansible.builtin.set_fact:
       vpc_id: "{{ vpc_info.vpcs[0].vpc_id }}"
     when:
       - zone.vpc_name is defined
@@ -40,5 +41,4 @@
       - vpc_id|length > 0
     tags: dns
 
-  when:
-  - vpc_info.vpcs|length > 0
+  

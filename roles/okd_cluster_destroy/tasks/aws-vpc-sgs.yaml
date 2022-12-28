@@ -6,7 +6,7 @@
   when: debug|d(false)
 
 - name: Destroy | VPC | Set VPC ID
-  ec2_group_info:
+  amazon.aws.ec2_group_info:
     filters:
       vpc-id: "{{ vpc_id }}"
   register: ret_sgs
@@ -19,7 +19,7 @@
   when: debug|d(false)
 
 - name: AWS | SG - delete rules
-  ec2_group:
+  amazon.aws.ec2_group:
     state: present
     region: "{{ vpc_region }}"
     vpc_id: "{{ vpc_id }}"
@@ -34,7 +34,7 @@
   tags: vpc
 
 - name: AWS | SG - delete
-  ec2_group:
+  amazon.aws.ec2_group:
     state: absent
     region: "{{ vpc_region }}"
     vpc_id: "{{ vpc_id }}"

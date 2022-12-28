@@ -10,7 +10,7 @@ security_groups:
   - name: "{{ cluster_state.infra_id }}-bootstrap-sg"
     description: Bootstrap Security Group
     purge_tags: no
-    tags: "{{ cluster_state.tags | combine({'Name':cluster_state.infra_id+'-bootstrap-sg'}) }}"
+    tags: "{{ cluster_state.tags | combine({'Name': cluster_state.infra_id + '-bootstrap-sg'}) }}"
     purge_rules: true
     rules:
       - proto: tcp
@@ -27,7 +27,7 @@ security_groups:
   - name: "{{ cluster_state.infra_id }}-controlplane-sg"
     description: Security Group for Control Plane nodes
     purge_tags: no
-    tags: "{{ cluster_state.tags | combine({'Name':cluster_state.infra_id+'-controlplane-sg'}) }}"
+    tags: "{{ cluster_state.tags | combine({'Name': cluster_state.infra_id + '-controlplane-sg'}) }}"
     purge_rules: true
     rules:
       - proto: all
@@ -46,7 +46,7 @@ security_groups:
   - name: "{{ cluster_state.infra_id }}-compute-sg"
     description: Security Group for Compute nodes
     purge_tags: no
-    tags: "{{ cluster_state.tags | combine({'Name':cluster_state.infra_id+'-compute-sg'}) }}"
+    tags: "{{ cluster_state.tags | combine({'Name': cluster_state.infra_id + '-compute-sg'}) }}"
     purge_rules: true
     rules:
       - proto: all

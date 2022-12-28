@@ -1,6 +1,6 @@
 ---
 - name: Destroy | VPC | AWS
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy VPC IGW triggered"
   tags: vpc
 

@@ -14,10 +14,10 @@ metadata:
 
 {% if config_networking %}
 networking:
-  clusterNetwork: {{ config_networking_clusterNetwork }}
-  machineNetwork: {{ config_networking_machineNetwork }}
-  networkType: {{ config_networking_networkType }}
-  serviceNetwork: {{ config_networking_serviceNetwork }}
+  clusterNetwork: {{ config_networking_clusternetwork }}
+  machineNetwork: {{ config_networking_machinenetwork }}
+  networkType: {{ config_networking_networktype }}
+  serviceNetwork: {{ config_networking_servicenetwork }}
 {% endif %}
 
 {% if (config_platform is not defined) or (config_platform |length <= 0) %}

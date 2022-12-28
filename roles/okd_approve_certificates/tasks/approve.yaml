@@ -1,5 +1,9 @@
 ---
-- name: "Waiting [{{ cert_wait_interval_sec }}s] to retrieve CSRs [{{ item_retry }}/{{ end_at }}]"
+- name: Set waiting message
+  ansible.builtin.set_fact:
+    waiting_msg: "{{ cert_wait_interval_sec }}sec [{{ item_retry }}/{{ end_at }}]"
+
+- name: Waiting to retrieve CSRs {{ waiting_msg }}
   ansible.builtin.pause:
     seconds: "{{ cert_wait_interval_sec }}"
   when:
@@ -18,9 +22,9 @@
 
 - name: Filter pending CertificateSigningRequest
   ansible.builtin.set_fact:
-    csr_pending: "{{ csr_pending | d([]) + [ item_csr.metadata.name ] }}"
+    csr_pending: "{{ csr_pending | d([]) + [item_csr.metadata.name] }}"
   with_items: "{{ all_csr.resources }}"
-  when: "{{ item_csr.status | length <= 0 }}"
+  when: item_csr.status | length <= 0
   loop_control:
     loop_var: item_csr
   register: pending_csr_out
@@ -30,7 +34,7 @@
 
 - name: Show Total Pending
   ansible.builtin.debug:
-    msg: "Total pending: {{ csr_pending|length }}"
+    msg: "Total pending: {{ csr_pending | length }}"
 
 - name: Approve CertificateSigningRequest
   ansible.builtin.command: |
@@ -40,13 +44,16 @@
   vars:
     oc_bin: "{{ ansible_user_dir }}/.ansible/okd-installer/bin/oc"
   with_items: "{{ csr_pending }}"
-  ignore_errors: true
   loop_control:
     loop_var: csr_name
+  register: result
+  ignore_errors: True
+  changed_when:
+    - result.rc == 2
 
 - name: Update Total Approved
   ansible.builtin.set_fact:
-    cert_approved: "{{ cert_approved|int + csr_pending|length }}"
+    cert_approved: "{{ cert_approved | int + csr_pending | length }}"
 
 - name: Show Total Approved
   ansible.builtin.debug:

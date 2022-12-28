@@ -1,11 +1,12 @@
 ---
 # - import_playbook: var_check_required.yaml
 
-- import_playbook: config.yaml
+- name: OKD Stack Compute ALL | Load Config
+  import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Stack Compute - Create All
+- name: OKD Stack Compute ALL | Create All
   hosts: '{{ target|default("localhost") }}'
   connection: local
 
@@ -18,13 +19,13 @@
         - var_file_bootstrap is defined
         - topology_compute is not defined
 
-    - name: "Include User Provided Topology [{{ topology_compute }}] Bootstrap Variables"
+    - name: Include User Provided Variables for Bootstrap Topology - {{ topology_compute }}
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-bootstrap.yaml"
       when:
         - topology_compute is defined
 
-    - name: "Include Bootstrap Variables"
+    - name: Include Bootstrap Variables
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/node-bootstrap.yaml"
       when:
@@ -45,7 +46,7 @@
         - var_file_controlplane is defined
         - topology_compute is not defined
 
-    - name: "Include User Provided Topology [{{ topology_compute }}] ControlPlane Variables"
+    - name: Include User Provided Variables for ControlPlane Topology - {{ topology_compute }}
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-controlplane.yaml"
       when:
@@ -71,7 +72,7 @@
         - var_file_compute is defined
         - topology_compute is not defined
 
-    - name: "Include User Provided Topology [{{ topology_compute }}] Compute Variables"
+    - name: Include User Provided Variables for Compute Topology {{ topology_compute }}
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-compute.yaml"
       when:
@@ -89,7 +90,8 @@
       loop:
         - 'cloud_compute'    
 
-- import_playbook: config.yaml
+- name: OKD Stack Compute ALL | Save state
+  import_playbook: config.yaml
   vars:
     mode: save-state
     cluster_state: "{{ cluster_state | combine({'compute': cloud_compute_state}) }}"

@@ -4,7 +4,7 @@
   connection: local
   tasks:
     - name: Simple task
-      debug:
+      ansible.builtin.debug:
         msg: "Dummy task"
 #   - name: "Include mtulio.cloud_compute role"
 #     include_role:

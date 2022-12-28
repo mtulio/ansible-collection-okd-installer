@@ -28,30 +28,40 @@
     - vpc_info.vpcs|length > 0
   tags: vpc
 
-- block:
-    - ansible.builtin.include_tasks: aws-vpc-natgw.yaml
+- name: Include Network tasks to delete
+  when: (vpc_id is defined) and (vpc_id != '')
+  tags: vpc
+  block:
+    - name: Delete Nat Gateway(s)
+      ansible.builtin.include_tasks: aws-vpc-natgw.yaml
       tags: vpc
 
-    - ansible.builtin.include_tasks: aws-vpc-sgs.yaml
+    - name: Delete Security Group(s)
+      ansible.builtin.include_tasks: aws-vpc-sgs.yaml
       tags: vpc
 
-    - ansible.builtin.include_tasks: aws-vpc-endpoint.yaml
+    - name: Delete VPC Endpoint(s)
+      ansible.builtin.include_tasks: aws-vpc-endpoint.yaml
       tags: vpc
 
-    - ansible.builtin.include_tasks: aws-vpc-rtb.yaml
+    - name: Delete Route Table(s)
+      ansible.builtin.include_tasks: aws-vpc-rtb.yaml
       tags: vpc
 
-    - ansible.builtin.include_tasks: aws-vpc-subnets.yaml
+    - name: Delete Subnet(s)
+      ansible.builtin.include_tasks: aws-vpc-subnets.yaml
       tags: vpc
 
-    - ansible.builtin.include_tasks: aws-vpc-igw.yaml
+    - name: Delete Internet Gateway(s)
+      ansible.builtin.include_tasks: aws-vpc-igw.yaml
       tags: vpc
 
-    - ansible.builtin.include_tasks: aws-vpc-cagw.yaml
+    - name: Delete Carrier Gateway(s)
+      ansible.builtin.include_tasks: aws-vpc-cagw.yaml
       tags: vpc
 
     - name: AWS | VPC delete
-      ec2_vpc_net:
+      amazon.aws.ec2_vpc_net:
         state: absent
         region: "{{ vpc_region }}"
         name: "{{ vpc_name }}"
@@ -63,7 +73,3 @@
       ansible.builtin.debug:
         var: ret_vpc
       tags: vpc
-
-  when:
-    - (vpc_id is defined) and (vpc_id != '')
-  tags: vpc

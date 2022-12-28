@@ -20,8 +20,4 @@ galaxy_info:
     - amazon
     - digitalocean
 
-  cloud_platforms:
-    - amazon
-    - digitalocean
-
 dependencies: []

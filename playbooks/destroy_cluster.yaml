@@ -1,5 +1,5 @@
 ---
-- name: OKD Destroy - Start
+- name: OKD Destroy | Start
   hosts: '{{ target|default("localhost") }}'
   connection: local
   gather_facts: yes
@@ -9,10 +9,10 @@
       ansible.builtin.set_fact:
         datetime_start: "{{ ansible_date_time.iso8601 }}"
 
-
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- ansible.builtin.import_playbook: config.yaml
+- name: OKD Destroy | Config load
+  ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
@@ -68,16 +68,16 @@
 
     - name: Destroy | Saving the final list of Load Balancers
       ansible.builtin.debug:
-        msg: "Found {{ cloud_loadbalancers |length }} Load Balancers on the Configuration"
+        msg: "Found {{ cloud_loadbalancers | length }} Load Balancers on the Configuration"
 
   roles:
     - role: okd_cluster_destroy
 
-- name: OKD Destroy - Finish
+- name: OKD Destroy | Finish
   hosts: '{{ target|default("localhost") }}'
   connection: local
 
   tasks:
     - name: Show date time
       ansible.builtin.debug:
-        msg: "start=[{{ datetime_start|d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
+        msg: "start=[{{ datetime_start | d('') }}] end=[{{ ansible_date_time.iso8601 }}]"

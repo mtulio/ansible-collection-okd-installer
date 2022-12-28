@@ -1,5 +1,7 @@
 ---
-- hosts: '{{ target | default("localhost") }}'
+- name: OKD Install Collection Ping-Pong
+  hosts: '{{ target | default("localhost") }}'
   become: false
   tasks:
-    - ping:
+    - name: Calling ping
+      ansible.builtin.ping:

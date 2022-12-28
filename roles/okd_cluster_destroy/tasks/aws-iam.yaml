@@ -1,6 +1,6 @@
 ---
 - name: Destroy | IAM | AWS
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy IAM triggered"
 
 - name: Removing IAM Policies
@@ -10,8 +10,11 @@
     loop_var: iam_role
 
 - name: Removing IAM Roles
-  iam_role: 
+  community.aws.iam_role: 
     state: absent
     name: "{{ item.name }}"
   with_items: "{{ iam_roles }}"
-  ignore_errors: true
+  register: result
+  ignore_errors: True
+  changed_when:
+    - result.rc == 2

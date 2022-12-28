@@ -1,6 +1,6 @@
 ---
 - name: Destroy | DNS | AWS | Records
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy DNS Records for zone: {{ zone.name }}"
   tags: dns
   when: debug|d(false)

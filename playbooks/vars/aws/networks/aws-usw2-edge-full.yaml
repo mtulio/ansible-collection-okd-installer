@@ -72,7 +72,7 @@ cloud_networks:
     tags: "{{ cluster_state.tags | d({}) }}"
 
     internet_gateway: true
-    carrier_gateway: true
+    carrier_gateway: no
     nat_gateways:
       - name: "{{ cluster_state.infra_id }}-natgw-1a"
         subnet: "{{ cluster_state.infra_id }}-net-public-1a"
@@ -151,33 +151,33 @@ cloud_networks:
 
       # Edge (Local Zone) subnets
       - name: "{{ cluster_state.infra_id }}-net-public-lax-lz-1a"
-        az: us-west-2-nyc-1a
+        az: us-west-2-lax-1a
         cidr: 10.0.60.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
 
       - name: "{{ cluster_state.infra_id }}-net-private-lax-lz-1a"
-        az: us-west-2-nyc-1a
+        az: us-west-2-lax-1a
         cidr: 10.0.64.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1a"
         map_public: false
 
       - name: "{{ cluster_state.infra_id }}-net-public-lax-lz-1b"
         az: us-west-2-lax-1b
-        cidr: 10.0.60.0/22
+        cidr: 10.0.68.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: true
 
       - name: "{{ cluster_state.infra_id }}-net-private-lax-lz-1b"
         az: us-west-2-lax-1b
-        cidr: 10.0.64.0/22
+        cidr: 10.0.72.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private-1b"
         map_public: false
 
-      # Edge (Wavelength) subnets
+      ## Edge (Wavelength) subnets
       - name: "{{ cluster_state.infra_id }}-net-public-lax-wlz-1"
         az: us-west-2-wl1-lax-wlz-1
-        cidr: 10.0.68.0/22
+        cidr: 10.0.76.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public-edge"
         map_public: false
 

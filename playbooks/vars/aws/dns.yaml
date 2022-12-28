@@ -11,4 +11,4 @@ cloud_dns_zones:
     provider: aws
     vpc_name: "{{ cluster_state.infra_id }}-vpc"
     vpc_region: "{{ config_cluster_region }}"
-    private_zone: yes
+    private_zone: true

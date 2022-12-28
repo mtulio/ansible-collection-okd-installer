@@ -2,7 +2,7 @@
 
 #AWS: https://docs.ansible.com/ansible/latest/collections/community/aws/elb_target_group_module.html
 cloud_loadbalancer_targets:
-  - name: "{{ cluster_state.infra_id }}-ig-default-pub-80"
+  - name: "{{ cluster_state.infra_id }}-ingress-80"
     provider: aws
     protocol: tcp
     port: 80
@@ -33,7 +33,7 @@ cloud_loadbalancer_targets:
           "tag:Name": "{{ cluster_state.infra_id }}-worker-3"
         resource_type: ip
 
-  - name: "{{ cluster_state.infra_id }}-ig-default-pub-443"
+  - name: "{{ cluster_state.infra_id }}-ingress-443"
     provider: aws
     protocol: tcp
     port: 443
@@ -66,7 +66,7 @@ cloud_loadbalancer_targets:
 
 # AWS: https://docs.ansible.com/ansible/latest/collections/community/aws/elb_network_lb_module.html
 cloud_loadbalancers:
-  - name: "{{ cluster_state.infra_id }}-ig-default-pub"
+  - name: "{{ cluster_state.infra_id }}-ingress-pub"
     openshift_id: public
     provider: aws
     type: network
@@ -88,12 +88,12 @@ cloud_loadbalancers:
         Port: 80
         DefaultActions:
           - Type: forward
-            TargetGroupName: "{{ cluster_state.infra_id }}-ig-default-pub-80"
+            TargetGroupName: "{{ cluster_state.infra_id }}-ingress-80"
       - Protocol: TCP
         Port: 443
         DefaultActions:
           - Type: forward
-            TargetGroupName: "{{ cluster_state.infra_id }}-ig-default-pub-443"
+            TargetGroupName: "{{ cluster_state.infra_id }}-ingress-443"
     register_dns:
       - zone: "{{ cluster_state.dns.base_domain }}"
         record: "*.apps.{{ cluster_state.dns.cluster_domain }}"

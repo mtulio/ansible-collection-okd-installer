@@ -8,6 +8,9 @@
     - "{{ collection_tmp_dir }}"
     - "{{ collection_bin_dir }}"
 
+- ansible.builtin.set_fact:
+    default_version: "{{ release_image }}:{{ version|d(release_version) }}-{{ release_arch }}"
+
 - name: mount the binary names 
   set_fact:
     bin_installer: "openshift-install-{{ client_os }}-{{ version|d(release_version) }}"
@@ -20,7 +23,7 @@
     path: "{{ collection_bin_dir }}/{{ bin_installer }}"
   register: check_bin_inst
 
-- name: eownload and unarchive openshift-install utility
+- name: Download and unarchive openshift-install utility
   block:
 
   - name: check if openshift_installer tarball is present
@@ -28,11 +31,24 @@
       path: "{{ collection_tmp_dir }}/{{ bin_installer }}.tar.gz"
     register: check_tar_inst
 
+  - name: Download message
+    debug:
+      msg: "Donwloading tools [{{ release_image_version_arch | d(local_version) }}] using secret [{{ config_pull_secret_file }}]"
+    when: not(check_tar_inst.stat.exists)
+
+  - name: Check required variables - config_pull_secret_file
+    ansible.builtin.assert:
+      that:
+        - config_pull_secret_file is defined
+        - config_pull_secret_file|length > 0
+      fail_msg: "'config_pull_secret_file' is not defined. Check the env var CONFIG_PULL_SECRET_FILE"
+    when:
+      - not(check_tar_inst.stat.exists)
+
   - name: extract the clients from release image
     shell: |
-      oc adm release extract \
-        -a {{ config_pull_secret_file }} \
-        --tools {{ release_image }}:{{ version|d(release_version) }}-{{ release_arch }}
+      oc adm release extract -a {{ config_pull_secret_file }} \
+        --tools {{ release_image_version_arch | d(local_version) }}
     when:
       - not(check_tar_inst.stat.exists)
     args:

@@ -1,18 +1,19 @@
 ---
 - name: Destroy | DNS | AWS
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy DNS triggered"
   tags: dns
+  when: debug|d(false)
 
 - name: DNS | AWS | Clear Zone records
-  include: aws-dns-records.yaml
+  ansible.builtin.include_tasks: aws-dns-records.yaml
   with_items: "{{ cloud_dns_zones }}"
   loop_control:
     loop_var: zone
   tags: dns
 
 - name: DNS | AWS | Delete Zone
-  include: aws-dns-zone.yaml
+  ansible.builtin.include_tasks: aws-dns-zone.yaml
   when: zone.private_zone | d(false)
   with_items: "{{ cloud_dns_zones }}"
   loop_control:

@@ -5,11 +5,11 @@
 
   tasks:
     - name: Show Current Config
-      debug:
+      ansible.builtin.debug:
         var: cluster_state
 
     - name: Save cluster state locally
-      copy:
+      ansible.builtin.copy:
         dest: "{{ install_dir }}/cluster_state.json"
         content: "{{ cluster_state }}"
         mode: 0640

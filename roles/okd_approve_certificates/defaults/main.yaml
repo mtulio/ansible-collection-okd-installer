@@ -1,0 +1,8 @@
+---
+cert_max_retries: 3
+cert_default_max_retries: 20
+cert_wait_interval_sec: 10
+cert_approved: 0
+cert_nodes_count: 0
+cert_expected_nodes: 3
+cert_approval_done: no

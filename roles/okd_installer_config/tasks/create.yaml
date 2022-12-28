@@ -1,34 +1,34 @@
 ---
 
-- include: check.yaml
-- include: create-assertions.yaml
+- ansible.builtin.include_tasks: check.yaml
+- ansible.builtin.include_tasks: create-assertions.yaml
 
 - name: InstallerConfig | Check if metadata.json exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ config_install_dir }}/metadata.json"
   register: st_out
 
 - name: InstallerConfig | Create the install config
-  template:
+  ansible.builtin.template:
     src: ocp-install-config.yaml.j2
     dest: "{{ config_install_dir }}/install-config.yaml"
     mode: 0644
   when: not(st_out.stat.exists)
 
 - name: InstallerConfig | Backup the rendered install config
-  template:
+  ansible.builtin.template:
     src: ocp-install-config.yaml.j2
     dest: "{{ config_install_dir }}/install-config-bkp.yaml"
     mode: 0644
   when: not(st_out.stat.exists)
 
 - name: InstallerConfig | Create manifests
-  shell: |
+  ansible.builtin.shell: |
     {{ bin_openshift_install }} create manifests --dir {{ config_install_dir }}
   when: not(st_out.stat.exists)
 
 - name: InstallerConfig | Remove Cluster/Machine API manifests for UPI
-  file:
+  ansible.builtin.file:
     state: absent
     path: "{{ item }}"
   with_items:
@@ -41,6 +41,6 @@
   when: not(st_out.stat.exists)
 
 - name: InstallerConfig | Create ignition configs
-  shell: |
+  ansible.builtin.shell: |
     {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
   when: not(st_out.stat.exists)

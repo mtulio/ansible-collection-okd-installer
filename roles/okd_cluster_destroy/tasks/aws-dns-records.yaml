@@ -3,13 +3,11 @@
   debug:
     msg: "Destroy DNS Records for zone: {{ zone.name }}"
   tags: dns
+  when: debug|d(false)
 
 - name: Destroy | DNS | AWS | Records delete triggere
-  include: aws-dns-record.yaml
-  with_items:
-    - "api.{{ cluster_state.dns.cluster_domain }}"
-    - "api-int.{{ cluster_state.dns.cluster_domain }}"
-    - "*.apps.{{ cluster_state.dns.cluster_domain }}"
+  ansible.builtin.include_tasks: aws-dns-record.yaml
+  with_items: "{{ okd_cluster_destroy_dns_records }}"
   loop_control:
     loop_var: record
   tags: dns

@@ -1,6 +1,7 @@
 ---
 
 - name: "Save cluster_state to {{ config_install_dir + '/cluster_state.json' }}"
-  copy:
+  ansible.builtin.copy:
     dest: "{{ config_install_dir + '/cluster_state.json' }}"
     content: "{{ cluster_state }}"
+  changed_when: false

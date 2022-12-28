@@ -1,6 +1,6 @@
 ---
 - name: Destroy | Load Balancer | AWS
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy Load Balancer triggered"
   tags: loadbalancer
 

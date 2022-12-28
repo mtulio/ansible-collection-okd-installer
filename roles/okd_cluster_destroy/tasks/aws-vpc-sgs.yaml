@@ -1,8 +1,9 @@
 ---
 - name: Destroy | VPC | AWS
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy VPC triggered"
   tags: vpc
+  when: debug|d(false)
 
 - name: Destroy | VPC | Set VPC ID
   ec2_group_info:
@@ -12,9 +13,10 @@
   tags: vpc
 
 - name: Destroy | VPC | SGs | Show vpc_id
-  debug:
+  ansible.builtin.debug:
     var: ret_sgs
   tags: vpc
+  when: debug|d(false)
 
 - name: AWS | SG - delete rules
   ec2_group:

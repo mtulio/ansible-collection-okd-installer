@@ -6,6 +6,9 @@
 config_default_architecture: amd64
 config_default_hyperthreading: Enabled
 
+config_valid_providers:
+  - aws
+
 # Compute
 config_compute_replicas: 3
 config_compute_platform: {}
@@ -43,8 +46,8 @@ config_networking_serviceNetwork:
   - 172.30.0.0/16
 
 # Platform
-config_platform_default:
-  none: {}
+config_platform_default: none
+config_platform_spec_default: {}
 
 # Publish
 config_publish: External

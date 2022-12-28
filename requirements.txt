@@ -1,3 +1,14 @@
-ansible>=2.11
+# Ansible dependencies
+ansible==6.4.0
+ansible-core==2.13.4
+
 molecule
 ansible-lint
+jmespath==1.0.1
+
+# provider: AWS
+boto3==1.24.89
+botocore==1.27.89
+
+# kubernetes Collection
+kubernetes==24.2.0

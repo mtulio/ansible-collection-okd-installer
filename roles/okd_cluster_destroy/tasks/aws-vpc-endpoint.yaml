@@ -1,6 +1,6 @@
 ---
 - name: Destroy | VPC | AWSe
-  debug:
+  ansible.builtin.debug:
     msg: "Destroy VPC Endpoint service triggered"
   tags: vpc
 

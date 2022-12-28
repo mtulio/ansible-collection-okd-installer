@@ -1,0 +1,26 @@
+---
+namespace: mtulio
+name: okd_installer
+description: Ansible Collection for OKD Installation
+version: "0.0.0-latest"
+readme: README.md
+authors:
+  - mtulio (https://mtulio.net/)
+dependencies: { }
+license:
+  - Apache-2.0
+tags:
+  - okd
+  - openshift
+  - kubernetes
+  - cloud
+  - amazon
+  - aws
+repository: https://github.com/mtulio/ansible-collection-okd-installer
+documentation: https://github.com/mtulio/ansible-collection-okd-installer
+# homepage: ""
+issues: https://github.com/mtulio/ansible-collection-okd-installer/issues
+build_ignore:
+  - scripts
+  - molecule
+  - .DS_Store

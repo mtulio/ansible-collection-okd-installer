@@ -1,35 +1,62 @@
 ---
-- import_playbook: var_check_required.yaml
+- name: OKD Destroy - Start
+  hosts: '{{ target|default("localhost") }}'
+  connection: local
+  gather_facts: yes
 
-- import_playbook: config.yaml
+  tasks:
+    - name: Show date time
+      ansible.builtin.set_fact:
+        datetime_start: "{{ ansible_date_time.iso8601 }}"
+
+
+# - ansible.builtin.import_playbook: var_check_required.yaml
+
+- ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
 - name: OKD Destroy Cluster
   hosts: '{{target|default("localhost")}}'
   connection: local
+  gather_facts: yes
 
   vars_files:
-    - "./vars/{{ provider }}/iam.yaml"
-    - "./vars/{{ provider }}/dns.yaml"
-    - "./vars/{{ provider }}/network.yaml"
+    - "./vars/{{ config_provider }}/iam.yaml"
+    - "./vars/{{ config_provider }}/dns.yaml"
 
   pre_tasks:
+    # Network
+    - name: Destroy | Loading Destroy Resource Names
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/topologies/{{ topology_network }}/network.yaml"
+      when: topology_network is defined
+
+    - name: Destroy | Loading Destroy Resource Names
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/network.yaml"
+      when: topology_network is not defined
+
+    # Load Balancers
     - name: Destroy | Preparing the list of Load Balancers
       ansible.builtin.set_fact:
         load_balancers_all: []
 
+    - name: Destroy | Loading Destroy Resource Names
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/destroy_resources.yaml"
+
     - name: Destroy | Loading Router Default Load Balancers
-      include_vars:
-        file: "./vars/{{ provider }}/loadbalancer-router-default.yaml"
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/loadbalancer-router-default.yaml"
 
     - name: Destroy | Saving Default Router to the List
       ansible.builtin.set_fact:
         load_balancers_all: "{{ load_balancers_all + cloud_loadbalancers }}"
 
     - name: Destroy | Loading ControlPlane Load Balancers
-      include_vars:
-        file: "./vars/{{ provider }}/loadbalancer.yaml"
+      ansible.builtin.include_vars:
+        file: "./vars/{{ config_provider }}/loadbalancer.yaml"
 
     - name: Destroy | Saving Default Router to the List
       ansible.builtin.set_fact:
@@ -45,3 +72,12 @@
 
   roles:
     - role: okd_cluster_destroy
+
+- name: OKD Destroy - Finish
+  hosts: '{{ target|default("localhost") }}'
+  connection: local
+
+  tasks:
+    - name: Show date time
+      ansible.builtin.debug:
+        msg: "start=[{{ datetime_start|d('') }}] end=[{{ ansible_date_time.iso8601 }}]"

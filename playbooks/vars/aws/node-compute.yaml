@@ -1,7 +1,7 @@
 ---
 openshift_prefix: "{{ cluster_state.infra_id }}"
 #openshift_bootstrap_bucket: "{{ openshift_prefix }}-infra"
-openshift_instance_type: "{{ compute_instance | d('m6a.large') }}"
+openshift_instance_type: "{{ compute_instance | d('m6i.xlarge') }}"
 openshift_instance_profile: "{{ cluster_state.compute.iam_profile_compute }}"
 # TODO: fix image lookup for agnostic installations
 #openshift_image_id: "{{ cluster_state.compute.image_id }}"
@@ -19,7 +19,7 @@ openshift_userdata:
 _def:
   name: 'worker'
   detailed_monitoring: yes
-  ebs_optimized: no
+  ebs_optimized: yes
   image_id: "{{ openshift_image_id }}"
   instance_role: "{{ openshift_instance_profile }}"
   instance_type: "{{ openshift_instance_type }}"
@@ -27,6 +27,12 @@ _def:
   state: present
   tags: "{{ openshift_tags }}"
   termination_protection: no
+  volumes:
+  - device_name: /dev/xvda
+    ebs:
+      volume_size: 128
+      volume_type: gp3
+      delete_on_termination: true
 
 
 # https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_instance_module.html
@@ -41,7 +47,6 @@ compute_resources:
         tag:Name: "{{ openshift_prefix }}-{{ _def.name }}-1"
         instance-state-name: running
       tags: "{% set x=_def.tags.__setitem__('Name', openshift_prefix+'-'+_def.name+'-1' ) %}{{ _def.tags }}"
-
       detailed_monitoring: "{{ _def.detailed_monitoring }}"
       ebs_optimized: "{{ _def.ebs_optimized }}"
       image_id: "{{ _def.image_id }}"
@@ -61,7 +66,6 @@ compute_resources:
       filters:
         tag:Name: "{{ openshift_prefix }}-{{ _def.name }}-2"
       tags: "{% set x=_def.tags.__setitem__('Name', openshift_prefix+'-'+_def.name+'-2' ) %}{{ _def.tags }}"
-
       detailed_monitoring: "{{ _def.detailed_monitoring }}"
       ebs_optimized: "{{ _def.ebs_optimized }}"
       image_id: "{{ _def.image_id }}"
@@ -81,7 +85,25 @@ compute_resources:
       filters:
         tag:Name: "{{ openshift_prefix }}-{{ _def.name }}-3"
       tags: "{% set x=_def.tags.__setitem__('Name', openshift_prefix+'-'+_def.name+'-3' ) %}{{ _def.tags }}"
+      detailed_monitoring: "{{ _def.detailed_monitoring }}"
+      ebs_optimized: "{{ _def.ebs_optimized }}"
+      image_id: "{{ _def.image_id }}"
+      instance_role: "{{ _def.instance_role }}"
+      instance_type: "{{ _def.instance_type }}"
+      security_groups: "{{ _def.security_groups }}"
+      state: "{{ _def.state }}"
+      termination_protection: "{{ _def.termination_protection }}"
+      user_data: "{{ lookup('template', openshift_userdata_template) |to_nice_json | string }}"
+      volumes: "{{ _def.volumes | d([]) }}"
+      wait: no
 
+    - provider: aws
+      type: machine
+      name: "{{ openshift_prefix }}-{{ _def.name }}-4"
+      vpc_subnet_name: "{{ openshift_prefix }}-net-private-1a"
+      filters:
+        tag:Name: "{{ openshift_prefix }}-{{ _def.name }}-4"
+      tags: "{% set x=_def.tags.__setitem__('Name', openshift_prefix+'-'+_def.name+'-4' ) %}{{ _def.tags }}"
       detailed_monitoring: "{{ _def.detailed_monitoring }}"
       ebs_optimized: "{{ _def.ebs_optimized }}"
       image_id: "{{ _def.image_id }}"

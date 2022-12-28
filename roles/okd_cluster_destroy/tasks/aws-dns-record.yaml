@@ -3,6 +3,7 @@
   debug:
     msg: "Destroy DNS Record: {{ record }}"
   tags: dns
+  when: debug|d(false)
 
 - name: Destroy | DNS | AWS | Record Get
   community.aws.route53:
@@ -18,6 +19,7 @@
 - name: Destroy | DNS | AWS | Record Show
   debug:
     var: rec
+  when: debug|d(false)
 
 - name: Destroy | DNS | AWS | Record Delete
   community.aws.route53:

@@ -1,5 +1,11 @@
 ---
 
+- name: Check required variables - provider
+  ansible.builtin.assert:
+    that:
+      - provider is in config_valid_providers
+    fail_msg: "'provider' is not a valid provider {{ config_valid_providers }}"
+
 - name: InstallerConfig | Assert directories exists
   ansible.builtin.stat:
     path: "{{ config_install_dir }}"
@@ -14,30 +20,30 @@
     #success_msg: "'my_param' is between 0 and 100"
 
 - name: Load variables from installer assets
-  set_fact:
+  ansible.builtin.set_fact:
       ocp_installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"
       ocp_installer_metadata: "{{ lookup('file', config_install_dir + '/metadata.json') }}"
       ocp_ignition_bootstrap: "{{ lookup('file', config_install_dir + '/bootstrap.ign') }}"
   no_log: true
 
 - name: OpenShift Config Load | Set defaults short vars
-  set_fact:
+  ansible.builtin.set_fact:
     base_domain: "{{ ocp_installer_state[\"*installconfig.InstallConfig\"][\"config\"][\"baseDomain\"] }}"
     tags: {}
 
 - name: Check if cluster_state file exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ config_install_dir + '/cluster_state.json' }}"
   register: st_out
 
 - name: Load local cluster_state
-  set_fact:
+  ansible.builtin.set_fact:
     cluster_state: "{{ lookup('file', config_install_dir + '/cluster_state.json', errors='ignore') }}"
   when: st_out.stat.exists
 
 - block:
   - name: Create initial cluster_state
-    set_fact:
+    ansible.builtin.set_fact:
       cluster_state:
         cluster_name: "{{ ocp_installer_metadata.clusterName }}"
         cluster_id: "{{ ocp_installer_metadata.clusterID }}"
@@ -46,7 +52,7 @@
         region: "{{ config_cluster_region | d(lookup('env', 'CONFIG_REGION')) }}"
         platform:
           provider: "{{ provider | d('NA') }}"
-          integratoin: "{{ config_platform | d('none') }}"
+          platform: "{{ config_platform | d('none') }}"
         dns:
           base_domain: "{{ base_domain }}"
           base_domain_id: ''
@@ -72,4 +78,4 @@
       query_root_ca: "storage.files[?path=='/opt/openshift/tls/root-ca.crt'].contents.source"
   when: not(st_out.stat.exists)
 
-- include: save-state.yaml
+- ansible.builtin.include_tasks: save-state.yaml

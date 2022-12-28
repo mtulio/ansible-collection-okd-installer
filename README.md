@@ -70,6 +70,82 @@ Supported Cloud Platforms* and installation types:
 *Agnostic installation means that OKD there's no native integration with the Platform.
 **None means there is support to install OKD on this platform, but no native integration will be available on the OKD, which means every controller to interact with the Cloud Resource should be added separatelly.
 
+## Usage
+
+Quick start:
+
+- Install the okd-installer Collection
+
+> Navigate to the [Collection page](https://galaxy.ansible.com/mtulio/okd_installer) to change the version.
+
+~~~
+ansible-galaxy collection install mtulio.okd_installer:=0.1.0-beta4
+~~~
+
+- Install the OKD/OCP clients: oc and openshift-install
+
+~~~
+ansible-playbook mtulio.okd_installer.install_clients -e version=4.11.4
+~~~
+
+- Export the env vars to create a OKD cluster in AWS with agnostic integraion (platform=none)
+
+~~~bash
+CLUSTER_NAME="aws-none"
+cat <<EOF> ./.env-${CLUSTER_NAME}
+export CONFIG_CLUSTER_NAME=${CLUSTER_NAME}
+export CONFIG_PROVIDER=aws
+export CONFIG_CLUSTER_REGION=us-east-1
+export CONFIG_PLATFORM=none
+export CONFIG_BASE_DOMAIN=devcluster.example.com
+export CONFIG_PULL_SECRET_FILE=${HOME}/.openshift/pull-secret-latest.json
+export CONFIG_SSH_KEY="$(cat ~/.ssh/id_rsa.pub)"
+EOF
+
+source ./.env-${CLUSTER_NAME}
+~~~
+
+- Generate the Install Config
+
+~~~bash
+ansible-playbook mtulio.okd_installer.config \
+    -e mode=create \
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
+~~~
+
+- Create a Cluster - installing all the Stacks (Network, IAM, DNS, Compute ...)
+
+> All the resource/stacks will be created with Ansible, instead of `openshift-install` utility
+
+~~~bash
+ansible-playbook mtulio.okd_installer.create_all \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e certs_max_retries=20 \
+    -e cert_wait_interval_sec=60
+~~~
+
+- Check the Cluster installation
+
+~~~bash
+~/.ansible/okd-installer/bin/openshift-install \
+    wait-for install-complete \
+    --dir ~/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/ \
+    --log-level debug
+~~~
+
+- Delete a Cluster
+
+~~~bash
+ansible-playbook mtulio.okd_installer.destroy_cluster \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME}
+~~~
+
+#### Read more the documentation
+
+The Guides and Documentation are being created under the directoy [docs](./docs/README.md).
+
 ## Contribute!
 
 You can see the value and would like to contribute?! We are open to hearing from you.

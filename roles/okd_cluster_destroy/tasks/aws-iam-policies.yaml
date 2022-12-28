@@ -5,7 +5,7 @@
 
 # TODO discovery if role exists before try to delete policy
 - name: Deleting IAM Policies
-  amazon.aws.iam_policy:
+  community.aws.iam_policy:
     state: absent
     iam_type: role
     iam_name: "{{ iam_role.name }}"

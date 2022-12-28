@@ -1,5 +1,5 @@
 ---
-- name: OKD Installer - Create ALL Start
+- name: OKD Installer | Create ALL | Start
   hosts: '{{ target|default("localhost") }}'
   connection: local
 
@@ -47,27 +47,30 @@
   when:
     - (config_provider == 'aws') or (config_platform == 'none')
 
-- ansible.builtin.import_playbook: create_imageregistry.yaml
+- name: OKD Installer | Create all | create basic image-registry
+  ansible.builtin.import_playbook: create_imageregistry.yaml
   when:
     - (config_provider == 'aws') or (config_platform == 'none')
     - create_registry|d('no') == 'yes'
 
-- ansible.builtin.import_playbook: config.yaml
+- name: OKD Installer | Create all | Load Config
+  ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
-- ansible.builtin.import_playbook: destroy_bootstrap.yaml
+- name: OKD Installer | Create all | Bootstrap Destroy
+  ansible.builtin.import_playbook: destroy_bootstrap.yaml
   when:
     - (config_provider == 'aws')
-    - destroy_bootstrap|d('no') == 'yes'
+    - destroy_bootstrap | d('no') == 'yes'
 
-- name: OKD Installer - Create ALL Finish
-  hosts: '{{ target|default("localhost") }}'
+- name: OKD Installer | Create ALL Finish
+  hosts: '{{ target | default("localhost") }}'
   connection: local
 
   tasks:
     - name: Show final message
       ansible.builtin.debug:
         msg:
-          - "start=[{{ datetime_start|d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
+          - "start=[{{ datetime_start | d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
           - "export KUBECONFIG={{ config_install_dir }}/auth/kubeconfig"

@@ -1,7 +1,8 @@
 ---
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- ansible.builtin.import_playbook: config.yaml
+- name: OKD Stack IAM | Config load
+  ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
@@ -23,7 +24,8 @@
   roles:
     - cloud_iam
 
-- ansible.builtin.import_playbook: config.yaml
+- name: OKD Stack IAM | Save state
+  ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state
     cluster_state: "{{ cluster_state | combine({'iam': cloud_iam_state}) }}"

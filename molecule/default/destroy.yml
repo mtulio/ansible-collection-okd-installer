@@ -4,17 +4,18 @@
   connection: local
   gather_facts: false
   no_log: "{{ molecule_no_log }}"
+
   tasks:
     # Developer must implement.
 
     # Mandatory configuration for Molecule to function.
 
     - name: Populate instance config
-      set_fact:
+      ansible.builtin.set_fact:
         instance_conf: {}
 
-    - name: Dump instance config
-      copy:
+    - name: Dump instance config # noqa: jinja[invalid] no-handler
+      ansible.builtin.copy:
         content: |
           # Molecule managed
 

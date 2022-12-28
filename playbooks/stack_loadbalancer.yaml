@@ -1,7 +1,8 @@
 ---
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- ansible.builtin.import_playbook: config.yaml
+- name: OKD Stack LB | Config load
+  ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
@@ -24,7 +25,8 @@
   roles:
     - cloud_load_balancer
 
-- ansible.builtin.import_playbook: config.yaml
+- name: OKD Stack LB | Save state
+  ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state
     cluster_state: "{{ cluster_state | combine({'load_balancers': cloud_load_balancers_state}) }}"

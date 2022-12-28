@@ -45,7 +45,7 @@ compute_resources:
       filters:
         tag:Name: "{{ openshift_prefix }}-{{ _def.name }}-1"
         instance-state-name: running
-      tags: "{% set x=_def.tags.__setitem__('Name', openshift_prefix+'-'+_def.name+'-1' ) %}{{ _def.tags }}"
+      tags: "{% set x = _def.tags.__setitem__('Name', openshift_prefix + '-' + _def.name + '-1') %}{{ _def.tags }}"
 
       detailed_monitoring: "{{ _def.detailed_monitoring }}"
       ebs_optimized: "{{ _def.ebs_optimized }}"
@@ -54,7 +54,7 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) |to_nice_json | string }}"
+      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: no
 
@@ -82,7 +82,7 @@ compute_resources:
       vpc_subnet_name: "{{ openshift_prefix }}-net-private-1b"
       filters:
         tag:Name: "{{ openshift_prefix }}-{{ _def.name }}-2"
-      tags: "{% set x=_def.tags.__setitem__('Name', openshift_prefix+'-'+_def.name+'-2' ) %}{{ _def.tags }}"
+      tags: "{% set x = _def.tags.__setitem__('Name', openshift_prefix + '-' + _def.name + '-2') %}{{ _def.tags }}"
 
       detailed_monitoring: "{{ _def.detailed_monitoring }}"
       ebs_optimized: "{{ _def.ebs_optimized }}"
@@ -91,7 +91,7 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) |to_nice_json | string }}"
+      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: no
 
@@ -119,7 +119,7 @@ compute_resources:
       vpc_subnet_name: "{{ openshift_prefix }}-net-private-1c"
       filters:
         tag:Name: "{{ openshift_prefix }}-{{ _def.name }}-3"
-      tags: "{% set x=_def.tags.__setitem__('Name', openshift_prefix+'-'+_def.name+'-3' ) %}{{ _def.tags }}"
+      tags: "{% set x = _def.tags.__setitem__('Name', openshift_prefix + '-' + _def.name + '-3') %}{{ _def.tags }}"
 
       detailed_monitoring: "{{ _def.detailed_monitoring }}"
       ebs_optimized: "{{ _def.ebs_optimized }}"
@@ -128,7 +128,7 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) |to_nice_json | string }}"
+      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: no
 

@@ -1,6 +1,7 @@
 ---
 
-- ansible.builtin.include_tasks: check-vars.yaml
+- name: Check vars
+  ansible.builtin.include_tasks: check-vars.yaml
 
 # Check create install dir
 - name: InstallerConfig | Assert directories exists

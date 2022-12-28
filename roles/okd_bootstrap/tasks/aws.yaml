@@ -7,7 +7,7 @@
 
 # TODO: Make it indepotent
 - name: Upload bootstrap.ign
-  amazon.aws.aws_s3:
+  amazon.aws.s3_object:
     bucket: "{{ openshift_bootstrap_bucket }}"
     object: "/bootstrap.ign"
     src: "{{ config_install_dir + '/bootstrap.ign' }}"

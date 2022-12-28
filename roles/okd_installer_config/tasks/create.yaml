@@ -1,7 +1,10 @@
 ---
 
-- ansible.builtin.include_tasks: check.yaml
-- ansible.builtin.include_tasks: create-assertions.yaml
+- name: Check
+  ansible.builtin.include_tasks: check.yaml
+
+- name: Create assertions
+  ansible.builtin.include_tasks: create-assertions.yaml
 
 - name: InstallerConfig | Check if metadata.json exists
   ansible.builtin.stat:

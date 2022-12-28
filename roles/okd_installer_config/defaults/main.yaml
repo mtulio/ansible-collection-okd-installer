@@ -33,16 +33,16 @@ config_controlplane:
 ## Non-mandatory
 config_networking: no
 
-config_networking_clusterNetwork:
+config_networking_clusternetwork:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
 
-config_networking_machineNetwork:
+config_networking_machinenetwork:
   - cidr: 10.0.0.0/16
 
-config_networking_networkType: OpenShiftSDN
+config_networking_networktype: OpenShiftSDN
 
-config_networking_serviceNetwork:
+config_networking_servicenetwork:
   - 172.30.0.0/16
 
 # Platform
@@ -58,7 +58,7 @@ config_publish: External
 #config_pullSecret_file: ''
 
 # SSH
-config_sshKey: ''
+config_ssh_key: ''
 
 # Client binary names
 bin_openshift_install: openshift-install

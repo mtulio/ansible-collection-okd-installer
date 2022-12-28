@@ -11,7 +11,7 @@
 
 - name: Set worker node counter
   ansible.builtin.set_fact:
-    cert_nodes_count: "{{ all_nodes.resources|length|int }}"
+    cert_nodes_count: "{{ all_nodes.resources | length | int }}"
 
 - name: Set Approval Done
   ansible.builtin.set_fact:

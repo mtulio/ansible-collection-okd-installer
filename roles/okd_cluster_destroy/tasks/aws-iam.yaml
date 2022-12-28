@@ -14,4 +14,7 @@
     state: absent
     name: "{{ item.name }}"
   with_items: "{{ iam_roles }}"
-  ignore_errors: true
+  register: result
+  ignore_errors: True
+  changed_when:
+    - result.rc == 2

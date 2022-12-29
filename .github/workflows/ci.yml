@@ -220,6 +220,7 @@ jobs:
       - name: Build container image
         env:
           VERSION: ${{ steps.get_version.outputs.VERSION }}
+          VERSION_BUILD: "0.0.0-ci.${{ github.run_number }}-${{ github.run_id }}"
           IMAGE: quay.io/mrbraga/okd-installer
           QUAY_USER: ${{ secrets.QUAY_USER }}
           QUAY_PASS: ${{ secrets.QUAY_PASS }}
@@ -236,6 +237,8 @@ jobs:
 
           echo "> Build container image:"
           podman build -t ${IMAGE}:${VERSION} -f hack/Containerfile .
+          podman tag ${IMAGE}:${VERSION} ${IMAGE}:${VERSION_BUILD}
 
           echo "> Publish container image:"
           podman push ${IMAGE}:${VERSION}
+          podman push ${IMAGE}:${VERSION_BUILD}

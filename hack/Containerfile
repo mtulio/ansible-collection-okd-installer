@@ -2,10 +2,12 @@ FROM quay.io/centos/centos:stream9
 
 WORKDIR /okd-installer
 
-RUN dnf install python3-pip -y && dnf clean all
+RUN dnf install python3-pip -y \
+    && dnf clean all
 
 ADD ./requirements.* .
-RUN pip3 install --force-reinstall -r requirements.txt
+ADD ./build/*.tar.gz ./mtulio.okd_installer.tar.gz
 
-RUN ansible-galaxy collection install --requirements-file requirements.yml
-
+RUN pip3 install --force-reinstall -r requirements.txt \
+    && ansible-galaxy collection install --requirements-file requirements.yml \
+    && ansible-galaxy collection install ./mtulio.okd_installer.tar.gz

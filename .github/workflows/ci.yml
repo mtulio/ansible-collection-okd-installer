@@ -173,7 +173,7 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/*/}
+        run: echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       - name: Deploy to Galaxy
         env:
@@ -209,7 +209,7 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/*/}
+        run: echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       - name: Download artifacts
         uses: actions/download-artifact@v3

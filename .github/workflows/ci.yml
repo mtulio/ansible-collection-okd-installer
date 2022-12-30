@@ -134,7 +134,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mtulio-okd_installer-builds
-          path: /tmp/build/
+          path: build/
 
       - name: Build container image
         env:
@@ -144,11 +144,11 @@ jobs:
           QUAY_PASS: ${{ secrets.QUAY_PASS }}
         run: |
           echo "> Check build artifacts dir /tmp/build:"
-          ls -l /tmp/build
+          ls -l build/
 
-          echo "> Moving artifacts to local:"
-          mkdir ./build || true
-          mv -v /tmp/build/*.tar.gz ./build
+          #echo "> Moving artifacts to local:"
+          #mkdir ./build || true
+          #mv -v /tmp/build/*.tar.gz ./build
 
           echo "> Build container image:"
           podman build -t ${IMAGE}:${VERSION} -f hack/Containerfile .

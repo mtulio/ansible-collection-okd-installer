@@ -5,10 +5,12 @@
 # of the distributed on the ansible minor version(y).
 
 collections:
+- name: community.kubernetes
+  version: '>=2.0.0,<3.0.0'
 
 # The version 5x was crashing when using ansible==6.4.0, setting to the major
 # distributed on that ansible version: 3.y.z
 - name: community.aws
   version: '>=3.0.0,<4.0.0'
-- name: community.kubernetes
-  version: '>=2.0.0,<3.0.0'
+- name: amazon.aws
+  version: '>=3.0.0,<4.0.0'

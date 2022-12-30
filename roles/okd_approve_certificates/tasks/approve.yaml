@@ -1,8 +1,4 @@
 ---
-- name: Set waiting message
-  ansible.builtin.set_fact:
-    waiting_msg: "{{ cert_wait_interval_sec }}sec [{{ item_retry }}/{{ end_at }}]"
-
 - name: Waiting to retrieve CSRs {{ waiting_msg }}
   ansible.builtin.pause:
     seconds: "{{ cert_wait_interval_sec }}"

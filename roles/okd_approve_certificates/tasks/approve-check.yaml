@@ -18,13 +18,18 @@
     cert_approval_done: yes
   when: cert_nodes_count|int >= cert_expected_nodes|int
 
+- name: Set waiting message
+  ansible.builtin.set_fact:
+    waiting_msg: "{{ cert_wait_interval_sec }}sec [{{ item_retry }}/{{ end_at }}]"
+
 - name: Show Approval state
   ansible.builtin.debug:
     msg:
-      - "Total Worker Nodes (joined)=[{{ cert_nodes_count }}]"
+      - "CSR Approver Done            =[{{ cert_approval_done }}]"
+      - "CSR Approver Interval        ={{ waiting_msg }}"
+      - "Total Worker Nodes (joined)  =[{{ cert_nodes_count }}]"
       - "Total Worker Nodes (expected)=[{{ cert_expected_nodes }}]"
-      - "Total certs sapproved=[{{ cert_approved }}]"
-      - "CSR Approver Done=[{{ cert_approval_done }}]"
+      - "Total certificates approved  =[{{ cert_approved }}]"
 
 - name: Start CSR approval
   ansible.builtin.include_tasks: approve.yaml

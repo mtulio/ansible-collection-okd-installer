@@ -32,6 +32,7 @@
   when: item.group_name != 'default'
   register: returned_sgs
   tags: vpc
+  no_log: true
 
 - name: AWS | SG - delete
   amazon.aws.ec2_group:
@@ -43,3 +44,4 @@
   register: returned_sgs
   when: item.group_name != 'default'
   tags: vpc
+  no_log: true

@@ -1,5 +1,7 @@
 FROM quay.io/centos/centos:stream9
 
+ENV ANSIBLE_UNSAFE_WRITES=1
+
 WORKDIR /okd-installer
 
 RUN dnf install python3-pip -y \

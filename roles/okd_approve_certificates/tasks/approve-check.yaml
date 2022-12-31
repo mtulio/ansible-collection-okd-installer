@@ -8,6 +8,9 @@
       - "node-role.kubernetes.io/worker"
     kubeconfig: "{{ config_install_dir }}/auth/kubeconfig"
   register: all_nodes
+  until: "all_nodes is not failed"
+  retries: 5
+  delay: 5
 
 - name: Set worker node counter
   ansible.builtin.set_fact:

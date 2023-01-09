@@ -5,9 +5,9 @@
   gather_facts: yes
 
   tasks:
-    - name: Show date time
+    - name: OKD Installer | Destroy | Timer start
       ansible.builtin.set_fact:
-        datetime_start: "{{ ansible_date_time.iso8601 }}"
+        okdi_del_timer_start: "{{ ansible_date_time.iso8601 }}"
 
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
@@ -20,11 +20,9 @@
   hosts: '{{target|default("localhost")}}'
   connection: local
   gather_facts: yes
-
   vars_files:
     - "./vars/{{ config_provider }}/iam.yaml"
     - "./vars/{{ config_provider }}/dns.yaml"
-
   pre_tasks:
     # Network
     - name: Destroy | Loading Destroy Resource Names
@@ -69,15 +67,20 @@
     - name: Destroy | Saving the final list of Load Balancers
       ansible.builtin.debug:
         msg: "Found {{ cloud_loadbalancers | length }} Load Balancers on the Configuration"
-
   roles:
     - role: okd_cluster_destroy
+
 
 - name: OKD Destroy | Finish
   hosts: '{{ target|default("localhost") }}'
   connection: local
-
   tasks:
-    - name: Show date time
+    - name: OKD Installer | Destroy | Timer start
+      ansible.builtin.set_fact:
+        okdi_del_timer_end: "{{ ansible_date_time.iso8601 }}"
+
+    - name: OKD Installer | Destroy | Timer end
       ansible.builtin.debug:
-        msg: "start=[{{ datetime_start | d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
+        msg:
+        - "start=[{{ okdi_del_timer_start | d('') }}] end=[{{ okdi_del_timer_end }}]"
+        - "total=[{{ ((okdi_del_timer_end | to_datetime) - (okdi_del_timer_start | to_datetime)) }}]"

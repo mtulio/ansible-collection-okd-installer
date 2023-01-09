@@ -7,7 +7,7 @@
   tasks:
     - name: OKD Installer | Create all | Timer start
       ansible.builtin.set_fact:
-        play_okdi_call_start: "{{ ansible_date_time.iso8601 }}"
+        okdi_call_timer_start: "{{ ansible_date_time.iso8601 }}"
 
 # - name: OKD Installer | Create all | check required vars
 #   ansible.builtin.import_playbook: var_check_required.yaml
@@ -74,9 +74,21 @@
   connection: local
   gather_facts: true
 
+  # tasks:
+  #   - name: OKD Installer | Create all | Timer end
+  #     ansible.builtin.debug:
+  #       msg:
+  #         - "start=[{{ datetime_start | d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
+  #         - "export KUBECONFIG={{ config_install_dir }}/auth/kubeconfig"
+
   tasks:
     - name: OKD Installer | Create all | Timer end
+      ansible.builtin.set_fact:
+        okdi_call_timer_end: "{{ ansible_date_time.iso8601 }}"
+
+    - name: OKD Installer | Create all | Ending Summary
       ansible.builtin.debug:
         msg:
-          - "start=[{{ datetime_start | d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
-          - "export KUBECONFIG={{ config_install_dir }}/auth/kubeconfig"
+        - "start=[{{ okdi_call_timer_start | d('') }}] end=[{{ okdi_call_timer_end }}]"
+        - "total=[{{ ((okdi_call_timer_end | to_datetime) - (okdi_call_timer_start | to_datetime)) }}]"
+        - "export KUBECONFIG={{ config_install_dir }}/auth/kubeconfig"

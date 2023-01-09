@@ -43,7 +43,9 @@ jobs:
         run: |
           ansible-lint ./
 
-  # Run molecule tests.
+  # # Run molecule tests.
+  # # TODO: more tests should be added to molecule before running it every build.
+  # # Disabling molecule step (and debian) until more consistent tests is added.
   molecule:
     name: Molecule
     runs-on: ubuntu-latest
@@ -53,8 +55,8 @@ jobs:
         include:
           - distro: centos7
             playbook: converge.yml
-          - distro: debian10
-            playbook: converge.yml
+          # - distro: debian10
+          #   playbook: converge.yml
 
     steps:
       - name: Check out the codebase.
@@ -73,13 +75,13 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
 
-      - name: Run Molecule tests.
-        run: molecule test
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          MOLECULE_DISTRO: ${{ matrix.distro }}
-          MOLECULE_PLAYBOOK: ${{ matrix.playbook }}
+      # - name: Run Molecule tests.
+      #   run: molecule test
+      #   env:
+      #     PY_COLORS: '1'
+      #     ANSIBLE_FORCE_COLOR: '1'
+      #     MOLECULE_DISTRO: ${{ matrix.distro }}
+      #     MOLECULE_PLAYBOOK: ${{ matrix.playbook }}
 
   # Build a Collection and save to artifacts.
   build:

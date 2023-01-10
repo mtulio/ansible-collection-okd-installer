@@ -1,22 +1,22 @@
 ---
-- name: Waiting to retrieve CSRs {{ waiting_msg }}
+- name: Approver | Waiting to retrieve CSRs {{ waiting_msg }}
   ansible.builtin.pause:
     seconds: "{{ cert_wait_interval_sec }}"
   when:
     - item_retry|int > 1
 
-- name: Getting existing Certificate Signing Requests
+- name: Approver | Getting existing Certificate Signing Requests
   kubernetes.core.k8s_info:
     api_version: certificates.k8s.io/v1
     kind: CertificateSigningRequest
     kubeconfig: "{{ config_install_dir }}/auth/kubeconfig"
   register: all_csr
 
-- name: Set default pending
+- name: Approver | Set pending list
   ansible.builtin.set_fact:
     csr_pending: []
 
-- name: Filter pending CertificateSigningRequest
+- name: Approver | Filter pending CertificateSigningRequest
   ansible.builtin.set_fact:
     csr_pending: "{{ csr_pending | d([]) + [item_csr.metadata.name] }}"
   with_items: "{{ all_csr.resources }}"
@@ -27,12 +27,13 @@
   until: "csr_pending | length > 0"
   retries: 3
   delay: 10
+  no_log: true
 
-- name: Show Total Pending
+- name: Approver | Show Total Pending
   ansible.builtin.debug:
     msg: "Total pending: {{ csr_pending | length }}"
 
-- name: Approve CertificateSigningRequest
+- name: Approver | Approve CertificateSigningRequest
   ansible.builtin.command: |
     {{ oc_bin }} \
       --kubeconfig {{ config_install_dir }}/auth/kubeconfig \
@@ -47,16 +48,10 @@
   changed_when:
     - result.rc == 2
 
-- name: Update Total Approved
+- name: Approver | Update Total counter
   ansible.builtin.set_fact:
     cert_approved: "{{ cert_approved | int + csr_pending | length }}"
 
-- name: Show Total Approved
+- name: Approver | Show Total Approved
   ansible.builtin.debug:
-    msg: "Total approved: {{ cert_approved }}. Total Nodes: {{ cert_nodes_count }}"
-
-# - name: Check for approval
-#   debug:
-#     msg: "Skipping pause. {{ certs_expected }}"
-#   when:
-#   - (certs_expected|int != 0) and (certs_approved|int == certs_expected|int)
+    msg: "Total approved: {{ cert_approved }}"

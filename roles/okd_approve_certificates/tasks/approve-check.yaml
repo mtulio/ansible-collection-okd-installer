@@ -1,6 +1,6 @@
 ---
 
-- name: Getting existing nodes
+- name: Check | Getting existing nodes
   kubernetes.core.k8s_info:
     api_version: v1
     kind: Node
@@ -12,20 +12,20 @@
   retries: 5
   delay: 5
 
-- name: Set worker node counter
+- name: Check | Set worker node counter
   ansible.builtin.set_fact:
     cert_nodes_count: "{{ all_nodes.resources | length | int }}"
 
-- name: Set Approval Done
+- name: Check | Set Approval Done
   ansible.builtin.set_fact:
     cert_approval_done: yes
   when: cert_nodes_count|int >= cert_expected_nodes|int
 
-- name: Set waiting message
+- name: Check | Set waiting message
   ansible.builtin.set_fact:
     waiting_msg: "{{ cert_wait_interval_sec }}sec [{{ item_retry }}/{{ end_at }}]"
 
-- name: Show Approval state
+- name: Check | Show Approval state
   ansible.builtin.debug:
     msg:
       - "CSR Approver Done            =[{{ cert_approval_done }}]"
@@ -34,6 +34,6 @@
       - "Total Worker Nodes (expected)=[{{ cert_expected_nodes }}]"
       - "Total certificates approved  =[{{ cert_approved }}]"
 
-- name: Start CSR approval
+- name: Check | Starting Approver
   ansible.builtin.include_tasks: approve.yaml
   when: not(cert_approval_done)

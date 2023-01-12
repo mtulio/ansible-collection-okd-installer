@@ -1,12 +1,12 @@
 ---
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- name: OKD Stack Compute | Load Config
+- name: okd-installer | Create Stack | Compute | Load Config
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Stack Compute
+- name: okd-installer | Create Stack | Compute
   hosts: '{{ target|default("localhost") }}'
   connection: local
 
@@ -36,7 +36,7 @@
       when: node_role|d('') == 'bootstrap'
     - role: cloud_compute
 
-- name: OKD Stack Compute | Save state
+- name: okd-installer | Create Stack | Compute | Save state
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state

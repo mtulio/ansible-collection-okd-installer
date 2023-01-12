@@ -1,4 +1,4 @@
 ---
 
-- name: Run mode
+- name: Init tasks for mode {{ mode | d('check') }}
   ansible.builtin.include_tasks: "{{ mode | d('check') }}.yaml"

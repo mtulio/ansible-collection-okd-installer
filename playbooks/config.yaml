@@ -1,5 +1,5 @@
 ---
-- name: Install Config
+- name: okd-installer | Install Configuration
   hosts: localhost
   connection: local
 

@@ -1,27 +1,27 @@
 ---
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- name: OKD Stack Network | Config load
+- name: okd-installer | Create Stack | Network | Config load
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Stack Network
+- name: okd-installer | Create Stack | Network
   hosts: '{{target|default("localhost")}}'
   connection: local
 
   pre_tasks:
-    - name: Include User Provided Network Variables
+    - name: okd-installer | Create Stack | Network | Include User Provided Network Variables
       ansible.builtin.include_vars:
         file: "{{ var_file }}"
       when: var_file is defined
 
-    - name: Include Network Variables - Pre-build topologies
+    - name: okd-installer | Create Stack | Network | Include Network Variables - Pre-build topologies
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/topologies/{{ topology_network }}/network.yaml"
       when: topology_network is defined
 
-    - name: Include Network Variables - Default
+    - name: okd-installer | Create Stack | Network | Include Network Variables - Default
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/network.yaml"
       when: cloud_networks is not defined
@@ -29,7 +29,7 @@
   roles:
     - cloud_network
 
-- name: OKD Stack Network | Save state
+- name: okd-installer | Create Stack | Network | Save state
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state

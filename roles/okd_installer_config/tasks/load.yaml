@@ -1,17 +1,17 @@
 ---
 
-- name: Check required variables - provider
+- name: Load | Check required variables - provider
   ansible.builtin.assert:
     that:
       - provider is in config_valid_providers
     fail_msg: "'provider' is not a valid provider {{ config_valid_providers }}"
 
-- name: InstallerConfig | Assert directories exists
+- name: Load | Assert directories exists
   ansible.builtin.stat:
     path: "{{ config_install_dir }}"
   register: st_dir
 
-- name: Check installer dir is present
+- name: Load | Check installer dir is present
   ansible.builtin.assert:
     that:
       - st_dir.stat.exists
@@ -19,29 +19,29 @@
     fail_msg: "installer dir [{{ config_install_dir }}] is not present. Create config first."
     #success_msg: "'my_param' is between 0 and 100"
 
-- name: Load variables from installer assets
+- name: Load | Set variables from installer assets
   ansible.builtin.set_fact:
       ocp_installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"
       ocp_installer_metadata: "{{ lookup('file', config_install_dir + '/metadata.json') }}"
       ocp_ignition_bootstrap: "{{ lookup('file', config_install_dir + '/bootstrap.ign') }}"
   no_log: true
 
-- name: OpenShift Config Load | Set defaults short vars
+- name: Load | Set defaults short vars
   ansible.builtin.set_fact:
     base_domain: "{{ ocp_installer_state[\"*installconfig.InstallConfig\"][\"config\"][\"baseDomain\"] }}"
     tags: {}
 
-- name: Check if cluster_state file exists
+- name: Load | Check if cluster_state file exists
   ansible.builtin.stat:
     path: "{{ config_install_dir + '/cluster_state.json' }}"
   register: st_out
 
-- name: Load local cluster_state
+- name: Load | Set local cluster_state
   ansible.builtin.set_fact:
     cluster_state: "{{ lookup('file', config_install_dir + '/cluster_state.json', errors='ignore') }}"
   when: st_out.stat.exists
 
-- name: Create initial cluster_state
+- name: Load | Create initial cluster_state
   ansible.builtin.set_fact:
     cluster_state:
       cluster_name: "{{ ocp_installer_metadata.clusterName }}"
@@ -77,5 +77,5 @@
     query_root_ca: "storage.files[?path=='/opt/openshift/tls/root-ca.crt'].contents.source"
   when: not(st_out.stat.exists)
 
-- name: Save state
+- name: Load | Save state
   ansible.builtin.include_tasks: save-state.yaml

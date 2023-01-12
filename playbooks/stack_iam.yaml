@@ -1,12 +1,12 @@
 ---
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- name: OKD Stack IAM | Config load
+- name: okd-installer | Create Stack | IAM | Config load
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Stack IAM
+- name: okd-installer | Create Stack | IAM
   hosts: '{{target|default("localhost")}}'
   connection: local
 
@@ -24,7 +24,7 @@
   roles:
     - cloud_iam
 
-- name: OKD Stack IAM | Save state
+- name: okd-installer | Create Stack | IAM | Save state
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state

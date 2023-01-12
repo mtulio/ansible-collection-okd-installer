@@ -1,36 +1,36 @@
 ---
 
-- name: Check
+- name: Create | Run Check vars
   ansible.builtin.include_tasks: check.yaml
 
-- name: Create assertions
+- name: Create | Run custom assertions
   ansible.builtin.include_tasks: create-assertions.yaml
 
-- name: InstallerConfig | Check if metadata.json exists
+- name: Create | Check if metadata.json exists
   ansible.builtin.stat:
     path: "{{ config_install_dir }}/metadata.json"
   register: st_out
 
-- name: InstallerConfig | Create the install config
+- name: Create | Render Install config file
   ansible.builtin.template:
     src: ocp-install-config.yaml.j2
     dest: "{{ config_install_dir }}/install-config.yaml"
     mode: 0644
   when: not(st_out.stat.exists)
 
-- name: InstallerConfig | Backup the rendered install config
+- name: Create | Backup the rendered install config
   ansible.builtin.template:
     src: ocp-install-config.yaml.j2
     dest: "{{ config_install_dir }}/install-config-bkp.yaml"
     mode: 0644
   when: not(st_out.stat.exists)
 
-- name: InstallerConfig | Create manifests
+- name: Create | Create manifests
   ansible.builtin.shell: |
     {{ bin_openshift_install }} create manifests --dir {{ config_install_dir }}
   when: not(st_out.stat.exists)
 
-- name: InstallerConfig | Remove Cluster/Machine API manifests for UPI
+- name: Create | Remove Cluster/Machine API manifests for UPI
   ansible.builtin.file:
     state: absent
     path: "{{ item }}"
@@ -43,7 +43,7 @@
     - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-3.yaml"
   when: not(st_out.stat.exists)
 
-- name: InstallerConfig | Create ignition configs
+- name: Create | Create ignition configs
   ansible.builtin.shell: |
     {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
   when: not(st_out.stat.exists)

@@ -1,6 +1,6 @@
 ---
 
-- name: Check required variables - cluster_name
+- name: Check | Assert required variables - cluster_name
   ansible.builtin.assert:
     that:
       - cluster_name is defined

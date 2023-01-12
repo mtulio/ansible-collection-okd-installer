@@ -1,5 +1,5 @@
 ---
-- name: OKD Destroy | Start
+- name: okd-installer | Cluster Destroy | Start
   hosts: '{{ target|default("localhost") }}'
   connection: local
   gather_facts: yes
@@ -11,12 +11,12 @@
 
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- name: OKD Destroy | Config load
+- name: okd-installer | Cluster Destroy | Config load
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Destroy Cluster
+- name: okd-installer | Cluster Destroy
   hosts: '{{target|default("localhost")}}'
   connection: local
   gather_facts: yes
@@ -71,7 +71,7 @@
     - role: okd_cluster_destroy
 
 
-- name: OKD Destroy | Finish
+- name: okd-installer | Cluster Destroy | Finish
   hosts: '{{ target|default("localhost") }}'
   connection: local
   gather_facts: true

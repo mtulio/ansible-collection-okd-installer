@@ -1,5 +1,5 @@
 ---
-- name: OpenShift Install Clients
+- name: okd-installer | Install Clients
   hosts: localhost
   connection: local
 

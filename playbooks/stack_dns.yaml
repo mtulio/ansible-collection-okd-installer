@@ -1,22 +1,22 @@
 ---
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- name: OKD Stack DNS | Config load
+- name: okd-installer | Stack | DNS | Config load
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Stack DNS
+- name: okd-installer | Stack | DNS
   hosts: '{{ target | default("localhost") }}'
   connection: local
 
   pre_tasks:
-    - name: Include User Provided DNS Variables
+    - name: okd-installer | Stack | DNS | Include Vars - User provided
       ansible.builtin.include_vars:
         file: "{{ var_file }}"
       when: var_file is defined
 
-    - name: Include DNS Variables
+    - name: okd-installer | Stack | DNS | Include Vars - default
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/dns.yaml"
       when:
@@ -25,7 +25,7 @@
   roles:
     - cloud_dns
 
-- name: OKD Stack DNS | Save state
+- name: okd-installer | Stack | DNS | Save state
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state

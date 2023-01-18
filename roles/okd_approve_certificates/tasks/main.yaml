@@ -1,6 +1,6 @@
 ---
 
-- name: Starting the certificate approval
+- name: Starting
   ansible.builtin.include_tasks: approve-check.yaml
   with_sequence: start=1 end="{{ end_at }}"
   vars:

@@ -4,5 +4,5 @@
   connection: local
 
   roles:
-    - role: okd_installer_config
+    - role: config
       mode: load

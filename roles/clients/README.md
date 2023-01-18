@@ -1,7 +1,10 @@
-okd_install_clients
-===================
+clients
+=======
 
-A brief description of the role goes here.
+Install OpenShift/OKD clients (utlities), like:
+
+- openshift-install
+- oc
 
 Requirements
 ------------

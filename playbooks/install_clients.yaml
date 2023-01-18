@@ -4,4 +4,4 @@
   connection: local
 
   roles:
-    - okd_install_clients
+    - clients

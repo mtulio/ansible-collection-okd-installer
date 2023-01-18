@@ -1,25 +1,24 @@
 ---
 
-- name: Load | Check required variables - provider
+- name: Load | Check required vars - provider
   ansible.builtin.assert:
     that:
       - provider is in config_valid_providers
     fail_msg: "'provider' is not a valid provider {{ config_valid_providers }}"
 
-- name: Load | Assert directories exists
+- name: Load | Assert directories
   ansible.builtin.stat:
     path: "{{ config_install_dir }}"
   register: st_dir
 
-- name: Load | Check installer dir is present
+- name: Load | Check installer dir
   ansible.builtin.assert:
     that:
       - st_dir.stat.exists
       - st_dir.stat.isdir
     fail_msg: "installer dir [{{ config_install_dir }}] is not present. Create config first."
-    #success_msg: "'my_param' is between 0 and 100"
 
-- name: Load | Set variables from installer assets
+- name: Load | Variables from ignition files
   ansible.builtin.set_fact:
       ocp_installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"
       ocp_installer_metadata: "{{ lookup('file', config_install_dir + '/metadata.json') }}"
@@ -31,7 +30,7 @@
     base_domain: "{{ ocp_installer_state[\"*installconfig.InstallConfig\"][\"config\"][\"baseDomain\"] }}"
     tags: {}
 
-- name: Load | Check if cluster_state file exists
+- name: Load | Check if cluster_state file
   ansible.builtin.stat:
     path: "{{ config_install_dir + '/cluster_state.json' }}"
   register: st_out

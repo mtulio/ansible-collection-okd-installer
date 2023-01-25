@@ -1,37 +1,37 @@
 ---
 # - import_playbook: var_check_required.yaml
 
-- name: OKD Stack Compute ALL | Load Config
+- name: okd-installer | Stack | Compute | Config Load
   import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Stack Compute ALL | Create All
+- name: okd-installer | Stack | Compute ALL | Create
   hosts: '{{ target|default("localhost") }}'
   connection: local
 
   tasks:
     # Create Compute: Bootstrap node
-    - name: Include User Provided Compute Variables
+    - name: okd-installer | Stack | Compute | Set User provided (Bootstrap)
       ansible.builtin.include_vars:
         file: "{{ var_file_bootstrap }}"
       when:
         - var_file_bootstrap is defined
         - topology_compute is not defined
 
-    - name: Include User Provided Variables for Bootstrap Topology - {{ topology_compute }}
+    - name: okd-installer | Stack | Compute | Set Topology - {{ topology_compute }}
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-bootstrap.yaml"
       when:
         - topology_compute is defined
 
-    - name: Include Bootstrap Variables
+    - name: okd-installer | Stack | Compute | Set Defaults
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/node-bootstrap.yaml"
       when:
         - topology_compute is not defined
 
-    - name: Run roles to create bootstrap
+    - name: okd-installer | Stack | Compute | Create Bootstrap
       ansible.builtin.include_role:
         name: "{{ item }}"
       loop:
@@ -39,58 +39,58 @@
         - 'cloud_compute'
 
     # Create Compute: Control Plane nodes
-    - name: Include User Provided Compute Variables
+    - name: okd-installer | Stack | Compute | Set User provided (CPlane)
       ansible.builtin.include_vars:
         file: "{{ var_file_controlplane }}"
       when:
         - var_file_controlplane is defined
         - topology_compute is not defined
 
-    - name: Include User Provided Variables for ControlPlane Topology - {{ topology_compute }}
+    - name: okd-installer | Stack | Compute | Set Topology - {{ topology_compute }}
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-controlplane.yaml"
       when:
         - topology_compute is defined
 
-    - name: Include Compute Variables
+    - name: okd-installer | Stack | Compute | Set Defaults
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/node-controlplane.yaml"
       when:
         - topology_compute is not defined
 
-    - name: Run roles to create controlplane
+    - name: okd-installer | Stack | Compute | Create controlplane
       ansible.builtin.include_role:
         name: "{{ item }}"
       loop:
         - 'cloud_compute'      
 
     # Create Compute: Compute nodes
-    - name: Include User Provided Compute Variables
+    - name: okd-installer | Stack | Compute | Set User provided (CMP)
       ansible.builtin.include_vars:
         file: "{{ var_file_compute }}"
       when:
         - var_file_compute is defined
         - topology_compute is not defined
 
-    - name: Include User Provided Variables for Compute Topology {{ topology_compute }}
+    - name: okd-installer | Stack | Compute | Set Topology {{ topology_compute }}
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-compute.yaml"
       when:
         - topology_compute is defined
 
-    - name: Include Compute Variables
+    - name: okd-installer | Stack | Compute | Set Default
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/node-compute.yaml"
       when:
         - topology_compute is not defined
 
-    - name: Run roles to create compute
+    - name: okd-installer | Stack | Compute | Create compute nodes
       ansible.builtin.include_role:
         name: "{{ item }}"
       loop:
         - 'cloud_compute'    
 
-- name: OKD Stack Compute ALL | Save state
+- name: okd-installer | Stack | Compute ALL | Save state
   import_playbook: config.yaml
   vars:
     mode: save-state

@@ -33,11 +33,11 @@ External Roles (included as Git modules/fixed version):
 
 Internal Roles:
 
-- [okd_bootstrap](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/okd_bootstrap): Setup bootstrap dependencies, like uploading ignition to a blob storage to be used on bootstrap's node user-data.
+- [bootstrap](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/bootstrap): Setup bootstrap dependencies, like uploading ignition to a blob storage to be used on bootstrap's node user-data.
 - [okd_cluster_destroy](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/okd_cluster_destroy): Destroy the cluster for a given provider
 - [clients](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/clients): Install openshift clients used by the playbooks. Some tools installed is: openshift-install, oc, ccoctl, etc
 - [config](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/config): Generate Install config and ignition files based on the desired cluster setup
-- [okd_approve_certificates](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/okd_approve_certificates): Approve the CSRs from compute nodes (a.k.a: workers)
+- [csr_approver](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/csr_approver): Approve the CSRs from compute nodes (a.k.a: workers)
 
 ### Playbooks
 

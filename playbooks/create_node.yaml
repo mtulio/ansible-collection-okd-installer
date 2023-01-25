@@ -32,7 +32,7 @@
         - (compute_resources is not defined) or (compute_resources | length <= 0)
 
   roles:
-    - role: okd_bootstrap
+    - role: bootstrap
       when: node_role|d('') == 'bootstrap'
     - role: cloud_compute
 

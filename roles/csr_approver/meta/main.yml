@@ -1,8 +1,8 @@
 ---
 galaxy_info:
-  role_name: okd_bootstrap
+  role_name: csr_approver
   author: mtulio
-  description: Ansible Role to Setup/Prepare Ignition for Bootstrap
+  description: Ansible Role to Approve CSR Certificates from Worker on Installing
   license: Apache-2.0
   min_ansible_version: "4.1"
   platforms:

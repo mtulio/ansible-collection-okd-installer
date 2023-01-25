@@ -5,4 +5,4 @@
 - name: okd-installer | Aprove CSR Certificates for Worker nodes
   hosts: localhost
   roles:
-    - okd_approve_certificates
+    - csr_approver

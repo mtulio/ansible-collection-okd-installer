@@ -35,7 +35,7 @@
       ansible.builtin.include_role:
         name: "{{ item }}"
       loop:
-        - 'okd_bootstrap'
+        - 'bootstrap'
         - 'cloud_compute'
 
     # Create Compute: Control Plane nodes

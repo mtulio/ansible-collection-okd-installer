@@ -1,4 +1,4 @@
 ---
-- name: Destroy | Provider
+- name: Destroy trigger by provider
   ansible.builtin.include_tasks: "{{ provider }}.yaml"
   tags: always

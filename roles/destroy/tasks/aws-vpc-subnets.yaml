@@ -1,24 +1,24 @@
 ---
-- name: Destroy | AWS | VPC Subnets
+- name: AWS | VPC | Subnets | Init
   ansible.builtin.debug:
     msg: "Destroy VPC subnets triggered"
   tags: vpc
   when: debug|d(false)
 
-- name: Destroy | AWS | VPC Subnets - get all subnets
+- name: AWS | VPC | Sb | Filter by VPC
   amazon.aws.ec2_vpc_subnet_info:
     filters:
       vpc-id: "{{ vpc_id }}"
   register: ret_subnets
   tags: vpc
 
-- name: Destroy | AWS | VPC Subnets - show results
+- name: AWS | VPC | Sb | Show
   ansible.builtin.debug:
     var: ret_subnets
   tags: vpc
   when: debug|d(false)
 
-- name: Destroy | AWS | VPC Subnets - delete subnets
+- name: AWS | VPC | Sb | Delete all
   amazon.aws.ec2_vpc_subnet:
     state: absent
     region: "{{ vpc_region }}"

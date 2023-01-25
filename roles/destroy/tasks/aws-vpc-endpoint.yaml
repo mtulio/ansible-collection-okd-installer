@@ -1,10 +1,10 @@
 ---
-- name: Destroy | AWS | VPC Endpoints
+- name: AWS | VPC | VPCe | Init
   ansible.builtin.debug:
     msg: "Destroy VPC Endpoint service triggered"
   tags: vpc
 
-- name: Destroy | AWS | VPCe - get all with filters
+- name: AWS | VPC | VPCe | Filter by VPC
   amazon.aws.ec2_vpc_endpoint_info:
     region: "{{ vpc_region }}"
     filters:
@@ -15,7 +15,7 @@
         - pending
   register: res_vpce
 
-- name: Destroy | AWS | VPCe - delete endpoints
+- name: AWS | VPC | VPCe | Delete all
   amazon.aws.ec2_vpc_endpoint:
     state: absent
     vpc_endpoint_id: "{{ item.vpc_endpoint_id }}"

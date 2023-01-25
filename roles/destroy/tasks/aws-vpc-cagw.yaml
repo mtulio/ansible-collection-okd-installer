@@ -1,10 +1,10 @@
 ---
-- name: Destroy | VPC | AWS
+- name: AWS | VPC | CAGW | Init
   ansible.builtin.debug:
-    msg: "Destroy VPC IGW triggered"
+    msg: "Destroy VPC CAGW triggered"
   tags: vpc
 
-  #- name: "Delete internet gateway"
+  #- name: AWS | VPC | CAGW | Delete
   #  ec2_carrier_gateway:
   #    region: "{{ vpc_region }}"
   #  vpc_id: "{{ vpc_id }}"

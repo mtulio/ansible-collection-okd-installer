@@ -1,9 +1,9 @@
 ---
-- name: Destroy | Compute | AWS
+- name: AWS | Compute | Init
   ansible.builtin.debug:
     msg: "Destroy Compute triggered"
 
-- name: EC2 | Destroying instance(s)
+- name: AWS | Compute | Remove instance(s)
   amazon.aws.ec2_instance:
     state: absent
     filters:

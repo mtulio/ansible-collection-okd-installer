@@ -1,10 +1,10 @@
 ---
-- name: Destroy | IAM | AWS
+- name: AWS | IAM | Policies | Init
   ansible.builtin.debug:
     msg: "Destroy IAM triggered"
 
 # TODO discovery if role exists before try to delete policy
-- name: Deleting IAM Policies
+- name: AWS | IAM | Policies | Remove
   community.aws.iam_policy:
     state: absent
     iam_type: role

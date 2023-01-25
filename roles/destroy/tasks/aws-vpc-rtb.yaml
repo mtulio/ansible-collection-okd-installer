@@ -1,10 +1,10 @@
 ---
-- name: Destroy | AWS | VPC Route Tables
+- name: AWS | VPC | Rtb | Init
   ansible.builtin.debug:
     msg: "Destroy VPC RTB triggered"
   tags: vpc
 
-- name: Destroy | AWS | VPC Rtb - qeury existing
+- name: AWS | VPC | Rtb | Filter by VPC
   amazon.aws.ec2_vpc_route_table_info:
     region: "{{ vpc_region }}"
     filters:
@@ -12,7 +12,7 @@
   register: route_table_info
   tags: vpc
 
-- name: Destroy | AWS | VPC Rtb - set tables to delete
+- name: AWS | VPC | Rtb | Make list to delete
   ansible.builtin.set_fact:
     route_tables_to_delete: "{{ (route_tables_to_delete | default([])) + [item.id] }}"
   when: item.associations | length == 0 or not item.associations[0].main
@@ -20,7 +20,7 @@
   tags: vpc
   no_log: True
 
-- name: Destroy | AWS | VPC Rtb - purge routes
+- name: AWS | VPC | Rtb | Purge routes
   amazon.aws.ec2_vpc_route_table:
     region: "{{ vpc_region }}"
     vpc_id: "{{ vpc_id }}"
@@ -33,12 +33,12 @@
   when: route_tables_to_delete is defined
   tags: vpc
 
-- name: Destroy | AWS | VPC Rtb - Waiting 10s to propagate
-  ansible.builtin.pause:
-    seconds: 10
-  tags: vpc
+# - name: AWS | VPC | Rtb | Waiting 10s to propagate
+#   ansible.builtin.pause:
+#     seconds: 10
+#   tags: vpc
 
-- name: Destroy | AWS | VPC Rtb - delete route table
+- name: AWS | VPC | Rtb | Delete
   amazon.aws.ec2_vpc_route_table:
     region: "{{ vpc_region }}"
     vpc_id: "{{ vpc_id }}"
@@ -48,3 +48,7 @@
   loop: "{{ route_tables_to_delete }}"
   when: route_tables_to_delete is defined
   tags: vpc
+  register: destroy_vpc_rtb
+  until: "destroy_vpc_rtb is not failed"
+  retries: 5
+  delay: 5

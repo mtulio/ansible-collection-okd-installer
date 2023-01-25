@@ -1,24 +1,24 @@
 ---
-- name: Destroy | VPC | AWS
+- name: AWS | VPC | SG | Init 
   ansible.builtin.debug:
     msg: "Destroy VPC triggered"
   tags: vpc
   when: debug|d(false)
 
-- name: Destroy | VPC | Set VPC ID
+- name: AWS | VPC | SG | Filter by VPC
   amazon.aws.ec2_group_info:
     filters:
       vpc-id: "{{ vpc_id }}"
   register: ret_sgs
   tags: vpc
 
-- name: Destroy | VPC | SGs | Show vpc_id
+- name: AWS | VPC | SG | Show vpc_id
   ansible.builtin.debug:
     var: ret_sgs
   tags: vpc
   when: debug|d(false)
 
-- name: AWS | SG - delete rules
+- name: AWS | VPC | SG | Purge rules
   amazon.aws.ec2_group:
     state: present
     region: "{{ vpc_region }}"
@@ -34,7 +34,7 @@
   tags: vpc
   no_log: true
 
-- name: AWS | SG - delete
+- name: AWS | VPC | SG | Delete
   amazon.aws.ec2_group:
     state: absent
     region: "{{ vpc_region }}"

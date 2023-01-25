@@ -1,10 +1,10 @@
 ---
-- name: Destroy | VPC | AWS
+- name: AWS | VPC | NatGW | Init
   ansible.builtin.debug:
     msg: "Destroy VPC NATGW triggered"
   tags: vpc
 
-- name: Get all nat gateways with specific filters
+- name: AWS | VPC | NatGW | Filter by VPC
   amazon.aws.ec2_vpc_nat_gateway_info:
     region: "{{ vpc_region }}"
     filters:
@@ -14,7 +14,7 @@
   register: natgws_delete
   tags: vpc
 
-- name: AWS | NAT GW delete
+- name: AWS | VPC | NatGW | Delete All
   amazon.aws.ec2_vpc_nat_gateway:
     state: absent
     region: "{{ vpc_region }}"

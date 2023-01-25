@@ -1,20 +1,20 @@
 ---
-- name: Destroy | Load Balancer
+- name: AWS | Load Balancer
   ansible.builtin.include_tasks: "{{ provider }}-loadbalancer.yaml"
   tags: loadbalancer
 
-- name: Destroy | Compute
+- name: AWS | Compute
   ansible.builtin.include_tasks: "{{ provider }}-compute.yaml"
   tags: compute
 
-- name: Destroy | IAM
+- name: AWS | IAM
   ansible.builtin.include_tasks: "{{ provider }}-iam.yaml"
   tags: iam
 
-- name: Destroy | DNS
+- name: AWS | DNS
   ansible.builtin.include_tasks: "{{ provider }}-dns.yaml"
   tags: dns
 
-- name: Destroy | VPC
+- name: AWS | VPC
   ansible.builtin.include_tasks: "{{ provider }}-vpc.yaml"
   tags: vpc

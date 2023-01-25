@@ -1,10 +1,10 @@
 ---
-- name: Destroy | Load Balancer | AWS
+- name: AWS | Load Balancer | Show
   ansible.builtin.debug:
     msg: "Destroy Load Balancer triggered"
   tags: loadbalancer
 
-- name: Remove an ELB
+- name: AWS | Load Balancer | Delete
   community.aws.elb_network_lb:
     name: "{{ item.name }}"
     state: absent

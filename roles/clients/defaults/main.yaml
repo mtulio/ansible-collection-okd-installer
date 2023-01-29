@@ -1,4 +1,9 @@
 ---
+distro_default: okd
+distro_image:
+  okd: "quay.io/openshift/okd"
+  ocp: "quay.io/openshift-release-dev/ocp-release"
+
 release_arch: x86_64
 default_version: 4.11.0
 # OCP follows the arch on the name
@@ -12,6 +17,8 @@ release_version: "{{ version | d(default_version) }}-{{ release_arch }}"
 # https://amd64.origin.releases.ci.openshift.org/
 release_image: "quay.io/openshift-release-dev/ocp-release"
 #release_image: "quay.io/openshift/okd"
+
+# registry.ci.openshift.org/origin/release-scos:4.12.0-0.okd-scos-2023-01-17-234959
 
 release_image_version_arch: "{{ release_image }}:{{ release_version }}"
 

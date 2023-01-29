@@ -20,15 +20,31 @@
 
 - name: Load | Variables from ignition files
   ansible.builtin.set_fact:
-      ocp_installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"
-      ocp_installer_metadata: "{{ lookup('file', config_install_dir + '/metadata.json') }}"
-      ocp_ignition_bootstrap: "{{ lookup('file', config_install_dir + '/bootstrap.ign') }}"
+    ocp_installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"
+    ocp_installer_metadata: "{{ lookup('file', config_install_dir + '/metadata.json') }}"
+    ocp_ignition_bootstrap: "{{ lookup('file', config_install_dir + '/bootstrap.ign') }}"
+    installer_coreos_stream: "{{ lookup('file', config_install_dir + '/coreos-stream.json') }}"
   no_log: true
 
 - name: Load | Set defaults short vars
   ansible.builtin.set_fact:
     base_domain: "{{ ocp_installer_state[\"*installconfig.InstallConfig\"][\"config\"][\"baseDomain\"] }}"
     tags: {}
+    image_id_ign: "{{ ocp_installer_state[\"*rhcos.Image\"] | d('') }}"
+    _region: "{{ config_cluster_region | d(lookup('env', 'CONFIG_REGION')) }}"
+    _provider: "{{ provider | d('NA') }}"
+    _arch: "{{ arch | d('x86_64') }}"
+
+- name: Load | Lookup ImageID
+  block:
+  - name: Load | Lookup ImageID | Check image
+    ansible.builtin.set_fact:
+      image_id_stream: "{{ installer_coreos_stream.architectures[_arch].images[_provider].regions[_region].image }}"
+    when:
+      - _provider != 'NA'
+  when:
+    - custom_image_id | d('') == ''
+    - image_id_ign == ''
 
 - name: Load | Check if cluster_state file
   ansible.builtin.stat:
@@ -47,9 +63,9 @@
       cluster_id: "{{ ocp_installer_metadata.clusterID }}"
       infra_id: "{{ ocp_installer_metadata.infraID }}"
       tags: "{% set x = tags.__setitem__('kubernetes.io/cluster/' + ocp_installer_metadata.infraID, 'owned') %}{{ tags }}"
-      region: "{{ config_cluster_region | d(lookup('env', 'CONFIG_REGION')) }}"
+      region: "{{ _region }}"
       platform:
-        provider: "{{ provider | d('NA') }}"
+        provider: "{{ _provider }}"
         platform: "{{ config_platform | d('none') }}"
       dns:
         base_domain: "{{ base_domain }}"
@@ -62,7 +78,7 @@
         subnets: []
       loadbalancers: {}
       compute:
-        image_id: "{{ custom_image_id | d(ocp_installer_state[\"*rhcos.Image\"]) }}"
+        image_id: "{{ custom_image_id | d(image_id_stream) | d(image_id_ign) }}"
         iam_profile_bootstrap: "{{ ocp_installer_metadata.infraID }}-instance-bootstrap"
         iam_profile_compute: "{{ ocp_installer_metadata.infraID }}-instance-compute"
         iam_profile_controlplane: "{{ ocp_installer_metadata.infraID }}-instance-controlPlane"

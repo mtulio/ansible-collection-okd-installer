@@ -43,13 +43,26 @@
         - config_pull_secret_file is defined
         - config_pull_secret_file|length > 0
       fail_msg: "'config_pull_secret_file' is not defined. Check the env var CONFIG_PULL_SECRET_FILE"
-    when: not(check_tar_inst.stat.exists)
+    when:
+     - not(check_tar_inst.stat.exists) or (skip_checks | d('no') == 'no')
 
   - name: openshift-install | Extract release
     ansible.builtin.shell: |
       oc adm release extract -a {{ config_pull_secret_file }} \
         --tools {{ release_image_version_arch | d(local_version) }}
-    when: not(check_tar_inst.stat.exists)
+    when:
+      - not(check_tar_inst.stat.exists)
+      - config_pull_secret_file | d("") != ""
+    args:
+      chdir: "{{ collection_tmp_dir }}"
+
+  - name: openshift-install | Extract release
+    ansible.builtin.shell: |
+      oc adm release extract \
+        --tools {{ release_image_version_arch | d(local_version) }}
+    when:
+      - not(check_tar_inst.stat.exists)
+      - config_pull_secret_file|d("") == ""
     args:
       chdir: "{{ collection_tmp_dir }}"
 

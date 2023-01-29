@@ -47,3 +47,14 @@
   ansible.builtin.shell: |
     {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
   when: not(st_out.stat.exists)
+
+- name: Create | Check exists coreos-stream.json
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/coreos-stream.json"
+  register: ex_coj
+
+- name: Create | Create CoreOS Stream JSON
+  ansible.builtin.shell: |
+    {{ bin_openshift_install }} coreos print-stream-json \
+      > {{ config_install_dir }}/coreos-stream.json
+  when: not(ex_coj.stat.exists)

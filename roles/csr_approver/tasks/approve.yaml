@@ -1,5 +1,5 @@
 ---
-- name: Approver | CSRs waiter {{ waiting_msg }}
+- name: Approver | Wait {{ waiting_msg }}
   ansible.builtin.pause:
     seconds: "{{ cert_wait_interval_sec }}"
   when:

@@ -1,9 +1,9 @@
 ---
 
-- name: Create | Assertions | Check vars
+- name: Create | Assertions | Variables
   ansible.builtin.include_tasks: check-vars.yaml
 
-- name: Create | Assertions | Directories exists
+- name: Create | Assrt. | Directories
   ansible.builtin.file:
     state: directory
     path: "{{ item }}"
@@ -11,22 +11,22 @@
   with_items:
     - "{{ config_install_dir }}"
 
-- name: Create | Assertions | Check installer bin
+- name: Create | Assrt. | Set bin path
   ansible.builtin.stat:
     path: "{{ bin_openshift_install }}"
   register: bin_oi_out
 
-- name: Create | Assertions | Fail missing installer
+- name: Create | Assrt. | Installer path
   ansible.builtin.debug:
     msg: "openshift-install binary not found on path: '{{ bin_openshift_install }}'"
   failed_when: not(bin_oi_out.stat.exists)
 
-- name: Create | Assertions | Env exists CONFIG_PULL_SECRET_FILE
+- name: Create | Assrt. | CONFIG_PULL_SECRET_FILE
   ansible.builtin.stat:
     path: "{{ config_pull_secret_file }}"
   register: ps_out
 
-- name: Create | Assertions | Fail missing pull secret file
+- name: Create | Assrt. | pull secret file
   ansible.builtin.debug:
     msg: "CONFIG_PULL_SECRET_FILE env var was not found. Please set it with pull-secret file path"
   failed_when: not(ps_out.stat.exists)

@@ -1,0 +1,92 @@
+################################
+# AWS Networks
+# 10.0.0.0/16 (to 10.0.255.255/16)
+#########################
+
+# TODO: fix those rules to more restrictive. This is used to dev env.
+security_groups:
+
+  - name: "{{ cluster_state.infra_id }}-controlplane-sg"
+    description: Security Group for Control Plane nodes
+    purge_tags: no
+    tags: "{{ cluster_state.tags | combine({'Name': cluster_state.infra_id + '-controlplane-sg'}) }}"
+    purge_rules: no
+    rules:
+      - proto: all
+        group_name: "{{ cluster_state.infra_id }}-controlplane-sg"
+      - proto: all
+        group_name: "{{ cluster_state.infra_id }}-compute-sg"
+        group_desc: Security Group for Compute nodes
+      - proto: all
+        cidr_ip: 10.0.0.0/8
+
+    purge_rules_egress: no
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0
+
+  - name: "{{ cluster_state.infra_id }}-compute-sg"
+    description: Security Group for Compute nodes
+    purge_tags: no
+    tags: "{{ cluster_state.tags | combine({'Name': cluster_state.infra_id + '-compute-sg'}) }}"
+    purge_rules: no
+    rules:
+      - proto: all
+        group_name: "{{ cluster_state.infra_id }}-controlplane-sg"
+        group_desc: Security Group for Control Plane nodes
+      - proto: all
+        group_name: "{{ cluster_state.infra_id }}-compute-sg"
+      - proto: all
+        cidr_ip: 10.0.0.0/8
+
+    purge_rules_egress: no
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0
+
+cloud_networks:
+  - name: "{{ cluster_state.infra_id }}-vpc"
+    block: "{{ okd_net_default_cidr }}"
+    provider: aws
+    region: "{{ provider_region }}"
+    security_groups: "{{ security_groups | d([]) }}"
+    tags: "{{ cluster_state.tags | d({}) }}"
+
+    internet_gateway: yes
+    nat_gateways:
+      - name: "{{ cluster_state.infra_id }}-natgw"
+        subnet: "{{ cluster_state.infra_id }}-net-public-1a"
+        tags: "{{ cluster_state.tags | d({}) }}"
+        wait: yes
+
+    route_tables:
+      - name: "{{ cluster_state.infra_id }}-rt-private"
+        routes:
+          - dest: 0.0.0.0/0
+            gw_type: natgw
+            target: "{{ cluster_state.infra_id }}-natgw"
+
+      - name: "{{ cluster_state.infra_id }}-rt-public"
+        routes:
+          - dest: 0.0.0.0/0
+            gw_type: igw
+
+    subnets:
+      - name: "{{ cluster_state.infra_id }}-net-public-1a"
+        az: "{{ provider_region }}a"
+        cidr: 10.0.16.0/22
+        route_table: "{{ cluster_state.infra_id }}-rt-public"
+        map_public: yes
+
+      - name: "{{ cluster_state.infra_id }}-net-private-1a"
+        az: "{{ provider_region }}a"
+        cidr: 10.0.48.0/22
+        route_table: "{{ cluster_state.infra_id }}-rt-private"
+        map_public: no
+
+    endpoint_services:
+      - name: s3
+        service: "com.amazonaws.{{ provider_region }}.s3"
+        route_tables:
+          - "{{ cluster_state.infra_id }}-rt-public"
+          - "{{ cluster_state.infra_id }}-rt-private"

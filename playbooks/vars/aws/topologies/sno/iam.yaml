@@ -1,0 +1,43 @@
+---
+iam_roles:
+- name: "{{ cluster_state.compute.iam_profile_controlplane }}"
+  providers:
+    - aws
+  assume_doc_type: file
+  assume_doc_name: "aws-ec2-assume.json"
+  managed_policies:
+    - arn:aws:iam::aws:policy/AdministratorAccess
+  tags: "{{ cluster_state.tags }}"
+  custom_policies:
+    - name: s3-ro-bootstrap
+      file_type: template
+      file_path: aws-s3-policy-ro.json.j2
+      bucket: "{{ cluster_state.infra_id }}-infra"
+    - name: ocp-bootstrap
+      policy_json: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "OKDInstallerBootstrapS3Read",
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:Describe*",
+                        "ec2:AttachVolume",
+                        "ec2:DetachVolume",
+                        "s3:GetObject"
+                    ],
+                    "Resource": "*"
+                }
+            ]
+          }
+
+- name: "{{ cluster_state.compute.iam_profile_compute }}"
+  providers:
+    - aws
+  assume_doc_type: file
+  assume_doc_name: "aws-ec2-assume.json"
+  managed_policies:
+    - arn:aws:iam::aws:policy/AdministratorAccess
+  tags: "{{ cluster_state.tags }}"
+  custom_policies: []

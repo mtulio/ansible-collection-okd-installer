@@ -3,6 +3,7 @@
 #config_metadata_name: ''
 
 # Defaults
+config_topology: ha
 config_default_architecture: amd64
 config_default_hyperthreading: Enabled
 
@@ -14,7 +15,7 @@ config_compute_replicas: 3
 config_compute_platform: {}
 config_compute:
 - name: worker
-  replicas: "{{ config_compute_replicas }}"
+  replicas: "{{ config_compute_replicas | int }}"
   platform: "{{ config_compute_platform }}"
   architecture: "{{ config_compute_architecture | d(config_default_architecture) }}"
   hyperthreading: "{{ config_compute_hyperthreading | d(config_default_hyperthreading) }}"

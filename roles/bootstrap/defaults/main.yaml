@@ -1,1 +1,7 @@
 ---
+bootstrap_bucket: "{{ cluster_state.infra_id }}-infra"
+bootstrap_topology: "{{ cluster_topology | d('ha') }}"
+bootstrap_src_topology:
+  ha: bootstrap.ign
+  sno: bootstrap-in-place-for-live-iso.ign
+bootstrap_src_ign: "{{ bootstrap_src_topology[bootstrap_topology] }}"

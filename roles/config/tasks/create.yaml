@@ -9,44 +9,60 @@
 - name: Create | Check if metadata.json exists
   ansible.builtin.stat:
     path: "{{ config_install_dir }}/metadata.json"
-  register: st_out
+  register: st_metadata
 
 - name: Create | Render Install config file
   ansible.builtin.template:
-    src: ocp-install-config.yaml.j2
+    src: install-config.yaml.j2
     dest: "{{ config_install_dir }}/install-config.yaml"
     mode: 0644
-  when: not(st_out.stat.exists)
+  when: not(st_metadata.stat.exists)
 
 - name: Create | Backup the rendered install config
-  ansible.builtin.template:
-    src: ocp-install-config.yaml.j2
+  ansible.builtin.copy:
+    src: "{{ config_install_dir }}/install-config.yaml"
     dest: "{{ config_install_dir }}/install-config-bkp.yaml"
     mode: 0644
-  when: not(st_out.stat.exists)
+  when: not(st_metadata.stat.exists)
 
-- name: Create | Create manifests
-  ansible.builtin.shell: |
-    {{ bin_openshift_install }} create manifests --dir {{ config_install_dir }}
-  when: not(st_out.stat.exists)
+# Topology: HA
+- name: Create | Topology HA
+  when:
+  - config_topology == 'ha'
+  - not(st_metadata.stat.exists)
+  block:
+  - name: Create | Create manifests
+    ansible.builtin.shell: |
+      {{ bin_openshift_install }} create manifests --dir {{ config_install_dir }}
 
-- name: Create | Remove Cluster/Machine API manifests for UPI
-  ansible.builtin.file:
-    state: absent
-    path: "{{ item }}"
-  with_items:
-    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-1.yaml"
-    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-2.yaml"
-    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-3.yaml"
-    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-1.yaml"
-    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-2.yaml"
-    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-3.yaml"
-  when: not(st_out.stat.exists)
+  - name: Create | Remove Cluster/Machine API manifests for UPI
+    ansible.builtin.file:
+      state: absent
+      path: "{{ item }}"
+    with_items:
+      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-1.yaml"
+      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-2.yaml"
+      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-3.yaml"
+      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-1.yaml"
+      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-2.yaml"
+      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-3.yaml"
 
-- name: Create | Create ignition configs
-  ansible.builtin.shell: |
-    {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
-  when: not(st_out.stat.exists)
+  - name: Create | Create ignition configs
+    ansible.builtin.shell: |
+      {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
+
+# Topology: SNO
+- name: Create | Topology SNO
+  when:
+  - config_topology == 'sno'
+  - not(st_metadata.stat.exists)
+  block:
+  - name: Create | Topology SNO | Create ignition configs
+    ansible.builtin.shell: |
+      {{ bin_openshift_install }} create single-node-ignition-config \
+        --dir {{ config_install_dir }}
+
+# Render Stream JSON
 
 - name: Create | Check exists coreos-stream.json
   ansible.builtin.stat:

@@ -5,7 +5,13 @@ baseDomain: {{ config_base_domain }}
 {% endif %}
 
 compute:
-{{ config_compute | to_nice_yaml }}
+{% if config_topology == 'ha' %}
+{{ config_compute }}
+
+{% elif config_topology == 'sno' %}
+- name: worker
+  replicas: 0
+{% endif %}
 
 controlPlane: {{ config_controlplane }}
 
@@ -30,6 +36,11 @@ platform:
 {% else %}
   {{ config_platform }}: {{ config_platform_spec|d('{}') }}
 {% endif %}
+{% endif %}
+
+{% if config_bootstrapinplace_disk is defined %}
+bootstrapInPlace:
+  installationDisk: {{ config_bootstrapinplace_disk }}
 {% endif %}
 
 publish: {{ config_publish }}

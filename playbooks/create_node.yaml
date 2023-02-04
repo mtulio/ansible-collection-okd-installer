@@ -25,6 +25,11 @@
         file: "{{ var_file }}"
       when: var_file is defined
 
+    - name: okd-installer | Stack | Compute | Include Vars - Pre-build topologies
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-{{ node_role }}.yaml"
+      when: topology_compute is defined
+
     - name: Include Compute Variables
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/node-{{ node_role }}.yaml"
@@ -33,8 +38,9 @@
 
   roles:
     - role: bootstrap
-      when: node_role|d('') == 'bootstrap'
+      when: (node_role | d('') == 'bootstrap') or (cluster_topology | d('') == 'sno')
     - role: cloud_compute
+
 
 - name: okd-installer | Create Stack | Compute | Save state
   ansible.builtin.import_playbook: config.yaml

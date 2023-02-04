@@ -16,6 +16,11 @@
         file: "{{ var_file }}"
       when: var_file is defined
 
+    - name: okd-installer | Stack | DNS | Include Vars - Pre-build topologies
+      ansible.builtin.include_vars:
+        file: "./vars/{{ provider }}/topologies/{{ topology_dns }}/dns.yaml"
+      when: topology_dns is defined
+
     - name: okd-installer | Stack | DNS | Include Vars - default
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/dns.yaml"

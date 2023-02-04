@@ -1,22 +1,22 @@
 ---
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- name: OKD Stack IAM | Config load
+- name: okd-installer | Stack | IAM | Config load
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Stack IAM
+- name: okd-installer | Stack | IAM
   hosts: '{{target|default("localhost")}}'
   connection: local
 
   pre_tasks:
-    - name: Include User Provided IAM Variables
+    - name: okd-installer | Stack | IAM | Include vars - user provided
       ansible.builtin.include_vars:
         file: "{{ var_file }}"
       when: var_file is defined
 
-    - name: Include IAM Variables
+    - name: okd-installer | Stack | IAM | Include vars - default
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/iam.yaml"
       when: cloud_iam is not defined
@@ -24,7 +24,7 @@
   roles:
     - cloud_iam
 
-- name: OKD Stack IAM | Save state
+- name: okd-installer | Stack | IAM | Save state
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state

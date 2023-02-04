@@ -1,0 +1,38 @@
+---
+
+- name: Check Vars | cluster_name
+  ansible.builtin.assert:
+    that:
+      - cluster_name is defined
+      - config_metadata_name is defined
+    fail_msg: "'cluster_name' is not defined"
+
+- name: Check Vars | config_base_domain
+  ansible.builtin.assert:
+    that:
+      - config_metadata_name is defined
+    fail_msg: "'config_metadata_name' is not defined. Check the env var CONFIG_CLUSTER_NAME"
+
+- name: Check Vars | config_base_domain
+  ansible.builtin.assert:
+    that:
+      - config_base_domain is defined
+    fail_msg: "'config_base_domain' is not defined. Check the env var CONFIG_BASE_DOMAIN"
+
+- name: Check Vars | config_ssh_key
+  ansible.builtin.assert:
+    that:
+      - config_ssh_key is defined
+    fail_msg: "'config_ssh_key' is not defined. Check the env var CONFIG_SSH_KEY"
+
+- name: Check Vars | config_pull_secret_file
+  ansible.builtin.assert:
+    that:
+      - config_pull_secret_file is defined
+    fail_msg: "'config_pull_secret_file' is not defined. Check the env var CONFIG_PULL_SECRET_FILE"
+
+- name: Check Vars | config_cluster_region
+  ansible.builtin.assert:
+    that:
+      - config_cluster_region is defined
+    fail_msg: "'config_cluster_region' is not defined. Check the env var CONFIG_CLUSTER_REGION"

@@ -1,0 +1,16 @@
+---
+- name: AWS | Compute | Init
+  ansible.builtin.debug:
+    msg: "Destroy Compute triggered"
+
+- name: AWS | Compute | Remove instance(s)
+  amazon.aws.ec2_instance:
+    state: absent
+    filters:
+      "tag:Name": "{{ machine.name }}"
+      instance-state-name: running
+    wait: "{{ machine.wait | d('no') }}"
+    wait_timeout: "{{ machine.wait_timeout | d(omit) }}"
+  with_items: "{{ okd_cluster_destroy_instances }}"
+  loop_control:
+    loop_var: machine

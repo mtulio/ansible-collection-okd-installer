@@ -1,0 +1,57 @@
+---
+- name: Approver | Wait {{ waiting_msg }}
+  ansible.builtin.pause:
+    seconds: "{{ cert_wait_interval_sec }}"
+  when:
+    - item_retry|int > 1
+
+- name: Approver | Getting existing CSRs
+  kubernetes.core.k8s_info:
+    api_version: certificates.k8s.io/v1
+    kind: CertificateSigningRequest
+    kubeconfig: "{{ config_install_dir }}/auth/kubeconfig"
+  register: all_csr
+
+- name: Approver | Set pending list
+  ansible.builtin.set_fact:
+    csr_pending: []
+
+- name: Approver | Filter pending CSR
+  ansible.builtin.set_fact:
+    csr_pending: "{{ csr_pending | d([]) + [item_csr.metadata.name] }}"
+  with_items: "{{ all_csr.resources }}"
+  when: item_csr.status | length <= 0
+  loop_control:
+    loop_var: item_csr
+  register: pending_csr_out
+  until: "csr_pending | length > 0"
+  retries: 3
+  delay: 10
+  no_log: true
+
+- name: Approver | Show Pending
+  ansible.builtin.debug:
+    msg: "Total pending: {{ csr_pending | length }}"
+
+- name: Approver | Approve CSRs
+  ansible.builtin.command: |
+    {{ oc_bin }} \
+      --kubeconfig {{ config_install_dir }}/auth/kubeconfig \
+      adm certificate approve {{ csr_name }}
+  vars:
+    oc_bin: "{{ ansible_user_dir }}/.ansible/okd-installer/bin/oc"
+  with_items: "{{ csr_pending }}"
+  loop_control:
+    loop_var: csr_name
+  register: result
+  ignore_errors: True
+  changed_when:
+    - result.rc == 2
+
+- name: Approver | Update Total counter
+  ansible.builtin.set_fact:
+    cert_approved: "{{ cert_approved | int + csr_pending | length }}"
+
+- name: Approver | Show approved
+  ansible.builtin.debug:
+    msg: "Total approved: {{ cert_approved }}"

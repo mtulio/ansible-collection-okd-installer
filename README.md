@@ -26,49 +26,57 @@ That collection distribute a set of Ansible Roles and Playbooks used to provisio
 External Roles (included as Git modules/fixed version):
 
 - [cloud_compute](https://github.com/mtulio/ansible-role-cloud-compute): Manage Compute resources
-- [cloud_network](https://github.com/mtulio/ansible-role-cloud-compute): Manage networks/VPCs
-- [cloud_iam](https://github.com/mtulio/ansible-role-cloud-compute): Manage Cloud identities
-- [cloud_load_balancer](https://github.com/mtulio/ansible-role-cloud-compute): Manage Load Balancers
+- [cloud_network](https://github.com/mtulio/ansible-role-cloud-network): Manage networks/VPCs
+- [cloud_iam](https://github.com/mtulio/ansible-role-cloud-iam): Manage Cloud identities
+- [cloud_load_balancer](https://github.com/mtulio/ansible-role-cloud-load-balancer): Manage Load Balancers
 - [cloud_dns](https://github.com/mtulio/ansible-role-cloud-dns): Manage DNS Domains on the Cloud Providers
 
 Internal Roles:
 
-- okd_bootstrap
-- okd_cluster_destroy
-- okd_install_clients
-- okd_installer_config
+- [bootstrap](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/bootstrap): Setup bootstrap dependencies, like uploading ignition to a blob storage to be used on bootstrap's node user-data.
+- [okd_cluster_destroy](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/okd_cluster_destroy): Destroy the cluster for a given provider
+- [clients](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/clients): Install openshift clients used by the playbooks. Some tools installed is: openshift-install, oc, ccoctl, etc
+- [config](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/config): Generate Install config and ignition files based on the desired cluster setup
+- [csr_approver](https://github.com/mtulio/ansible-collection-okd-installer/tree/main/roles/csr_approver): Approve the CSRs from compute nodes (a.k.a: workers)
 
 ### Playbooks
 
 Playbooks distributed on this Ansible Collection:
 
-- playbooks/config.yaml
-- playbooks/create_node.yaml
-- playbooks/destroy_cluster.yaml
 - playbooks/install_clients.yaml
-- playbooks/ping.yaml
+- playbooks/config.yaml
+- playbooks/stack_network.yaml
+- playbooks/stack_iam.yaml
 - playbooks/stack_dns.yaml
 - playbooks/stack_loadbalancer.yaml
-- playbooks/stack_iam.yaml
-- playbooks/stack_network.yaml
+- playbooks/create_node.yaml
+- playbooks/create_node_all.yaml
+- playbooks/create_all.yaml
+- playbooks/approve_certs.yaml
+- playbooks/destroy_cluster.yaml
+- playbooks/destroy_bootstrap.yaml
+- playbooks/ping.yaml
 
 ## Supported Cloud Platforms
 
 Supported Cloud Platforms* and installation types:
 
-| Platform/Install Type | IPI | UPI | Agnostic* |
+| Platform/Install Type | IPI | UPI | Agnostic** |
 | -- | -- | -- | -- |
 | AWS | No | Yes | Yes |
 | Azure | No | No | No |
 | GCP | No | No | No |
 | AlibabaCloud | No | No | No |
-| DigitalOcean | N/A | N/A | WIP |
+<!-- | DigitalOcean | N/A | N/A | Init |
 | Vultr | N/A | N/A | No |
-| Ionos | N/A | N/A | No |
+| Ionos | N/A | N/A | No | -->
 
 
-*Agnostic installation means that OKD there's no native integration with the Platform.
-**None means there is support to install OKD on this platform, but no native integration will be available on the OKD, which means every controller to interact with the Cloud Resource should be added separatelly.
+*To okd-installer Collection support a cloud provider, the stacks should be defined and the collection should be tested. The focus on okd-installer collection will provide flexibility to customize infrastructure in OKD supported and non-supported providers. If you would a fully automated installation you can use the installer (`openshift-install`) directly.
+
+**Agnostic installation means that OKD there's no native integration with the Platform (config `platform.None: {}`). `None` means there is playbooks to create the infrastrucutre resources to install OCP/OKD on the Cloud Provider, but no native integration with the platform will be available on the OKD, which means every controller to interact with the Cloud Resource should be added separatelly.
+
+We will add a guide to describe how to integrate a new provider by defining the playbooks to create the resource/stacks, calling it from okd-installer Collection. The basic requirement is to have the Ansible Modules publicaly available, some examples: [AWS](https://docs.ansible.com/ansible/latest/collections/community/aws/index.html), [GCP](https://docs.ansible.com/ansible/latest/collections/community/google/index.html), [Azure](https://docs.ansible.com/ansible/latest/collections/azure/azcollection/index.html), [IBM Cloud](https://github.com/IBM-Cloud/ansible-collection-ibm) [VMWare](https://docs.ansible.com/ansible/latest/collections/vmware/vmware_rest/index.html#plugins-in-vmware-vmware-rest), [Digital Ocean](https://docs.ansible.com/ansible/latest/collections/community/digitalocean/index.html), [Vultr](https://docs.ansible.com/ansible/latest/collections/vultr/cloud/index.html#plugins-in-vultr-cloud), [HetznerCloud](https://docs.ansible.com/ansible/latest/collections/hetzner/hcloud/index.html#plugins-in-hetzner-hcloud), [AlibabaCloud](https://docs.ansible.com/ansible/latest/scenario_guides/guide_alicloud.html), [HuaweiCloud](https://github.com/huaweicloud/huaweicloud-ansible-modules), [OracleCloud](https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.6.0/) etc.
 
 ## Usage
 
@@ -132,6 +140,17 @@ ansible-playbook mtulio.okd_installer.create_all \
     wait-for install-complete \
     --dir ~/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/ \
     --log-level debug
+~~~
+
+- Explore your cluster
+
+~~~bash
+export KUBECONFIG=~/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/auth/kubeconfig
+
+oc get clusteroperators
+
+# Or use the CLI downloaed by the okd-installer
+~/.ansible/okd-installer/bin/oc get co
 ~~~
 
 - Delete a Cluster

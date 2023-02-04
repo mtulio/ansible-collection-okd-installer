@@ -1,0 +1,21 @@
+--- # Setup S3 Bucket when provider ir AWS
+
+- name: Create bucket
+  amazon.aws.s3_bucket:
+    name: "{{ bootstrap_bucket }}"
+    state: present
+
+# TODO: Make it indepotent
+- name: Upload bootstrap.ign
+  amazon.aws.aws_s3:
+    bucket: "{{ bootstrap_bucket }}"
+    object: "/bootstrap.ign"
+    src: "{{ config_install_dir + '/bootstrap.ign' }}"
+    mode: put
+    overwrite: different
+  register: s3_put
+
+- name: Dump the S3 PUT result
+  ansible.builtin.debug:
+    var: s3_put
+  when: debug|d(false)

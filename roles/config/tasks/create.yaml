@@ -1,0 +1,60 @@
+---
+
+- name: Create | Run Check vars
+  ansible.builtin.include_tasks: check.yaml
+
+- name: Create | Run custom assertions
+  ansible.builtin.include_tasks: create-assertions.yaml
+
+- name: Create | Check if metadata.json exists
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/metadata.json"
+  register: st_out
+
+- name: Create | Render Install config file
+  ansible.builtin.template:
+    src: ocp-install-config.yaml.j2
+    dest: "{{ config_install_dir }}/install-config.yaml"
+    mode: 0644
+  when: not(st_out.stat.exists)
+
+- name: Create | Backup the rendered install config
+  ansible.builtin.template:
+    src: ocp-install-config.yaml.j2
+    dest: "{{ config_install_dir }}/install-config-bkp.yaml"
+    mode: 0644
+  when: not(st_out.stat.exists)
+
+- name: Create | Create manifests
+  ansible.builtin.shell: |
+    {{ bin_openshift_install }} create manifests --dir {{ config_install_dir }}
+  when: not(st_out.stat.exists)
+
+- name: Create | Remove Cluster/Machine API manifests for UPI
+  ansible.builtin.file:
+    state: absent
+    path: "{{ item }}"
+  with_items:
+    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-1.yaml"
+    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-2.yaml"
+    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-3.yaml"
+    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-1.yaml"
+    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-2.yaml"
+    - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-3.yaml"
+  when: not(st_out.stat.exists)
+
+- name: Create | Create ignition configs
+  ansible.builtin.shell: |
+    {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
+  when: not(st_out.stat.exists)
+
+- name: Create | Check exists coreos-stream.json
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/coreos-stream.json"
+  register: ex_coj
+
+- name: Create | Create CoreOS Stream JSON
+  ansible.builtin.shell: |
+    {{ bin_openshift_install }} coreos print-stream-json \
+      > {{ config_install_dir }}/coreos-stream.json
+  when: not(ex_coj.stat.exists)

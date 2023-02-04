@@ -1,0 +1,14 @@
+---
+- name: AWS | VPC | IGW | Init
+  ansible.builtin.debug:
+    msg: "Destroy VPC IGW triggered"
+  tags: vpc
+
+- name: AWS | VPC | IGW | Delete
+  amazon.aws.ec2_vpc_igw:
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc_id }}"
+    state: "absent"
+  with_items: "{{ vpc_info.vpcs }}"
+  tags: vpc
+  no_log: True

@@ -1,0 +1,152 @@
+---
+- name: Create workdir
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    mode: 0755
+  with_items:
+    - "{{ collection_tmp_dir }}"
+    - "{{ collection_bin_dir }}"
+
+- name: Create default_version var
+  ansible.builtin.set_fact:
+    default_version: "{{ release_image }}:{{ version | d(release_version) }}-{{ release_arch }}"
+
+- name: Mount the binary names 
+  ansible.builtin.set_fact:
+    bin_installer: "openshift-install-{{ client_os }}-{{ version | d(release_version) }}"
+    bin_clients: "openshift-client-{{ client_os }}-{{ version | d(release_version) }}"
+    bin_oc: "oc-{{ client_os }}-{{ version | d(release_version) }}"
+    bin_kubectl: "kubectl-{{ client_os }}-{{ version | d(release_version) }}"
+
+- name: openshift-install | Check is present
+  ansible.builtin.stat:
+    path: "{{ collection_bin_dir }}/{{ bin_installer }}"
+  register: check_bin_inst
+
+- name: openshift-install | Install client
+  when: not(check_bin_inst.stat.exists)
+  block:
+  - name: openshift-install | Check tarball
+    ansible.builtin.stat:
+      path: "{{ collection_tmp_dir }}/{{ bin_installer }}.tar.gz"
+    register: check_tar_inst
+
+  - name: openshift-install | Download msg
+    ansible.builtin.debug:
+      msg: "Donwloading tools [{{ release_image_version_arch | d(local_version) }}] using secret [{{ config_pull_secret_file }}]"
+    when: not(check_tar_inst.stat.exists)
+
+  - name: openshift-install | Check vars
+    ansible.builtin.assert:
+      that:
+        - config_pull_secret_file is defined
+        - config_pull_secret_file|length > 0
+      fail_msg: "'config_pull_secret_file' is not defined. Check the env var CONFIG_PULL_SECRET_FILE"
+    when:
+     - not(check_tar_inst.stat.exists) or (skip_checks | d('no') == 'no')
+
+  - name: openshift-install | Extract release
+    ansible.builtin.shell: |
+      oc adm release extract -a {{ config_pull_secret_file }} \
+        --tools {{ release_image_version_arch | d(local_version) }}
+    when:
+      - not(check_tar_inst.stat.exists)
+      - config_pull_secret_file | d("") != ""
+    args:
+      chdir: "{{ collection_tmp_dir }}"
+
+  - name: openshift-install | Extract release
+    ansible.builtin.shell: |
+      oc adm release extract \
+        --tools {{ release_image_version_arch | d(local_version) }}
+    when:
+      - not(check_tar_inst.stat.exists)
+      - config_pull_secret_file|d("") == ""
+    args:
+      chdir: "{{ collection_tmp_dir }}"
+
+  - name: openshift-install | Extract tarball
+    ansible.builtin.unarchive:
+      src: "{{ collection_tmp_dir }}/{{ bin_installer }}.tar.gz"
+      dest: "{{ collection_tmp_dir }}"
+    when: not(check_bin_inst.stat.exists)
+    register: ext_bin_inst
+
+  - name: openshift-install | Copy to bin dir
+    ansible.builtin.copy:
+      src: "{{ collection_tmp_dir }}/openshift-install"
+      dest: "{{ collection_bin_dir }}/{{ bin_installer }}"
+      mode: 0755
+    when: ext_bin_inst.changed
+
+  - name: openshift-install | Remove tmp file
+    ansible.builtin.file:
+      state: absent
+      path: "{{ collection_tmp_dir }}/openshift-install"
+    when: ext_bin_inst.changed
+
+- name: oc | Check openshift client is present
+  ansible.builtin.stat:
+    path: "{{ collection_bin_dir }}/{{ bin_oc }}"
+  register: check_bin_cli
+
+- name: oc | Install clients
+  when: not(check_bin_cli.stat.exists)
+  block:
+  - name: oc | Extract from tarball
+    ansible.builtin.unarchive:
+      src: "{{ collection_tmp_dir }}/{{ bin_clients }}.tar.gz"
+      dest: "{{ collection_tmp_dir }}"
+    when: not(check_bin_cli.stat.exists)
+    register: ext_bin_cli
+
+  - name: oc | Copy to bin path
+    ansible.builtin.copy:
+      src: "{{ collection_tmp_dir }}/oc"
+      dest: "{{ collection_bin_dir }}/{{ bin_oc }}"
+      mode: 0755
+    when: ext_bin_cli.changed
+
+  - name: oc | Remove tmp file
+    ansible.builtin.file:
+      state: absent
+      path: "{{ collection_tmp_dir }}/oc"
+    when: ext_bin_cli.changed
+
+  - name: kubectl | Copy to bin path
+    ansible.builtin.copy:
+      src: "{{ collection_tmp_dir }}/kubectl"
+      dest: "{{ collection_bin_dir }}/{{ bin_kubectl }}"
+      mode: 0755
+    when: ext_bin_cli.changed
+
+  - name: kubectl | Remove tmp file
+    ansible.builtin.file:
+      state: absent
+      path: "{{ collection_tmp_dir }}/kubectl"
+    when: ext_bin_cli.changed
+
+- name: Ensure file links are present
+  ansible.builtin.file:
+    state: link
+    src: "{{ collection_bin_dir }}/{{ item.src }}"
+    dest: "{{ collection_bin_dir }}/{{ item.link }}"
+  with_items:
+    - src: "{{ bin_installer }}"
+      link: openshift-install
+    - src: "{{ bin_oc }}"
+      link: oc
+    - src: "{{ bin_kubectl }}"
+      link: kubectl
+
+- name: Show clients path
+  ansible.builtin.debug:
+    msg: "binary=[{{ item.src }}] link=[{{ item.link }}]"
+  with_items:
+    - src: "{{ bin_installer }}"
+      link: openshift-install
+    - src: "{{ bin_oc }}"
+      link: oc
+    - src: "{{ bin_kubectl }}"
+      link: kubectl

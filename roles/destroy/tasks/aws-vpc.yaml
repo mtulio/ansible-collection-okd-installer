@@ -1,0 +1,75 @@
+---
+- name: AWS | VPC | Init
+  ansible.builtin.debug:
+    msg: "Destroy VPC triggered"
+  tags: vpc
+  when: debug|d(false)
+
+- name: AWS | VPC | Set VPC Id
+  ansible.builtin.set_fact:
+    vpc_name: "{{ cloud_networks[0].name }}"
+    vpc_region: "{{ cloud_networks[0].region }}"
+    vpc_cidr: "{{ cloud_networks[0].block }}"
+  tags: vpc
+
+- name: AWS | VPC | Get VPC by Name
+  amazon.aws.ec2_vpc_net_info:
+    filters:
+      "tag:Name": "{{ vpc_name }}"
+  when: vpc_name is defined
+  register: vpc_info
+  tags: vpc
+
+- name: AWS | VPC | Set VPC Id
+  ansible.builtin.set_fact:
+    vpc_id: "{{ vpc_info.vpcs[0].vpc_id }}"
+  when:
+    - vpc_name is defined
+    - vpc_info.vpcs|length > 0
+  tags: vpc
+
+- name: AWS | VPC | Init destroy modules
+  when: (vpc_id is defined) and (vpc_id != '')
+  tags: vpc
+  block:
+    - name: AWS | VPC | Nat Gateway(s)
+      ansible.builtin.include_tasks: aws-vpc-natgw.yaml
+      tags: vpc
+
+    - name: AWS | VPC | Security Group(s)
+      ansible.builtin.include_tasks: aws-vpc-sgs.yaml
+      tags: vpc
+
+    - name: AWS | VPC | VPC Endpoint(s)
+      ansible.builtin.include_tasks: aws-vpc-endpoint.yaml
+      tags: vpc
+
+    - name: AWS | VPC | Route Table(s)
+      ansible.builtin.include_tasks: aws-vpc-rtb.yaml
+      tags: vpc
+
+    - name: AWS | VPC | Subnet(s)
+      ansible.builtin.include_tasks: aws-vpc-subnets.yaml
+      tags: vpc
+
+    - name: AWS | VPC | Internet Gateway(s)
+      ansible.builtin.include_tasks: aws-vpc-igw.yaml
+      tags: vpc
+
+    - name: AWS | VPC | Carrier Gateway(s)
+      ansible.builtin.include_tasks: aws-vpc-cagw.yaml
+      tags: vpc
+
+    - name: AWS | VPC | Delete
+      amazon.aws.ec2_vpc_net:
+        state: absent
+        region: "{{ vpc_region }}"
+        name: "{{ vpc_name }}"
+        cidr_block: "{{ vpc_cidr }}"
+      register: ret_vpc
+      tags: vpc
+
+    - name: AWS | VPC | Show delete result
+      ansible.builtin.debug:
+        var: ret_vpc
+      tags: vpc

@@ -1,22 +1,22 @@
 ---
 # - ansible.builtin.import_playbook: var_check_required.yaml
 
-- name: OKD Stack LB | Config load
+- name: okd-installer | Stack | Load Balancer | Config load
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
 
-- name: OKD Stack Load Balancer
+- name: okd-installer | Stack | Load Balancer
   hosts: '{{target|default("localhost")}}'
   connection: local
 
   pre_tasks:
-    - name: Include User Provided Load Balancer Variables
+    - name: okd-installer | Stack | LB | Include vars - User Provided
       ansible.builtin.include_vars:
         file: "{{ var_file }}"
       when: var_file is defined
 
-    - name: Include Locad Balancer Variables
+    - name: okd-installer | Stack | LB | Include vars - default
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/loadbalancer.yaml"
       when:
@@ -25,7 +25,7 @@
   roles:
     - cloud_load_balancer
 
-- name: OKD Stack LB | Save state
+- name: okd-installer | Stack | LB | Save state
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: save-state

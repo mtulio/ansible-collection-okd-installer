@@ -1,4 +1,0 @@
----
-
-- name: Run mode
-  ansible.builtin.include_tasks: "{{ mode | d('check') }}.yaml"

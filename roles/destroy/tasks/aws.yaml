@@ -1,0 +1,20 @@
+---
+- name: AWS | Load Balancer
+  ansible.builtin.include_tasks: "{{ provider }}-loadbalancer.yaml"
+  tags: loadbalancer
+
+- name: AWS | Compute
+  ansible.builtin.include_tasks: "{{ provider }}-compute.yaml"
+  tags: compute
+
+- name: AWS | IAM
+  ansible.builtin.include_tasks: "{{ provider }}-iam.yaml"
+  tags: iam
+
+- name: AWS | DNS
+  ansible.builtin.include_tasks: "{{ provider }}-dns.yaml"
+  tags: dns
+
+- name: AWS | VPC
+  ansible.builtin.include_tasks: "{{ provider }}-vpc.yaml"
+  tags: vpc

@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  role_name: csr_approver
+  author: mtulio
+  description: Ansible Role to Approve CSR Certificates from Worker on Installing
+  license: Apache-2.0
+  min_ansible_version: "4.1"
+  platforms:
+    - name: EL
+      versions:
+        - all
+  galaxy_tags:
+    - openshift
+    - okd
+    - installer
+    - bootstrap
+    - aws
+    - amazon
+    - digitalocean
+
+dependencies: []

@@ -31,7 +31,7 @@ export CONFIG_PULL_SECRET_FILE=/home/mtulio/.openshift/pull-secret-latest.json
 export CONFIG_SSH_KEY="$(cat ~/.ssh/id_rsa.pub)"
 EOF
 
-source ./.env-${CLUSTER_ID}
+source ./.env-${CLUSTER_NAME}
 ```
 
 ### Create or customize the `openshift-install` binary
@@ -55,12 +55,22 @@ ansible-playbook mtulio.okd_installer.config \
 - (optional/alternative) A more customizaded environment variable setting the CIDR block:
 
 ```bash
+CUSTOM_NET_VARS=${PWD}/vars/networks/aws-use1-single-AZ-peer.yaml
 ansible-playbook mtulio.okd_installer.stack_network \
     -e provider=${CONFIG_PROVIDER} \
     -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e var_file=${PWD}/vars/networks/aws-use1-single-AZ-peer.yaml \
+    -e var_file=${CUSTOM_NET_VARS} \
     -e resource_prefix=singleaz \
     -e cidr_block_16=10.100.0.0/16 -e cidr_prefix_16=10.100
+```
+
+Exanoke Local Zones us-east-1:
+```bash
+CUSTOM_NET_VARS=${PWD}/vars/networks/aws-use1-localzones.yaml
+ansible-playbook mtulio.okd_installer.stack_network \
+    -e provider=${CONFIG_PROVIDER} \
+    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e var_file=${CUSTOM_NET_VARS}
 ```
 
 ### IAM Stack

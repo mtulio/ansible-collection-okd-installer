@@ -9,6 +9,8 @@
 - name: okd-installer | Stack | Network
   hosts: '{{target|default("localhost")}}'
   connection: local
+  vars:
+    profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
   pre_tasks:
     - name: okd-installer | Stack | Network | Include Vars - User Provided
@@ -16,15 +18,15 @@
         file: "{{ var_file }}"
       when: var_file is defined
 
-    - name: okd-installer | Stack | Network | Include Vars - Pre-build topologies
+    - name: okd-installer | Stack | Network | Include Vars - Profiles
       ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/topologies/{{ topology_network }}/network.yaml"
-      when: topology_network is defined
+        file: "{{ profile_path }}/network.yaml"
+      when: var_file is not defined
 
-    - name: okd-installer | Stack | Network | Include Vars - Default
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/network.yaml"
-      when: cloud_networks is not defined
+    # - name: okd-installer | Stack | Network | Include Vars - Default
+    #   ansible.builtin.include_vars:
+    #     file: "./vars/{{ provider }}/profiles/default/network.yaml"
+    #   when: cloud_networks is not defined
 
   roles:
     - cloud_network

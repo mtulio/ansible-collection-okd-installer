@@ -9,6 +9,8 @@
 - name: okd-installer | Stack | IAM
   hosts: '{{target|default("localhost")}}'
   connection: local
+  vars:
+    profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
   pre_tasks:
     - name: okd-installer | Stack | IAM | Include vars - user provided
@@ -16,15 +18,15 @@
         file: "{{ var_file }}"
       when: var_file is defined
 
-    - name: okd-installer | Stack | IAM | Include Vars - Pre-build topologies
+    - name: okd-installer | Stack | IAM | Include Vars - Profiles
       ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/topologies/{{ topology_iam }}/iam.yaml"
-      when: topology_iam is defined
+        file: "{{ profile_path }}/iam.yaml"
+      when: var_file is not defined
 
-    - name: okd-installer | Stack | IAM | Include vars - default
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/iam.yaml"
-      when: cloud_iam is not defined
+    # - name: okd-installer | Stack | IAM | Include vars - default
+    #   ansible.builtin.include_vars:
+    #     file: "./vars/{{ provider }}/profiles/default/iam.yaml"
+    #   when: cloud_iam is not defined
 
   roles:
     - cloud_iam

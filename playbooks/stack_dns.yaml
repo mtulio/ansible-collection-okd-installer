@@ -9,6 +9,8 @@
 - name: okd-installer | Stack | DNS
   hosts: '{{ target | default("localhost") }}'
   connection: local
+  vars:
+    profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
   pre_tasks:
     - name: okd-installer | Stack | DNS | Include Vars - User provided
@@ -16,16 +18,16 @@
         file: "{{ var_file }}"
       when: var_file is defined
 
-    - name: okd-installer | Stack | DNS | Include Vars - Pre-build topologies
+    - name: okd-installer | Stack | DNS | Include Vars - Profiles
       ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/topologies/{{ topology_dns }}/dns.yaml"
-      when: topology_dns is defined
+        file: "{{ profile_path }}/dns.yaml"
+      when: var_file is not defined
 
-    - name: okd-installer | Stack | DNS | Include Vars - default
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/dns.yaml"
-      when:
-        - (cloud_dns_zones is not defined) or (cloud_dns_zones | length <= 0)
+    # - name: okd-installer | Stack | DNS | Include Vars - default
+    #   ansible.builtin.include_vars:
+    #     file: "./vars/{{ provider }}/profiles/default/dns.yaml"
+    #   when:
+    #     - (cloud_dns_zones is not defined) or (cloud_dns_zones | length <= 0)
 
   roles:
     - cloud_dns

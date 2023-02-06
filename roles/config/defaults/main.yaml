@@ -3,7 +3,7 @@
 #config_metadata_name: ''
 
 # Defaults
-config_topology: ha
+cluster_topology: ha
 config_default_architecture: amd64
 config_default_hyperthreading: Enabled
 
@@ -15,7 +15,7 @@ config_compute_replicas: 3
 config_compute_platform: {}
 config_compute:
 - name: worker
-  replicas: "{{ config_compute_replicas | int }}"
+  replicas: "{{ config_compute_replicas }}"
   platform: "{{ config_compute_platform }}"
   architecture: "{{ config_compute_architecture | d(config_default_architecture) }}"
   hyperthreading: "{{ config_compute_hyperthreading | d(config_default_hyperthreading) }}"
@@ -65,3 +65,19 @@ config_ssh_key: ''
 bin_openshift_install: openshift-install
 bin_oc: oc
 bin_kubectl: kubectl
+
+
+# Patches (Defaults)
+config_patches: []
+
+## name: mc_varlibcontainers
+## create customd disk for /var/lib/containers
+cfg_patch_mc_varlibcontainers:
+  device_path: /dev/nvme2n1
+  device_name: nvme2n1
+  machineconfiguration_roles:
+  - worker
+
+## name: mc_varlibetcd
+cfg_patch_mc_varlibetcd:
+  device_path: /dev/nvme1n1

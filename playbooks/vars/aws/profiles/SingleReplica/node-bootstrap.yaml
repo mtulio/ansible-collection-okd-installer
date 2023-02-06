@@ -5,7 +5,7 @@ _cluster_prefix: "{{ cluster_state.infra_id }}"
 bootstrap_bucket: "{{ _cluster_prefix }}-infra"
 
 # Vars used on Machine/Compute Stack
-_instance_type: "{{ controlplane_instance | d('m6i.xlarge') }}"
+_instance_type: "{{ bootstrap_instance | d('m6i.xlarge') }}"
 _instance_profile: "{{ cluster_state.compute.iam_profile_bootstrap }}"
 _image_id: "{{ custom_image_id | d(cluster_state.compute.image_id) }}"
 _subnet_name: "{{ _cluster_prefix }}-net-public-1a"
@@ -32,6 +32,11 @@ _common:
   - device_name: /dev/xvda
     ebs:
       volume_size: 128
+      volume_type: gp3
+      delete_on_termination: true
+  - device_name: /dev/xvdd
+    ebs:
+      volume_size: 32
       volume_type: gp3
       delete_on_termination: true
 

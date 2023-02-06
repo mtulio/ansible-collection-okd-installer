@@ -34,6 +34,11 @@ _common:
       volume_size: 128
       volume_type: gp3
       delete_on_termination: true
+  - device_name: /dev/xvdd
+    ebs:
+      volume_size: 32
+      volume_type: gp3
+      delete_on_termination: true
 
 # Stack Compute (Ansible Role cloud_compute) options:
 compute_resources:

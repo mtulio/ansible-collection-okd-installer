@@ -25,22 +25,24 @@
     mode: 0644
   when: not(st_metadata.stat.exists)
 
-- name: Create | Topology HA
-  when:
-  - not(st_metadata.stat.exists)
+- name: Create | Generate installer metadata
+  when: not(st_metadata.stat.exists)
   block:
   - name: Create | Create manifests
     ansible.builtin.shell: |
       {{ bin_openshift_install }} create manifests --dir {{ config_install_dir }}
 
   - name: Create | Apply patches on manifest stage
-    ansible.builtin.include_tasks: ./patches-manifests/{{ item }}.yaml
-    loop:
-      - "rm-capi-machines"
+    ansible.builtin.include_tasks:
+      file: "patches-manifests/{{ patch_name }}.yaml"
+    loop_control:
+      loop_var: patch_name
+    loop: "{{ config_patches | d('rm-capi-machines') }}"
 
   - name: Create | Create ignition configs
     ansible.builtin.shell: |
       {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
+
 
 # Render Stream JSON
 - name: Create | Check exists coreos-stream.json

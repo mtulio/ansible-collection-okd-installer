@@ -1,0 +1,6 @@
+---
+- name: Create | Render Install config file
+  ansible.builtin.template:
+    src: patches/mc-disk-var-lib-etcd.yaml.j2
+    dest: "{{ config_install_dir }}/openshift/00-master-etcd.yaml"
+    mode: 0644

@@ -5,10 +5,10 @@ baseDomain: {{ config_base_domain }}
 {% endif %}
 
 compute:
-{% if config_topology == 'ha' %}
+{% if cluster_topology == 'ha' %}
 {{ config_compute }}
 
-{% elif config_topology == 'sno' %}
+{% elif cluster_topology == 'sno' %}
 - name: worker
   replicas: 0
 {% endif %}

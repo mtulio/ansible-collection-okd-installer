@@ -20,20 +20,17 @@
   hosts: '{{target|default("localhost")}}'
   connection: local
   gather_facts: yes
+  vars:
+    profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
+
   vars_files:
-    - "./vars/{{ config_provider }}/iam.yaml"
-    - "./vars/{{ config_provider }}/dns.yaml"
+    - "{{ profile_path }}/iam.yaml"
+    - "{{ profile_path }}/dns.yaml"
   pre_tasks:
     # Network
     - name: okd-installer | Destroy | Network | Loading Topology Names
       ansible.builtin.include_vars:
-        file: "./vars/{{ config_provider }}/topologies/{{ topology_network }}/network.yaml"
-      when: topology_network is defined
-
-    - name: okd-installer | Destroy | Network | Loading Default Names
-      ansible.builtin.include_vars:
-        file: "./vars/{{ config_provider }}/network.yaml"
-      when: topology_network is not defined
+        file: "{{ profile_path }}/network.yaml"
 
     # Load Balancers
     - name: okd-installer | Destroy | LB | Init list
@@ -42,11 +39,11 @@
 
     - name: okd-installer | Destroy | Load Resource Names
       ansible.builtin.include_vars:
-        file: "./vars/{{ config_provider }}/destroy_resources.yaml"
+        file: "{{ profile_path }}/destroy_resources.yaml"
 
     - name: okd-installer | Destroy | LB | Load Router Names
       ansible.builtin.include_vars:
-        file: "./vars/{{ config_provider }}/loadbalancer-router-default.yaml"
+        file: "{{ profile_path }}/loadbalancer-router-default.yaml"
 
     - name: okd-installer | Destroy | LB | Merge list
       ansible.builtin.set_fact:
@@ -54,7 +51,7 @@
 
     - name: okd-installer | Destroy | LB | Load API Names
       ansible.builtin.include_vars:
-        file: "./vars/{{ config_provider }}/loadbalancer.yaml"
+        file: "{{ profile_path }}/loadbalancer.yaml"
 
     - name: okd-installer | Destroy | LB | Merge list
       ansible.builtin.set_fact:

@@ -9,6 +9,8 @@
 - name: okd-installer | Create Stack | Compute
   hosts: '{{ target|default("localhost") }}'
   connection: local
+  vars:
+    profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
   vars_prompt:
     - name: node_role
@@ -27,18 +29,18 @@
 
     - name: okd-installer | Stack | Compute | Include Vars - Pre-build topologies
       ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-{{ node_role }}.yaml"
-      when: topology_compute is defined
+        file: "{{ profile_path }}/node-{{ node_role }}.yaml"
+      when: var_file is not defined
 
-    - name: Include Compute Variables
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/node-{{ node_role }}.yaml"
-      when:
-        - (compute_resources is not defined) or (compute_resources | length <= 0)
+    # - name: Include Compute Variables
+    #   ansible.builtin.include_vars:
+    #     file: "./vars/{{ provider }}/node-{{ node_role }}.yaml"
+    #   when:
+    #     - (compute_resources is not defined) or (compute_resources | length <= 0)
 
   roles:
     - role: bootstrap
-      when: (node_role | d('') == 'bootstrap') or (cluster_topology | d('') == 'sno')
+      when: (node_role | d('') == 'bootstrap') or (cluster_profile | d('') == 'sno')
     - role: cloud_compute
 
 

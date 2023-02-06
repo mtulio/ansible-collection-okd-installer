@@ -5,6 +5,22 @@
 
 # TODO: fix those rules to more restrictive. This is used to dev env.
 security_groups:
+  - name: "{{ cluster_state.infra_id }}-bootstrap-sg"
+    description: Bootstrap Security Group
+    purge_tags: no
+    tags: "{{ cluster_state.tags | combine({'Name': cluster_state.infra_id + '-bootstrap-sg'}) }}"
+    purge_rules: yes
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: all
+        cidr_ip: 10.0.0.0/8
+    purge_rules_egress: no
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0
 
   - name: "{{ cluster_state.infra_id }}-controlplane-sg"
     description: Security Group for Control Plane nodes
@@ -43,6 +59,26 @@ security_groups:
     rules_egress:
       - proto: all
         cidr_ip: 0.0.0.0/0
+
+  - name: "{{ cluster_state.infra_id }}-vpce-ec2"
+    description: Security Group for EC2 VPC Endpoint
+    purge_tags: no
+    tags: "{{ cluster_state.tags | combine({'Name': cluster_state.infra_id + '-vpce-ec2'}) }}"
+    purge_rules: no
+    rules:
+      - proto: tcp
+        cidr_ip: 10.0.0.0/8
+        ports:
+        - 443
+        rule_desc: allow VPC CIDR on port 443
+
+    purge_rules_egress: no
+    rules_egress:
+      - proto: tcp
+        cidr_ip: 0.0.0.0/0
+        ports:
+        - 443
+        rule_desc: allow VPC CIDR on port 443
 
 cloud_networks:
   - name: "{{ cluster_state.infra_id }}-vpc"

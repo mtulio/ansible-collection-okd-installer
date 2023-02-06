@@ -25,45 +25,24 @@
     mode: 0644
   when: not(st_metadata.stat.exists)
 
-# Topology: HA
 - name: Create | Topology HA
   when:
-  - config_topology == 'ha'
   - not(st_metadata.stat.exists)
   block:
   - name: Create | Create manifests
     ansible.builtin.shell: |
       {{ bin_openshift_install }} create manifests --dir {{ config_install_dir }}
 
-  - name: Create | Remove Cluster/Machine API manifests for UPI
-    ansible.builtin.file:
-      state: absent
-      path: "{{ item }}"
-    with_items:
-      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-1.yaml"
-      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-2.yaml"
-      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_master-machines-3.yaml"
-      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-1.yaml"
-      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-2.yaml"
-      - "{{ config_install_dir }}/openshift/99_openshift-cluster-api_worker-machineset-3.yaml"
+  - name: Create | Apply patches on manifest stage
+    ansible.builtin.include_tasks: ./patches-manifests/{{ item }}.yaml
+    loop:
+      - "rm-capi-machines"
 
   - name: Create | Create ignition configs
     ansible.builtin.shell: |
       {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
 
-# Topology: SNO
-- name: Create | Topology SNO
-  when:
-  - config_topology == 'sno'
-  - not(st_metadata.stat.exists)
-  block:
-  - name: Create | Topology SNO | Create ignition configs
-    ansible.builtin.shell: |
-      {{ bin_openshift_install }} create single-node-ignition-config \
-        --dir {{ config_install_dir }}
-
 # Render Stream JSON
-
 - name: Create | Check exists coreos-stream.json
   ansible.builtin.stat:
     path: "{{ config_install_dir }}/coreos-stream.json"

@@ -21,12 +21,6 @@
 - name: Load | Set bootstrap ignition filename for HA
   ansible.builtin.set_fact:
     _filename_bootstrap_ign: "bootstrap.ign"
-  when: config_topology == 'ha'
-
-- name: Load | Set bootstrap ignition filename for SNO
-  ansible.builtin.set_fact:
-    _filename_bootstrap_ign: "bootstrap-in-place-for-live-iso.ign"
-  when: config_topology == 'sno'
 
 - name: Load | Variables from ignition files
   ansible.builtin.set_fact:

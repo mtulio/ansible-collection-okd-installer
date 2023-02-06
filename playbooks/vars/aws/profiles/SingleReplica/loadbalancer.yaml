@@ -123,36 +123,3 @@ cloud_loadbalancers:
         record: "api-int.{{ cluster_state.dns.cluster_domain }}"
         private_zone: yes
         overwrite: yes
-
-  # - name: "{{ cluster_state.infra_id }}-ic-public"
-  #   openshift_id: public
-  #   provider: aws
-  #   type: network
-  #   scheme: internet-facing
-  #   state: present
-  #   tags: "{{ cluster_state.tags | d({}) }}"
-  #   #subnet_mappings:
-  #   #subnets: []
-  #   subnets_discovery: yes
-  #   vpc_name: "{{ cluster_state.infra_id }}-vpc"
-  #   subnets_names:
-  #     - "{{ cluster_state.infra_id }}-net-public-1a"
-  #     - "{{ cluster_state.infra_id }}-net-public-1b"
-  #     - "{{ cluster_state.infra_id }}-net-public-1c"
-  #   cross_zone_load_balancing: yes
-  #   ip_address_type: ipv4
-  #   listeners:
-  #     - Protocol: TCP
-  #       Port: 80
-  #       DefaultActions:
-  #         - Type: forward
-  #           TargetGroupName: "{{ cluster_state.infra_id }}-ic-pub-80"
-  #     - Protocol: TCP
-  #       Port: 443
-  #       DefaultActions:
-  #         - Type: forward
-  #           TargetGroupName: "{{ cluster_state.infra_id }}-ic-pub-443"
-  #   register_dns:
-  #     - zone: "{{ cluster_state.zones.base_domain }}"
-  #       record: "*.apps.{{ cluster_state.zones.cluster_domain }}"
-  #       overwrite: yes

@@ -19,7 +19,9 @@
     - name: okd-installer | Stack | LB | Include Vars - Pre-build topologies
       ansible.builtin.include_vars:
         file: "./vars/{{ provider }}/topologies/{{ topology_lb }}/loadbalancer.yaml"
-      when: topology_lb is defined
+      when:
+        - topology_lb is defined
+        - var_file is not defined
 
     - name: okd-installer | Stack | LB | Include vars - default
       ansible.builtin.include_vars:

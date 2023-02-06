@@ -38,7 +38,7 @@
     var_file: "{{ playbook_dir }}/vars/{{ config_provider }}/loadbalancer-router-default.yaml"
   when:
     - (config_provider is defined)
-    - (config_platform|d('') != "aws")
+    - (config_platform|d('') == "none")
 
 - name: OKD Installer | Create all | create stack | approve certs
   ansible.builtin.import_playbook: approve_certs.yaml
@@ -47,12 +47,6 @@
     cert_wait_interval_sec: 60
   when:
     - (config_provider == 'aws') or (config_platform == 'none')
-
-- name: OKD Installer | Create all | create basic image-registry
-  ansible.builtin.import_playbook: create_imageregistry.yaml
-  when:
-    - (config_provider == 'aws') or (config_platform == 'none')
-    - create_registry|d('no') == 'yes'
 
 - name: OKD Installer | Create all | Load Config
   ansible.builtin.import_playbook: config.yaml
@@ -63,23 +57,13 @@
   ansible.builtin.import_playbook: destroy_bootstrap.yaml
   when:
     - (config_provider == 'aws')
-    - destroy_bootstrap | d('no') == 'yes'
+    - destroy_bootstrap | d('yes') == 'yes'
 
-# - name: OKD Installer | Create ALL Finish
-#   hosts: '{{ target | default("localhost") }}'
-#   connection: local
 
 - name: OKD Installer | Create ALL | End
   hosts: '{{ target|default("localhost") }}'
   connection: local
   gather_facts: true
-
-  # tasks:
-  #   - name: OKD Installer | Create all | Timer end
-  #     ansible.builtin.debug:
-  #       msg:
-  #         - "start=[{{ datetime_start | d('') }}] end=[{{ ansible_date_time.iso8601 }}]"
-  #         - "export KUBECONFIG={{ config_install_dir }}/auth/kubeconfig"
 
   tasks:
     - name: OKD Installer | Create all | Timer end

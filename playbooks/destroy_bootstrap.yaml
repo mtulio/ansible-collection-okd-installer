@@ -1,4 +1,9 @@
 ---
+- name: okd-installer | Bootstrap Destroy | Config load
+  ansible.builtin.import_playbook: config.yaml
+  vars:
+    mode: load
+
 - name: okd-installer | Bootstrap Destroy
   hosts: '{{ target|default("localhost") }}'
   connection: local

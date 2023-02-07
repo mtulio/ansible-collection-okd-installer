@@ -17,6 +17,19 @@ The deployment described in this document is introducing a more performant disk 
 - Ephemeral disk (local storage) for `/var/lib/containers`
 - Dedicated etcd EBS mounted on `/var/lib/etcd`
 
+```text
+$ cat ~/opct/results/opct-sno-aws/sno2-run-lsblk.txt
+NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+nvme0n1     259:0    0   128G  0 disk 
+|-nvme0n1p1 259:4    0     1M  0 part 
+|-nvme0n1p2 259:5    0   127M  0 part 
+|-nvme0n1p3 259:6    0   384M  0 part /boot
+`-nvme0n1p4 259:7    0 127.5G  0 part /sysroot
+nvme1n1     259:1    0    32G  0 disk 
+`-nvme1n1p1 259:3    0    32G  0 part /var/lib/etcd
+nvme2n1     259:2    0 220.7G  0 disk /var/lib/containers
+```
+
 Using this layout we decreased the amount of memory used by monitoring stack (Prometheus), and, consequently the etcd when using a single/shared-disk deployment. The API disruptions decreased drastically, allowing to use smaller instance types with 16GiB of RAM and 4 vCPU.
 
 Steps:
@@ -134,6 +147,22 @@ Deploy a cluster creating all the resources with a single execution/playbook:
 
 ```bash
 ansible-playbook mtulio.okd_installer.create_all \
+    -e @./vars-sno.yaml
+```
+
+You can check when the bootstrap finished, or the Single Replica node have joined to the cluster:
+
+```bash
+$ KUBECONFIG=$HOME/.ansible/okd-installer/clusters/opct-sno/auth/kubeconfig oc get nodes
+NAME             STATUS   ROLES                               AGE   VERSION
+ip-10-0-50-187   Ready    control-plane,master,tests,worker   24m   v1.25.4+77bec7a
+
+```
+
+The you can destroy the bootstrap node:
+
+```bash
+ansible-playbook mtulio.okd_installer.destroy_bootstrap \
     -e @./vars-sno.yaml
 ```
 

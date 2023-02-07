@@ -7,7 +7,7 @@
     mode: load
 
 - name: okd-installer | Stack | Network
-  hosts: '{{target|default("localhost")}}'
+  hosts: '{{target | default("localhost")}}'
   connection: local
   vars:
     profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"

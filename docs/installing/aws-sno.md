@@ -7,9 +7,17 @@ The steps will create every infrastrucure stack to deploy a SNO on the AWS provi
 The infra resources created will be:
 - VPC and it's subnets on a single AZ
 - Security Groups
-- Load Balancers for API (public and private)m and Apps
+- Load Balancers for API (public and private) and Apps
 - DNS Zones and RRs
 - Compute resources: Bootstrap and single node control plane
+
+## Deployment considerations
+
+The deployment described in this document is introducing a more performant disk layout to avoid disruptions and concurrency between resources on the same disk (by default). The disk layout is when using EC2 instance `m6id.xlarge`:
+- Ephemeral disk (local storage) for `/var/lib/containers`
+- Dedicated etcd EBS mounted on `/var/lib/etcd`
+
+Using this layout we decreased the amount of memory used by monitoring stack (Prometheus), and, consequently the etcd when using a single/shared-disk deployment. The API disruptions decreased drastically, allowing to use smaller instance types with 16GiB of RAM and 4 vCPU.
 
 Steps:
 - Generate the SNO ignitions

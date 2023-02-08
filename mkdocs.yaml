@@ -111,10 +111,12 @@ nav:
       - Installing SNO with Ephemeral storage: guides/AWS/aws-sno.md
       - Installing HA Topology UPI BYO Network: guides/AWS/aws-upi-byo-network.md
     # - Digital Ocean: TODO.md
-    # - Oracle Cloud:
-    #   - Installing HA Topology with UPI and Platform Agnostic: TODO.md
-    #   - Installing HA Topology with UPI and Platform External: TODO.md
-    #   - Installing HA Topology with UPI and Platform External and CSI Driver: TODO.md
+    - Oracle Cloud:
+      # - Installing HA Topology with UPI and Platform Agnostic: TODO.md
+      - guides/OCI/oci-prerequisites.md
+      - guides/OCI/oci-installing-steps.md
+      - Installing HA Topology with UPI and Platform External: guides/OCI/oci-install-ccm.md
+      # - Installing HA Topology with UPI and Platform External and CSI Driver: TODO.md
   #- Examples: TODO.md
   - Development:
     - development/index.md

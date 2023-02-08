@@ -1,0 +1,21 @@
+---
+
+provider: oci
+config_cluster_region: us-sanjose-1
+
+oci_compartment_id: "{{ ansible_env['OCI_COMPARTMENT_ID'] }}"
+oci_compartment_id_dns: "{{ ansible_env['OCI_COMPARTMENT_ID_DNS'] }}"
+oci_compartment_id_image: "{{ ansible_env['OCI_COMPARTMENT_ID_IMAGE'] }}"
+
+os_mirror: yes
+os_mirror_from: stream_artifacts
+os_mirror_stream:
+  architecture: x86_64
+  artifact: openstack
+  format: qcow2.gz
+
+os_mirror_to_provider: oci
+os_mirror_to_oci:
+  compartment_id: "{{ oci_compartment_id_image }}"
+  bucket: "{{ oci_image_bucket | d(ansible_env['OS_MIRROR_IMAGE_BUCKET_NAME']) }}"
+  image_type: QCOW2

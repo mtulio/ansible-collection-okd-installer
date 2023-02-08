@@ -1,0 +1,16 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+  namespace: {{ oci_samples_namespace | d('oci-samples') }}
+  labels:
+    app: nginx
+spec:
+  selector:
+    app: nginx
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 81
+    targetPort: 80

@@ -9,6 +9,9 @@
       ansible.builtin.set_fact:
         okdi_call_timer_start: "{{ ansible_date_time.date }} {{ ansible_date_time.time }}"
 
+- name: OKD Installer | Create all | Clients install
+  ansible.builtin.import_playbook: install_clients.yaml
+
 - name: OKD Installer | Create all | Config | create config
   ansible.builtin.import_playbook: config.yaml
   vars:

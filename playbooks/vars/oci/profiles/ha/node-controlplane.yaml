@@ -1,0 +1,179 @@
+---
+# Local/reused Control Plane vars are prefixed with _cp
+
+# Defaults used in thie file
+node_controlplane_userdata_path: "{{ config_install_dir }}/master.ign"
+
+_platform_config:
+  type: AMD_VM
+_shape: "VM.Standard.E4.Flex"
+_shape_config:
+  ocpus: 4
+  memory_in_gbs: 16
+  #baseline_ocpu_utilization: BASELINE_1_8
+  #nvmes: 1
+
+# Uncomment if you want to run the nodes in the same FD
+#node_controlplane_single_fault_domain: "FAULT-DOMAIN-1"
+_controlplane_fault_domains: # it will be used by index: worker-1 uses index 0...
+  - FAULT-DOMAIN-1
+  - FAULT-DOMAIN-2
+  - FAULT-DOMAIN-3
+
+_agent_config:
+  are_all_plugins_disabled: true
+
+_source_details:
+  source_type: image
+  boot_volume_size_in_gbs: 120
+  # VPU/GB
+  # https://docs.oracle.com/en-us/iaas/Content/Block/Concepts/blockvolumeperformance.htm
+  boot_volume_vpus_per_gb: 90
+
+# Callbacks used to register the instances
+_callbacks:
+  - name: nlb
+    nlb_name: "{{ cluster_state.infra_id }}-nlb"
+    backend_sets:
+    - name: "{{ cluster_state.infra_id }}-api"
+      port: 6443
+    - name: "{{ cluster_state.infra_id }}-mcs"
+      port: 22623
+
+# Stack Compute (Ansible Role cloud_compute) options:
+compute_resources:
+  #
+  # Node role: controlplane
+  # Node: master-01
+  #
+  - provider: oci
+    type: machine
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-controlplane"
+
+    # OCI spec
+    spec:
+      state: present
+      wait: no
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-master-01"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
+      fault_domain: "{{ _controlplane_fault_domains[0] | d('FAULT-DOMAIN-1') }}"
+
+      # platform_config: "{{ _platform_config }}"
+      shape: "{{ _shape }}"
+      shape_config: "{{ _shape_config }}"
+      agent_config: "{{ _agent_config }}"
+      source_details: "{{ _source_details }}"
+
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-master-01-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "master-01"
+      metadata:
+        user_data: "{{ lookup('file', node_controlplane_userdata_path) | b64encode }}"
+
+    # Register the instance using callbacks
+    callbacks: "{{ _callbacks }}"
+
+
+  #
+  # Node role: controlplane
+  # Node: master-02
+  #
+  - provider: oci
+    type: machine
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-controlplane"
+
+    # OCI spec
+    spec:
+      state: present
+      wait: no
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-master-02"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
+      fault_domain: "{{ _controlplane_fault_domains[1] | d('FAULT-DOMAIN-2') }}"
+
+      # platform_config: "{{ _platform_config }}"
+      shape: "{{ _shape }}"
+      shape_config: "{{ _shape_config }}"
+      agent_config: "{{ _agent_config }}"
+      source_details: "{{ _source_details }}"
+
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-master-02-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "master-02"
+      metadata:
+        user_data: "{{ lookup('file', node_controlplane_userdata_path) | b64encode }}"
+
+    # Register the instance using callbacks
+    callbacks: "{{ _callbacks }}"
+
+  #
+  # Node role: controlplane
+  # Node: master-03
+  #
+  - provider: oci
+    type: machine
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-controlplane"
+
+    # OCI spec
+    spec:
+      state: present
+      wait: yes
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-master-03"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
+      fault_domain: "{{ _controlplane_fault_domains[2] | d('FAULT-DOMAIN-3') }}"
+
+      # platform_config: "{{ _platform_config }}"
+      shape: "{{ _shape }}"
+      shape_config: "{{ _shape_config }}"
+      agent_config: "{{ _agent_config }}"
+      source_details: "{{ _source_details }}"
+
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-master-03-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "master-03"
+      metadata:
+        user_data: "{{ lookup('file', node_controlplane_userdata_path) | b64encode }}"
+
+    # Register the instance using callbacks
+    callbacks: "{{ _callbacks }}"

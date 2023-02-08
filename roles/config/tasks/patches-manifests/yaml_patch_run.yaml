@@ -1,0 +1,18 @@
+---
+# generic update executor
+
+- name: patch | reading file {{ config_install_dir + patch_spec.manifest }}
+  set_fact:
+    patch_file: "{{ lookup('file', config_install_dir + patch_spec.manifest) | from_yaml }}"
+
+- debug: var=patch_file
+- debug: var=patch_spec.patch
+
+- name: patch | patching content
+  set_fact:
+    new_content: "{{ patch_file | combine(patch_spec.patch|from_json, recursive=True) }}"
+
+- name: patch | saving file {{ config_install_dir + patch_spec.manifest }}
+  copy:
+    dest: "{{ config_install_dir + patch_spec.manifest }}"
+    content: "{{ new_content | to_nice_yaml(indent=2) }}"

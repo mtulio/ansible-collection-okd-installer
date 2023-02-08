@@ -1,0 +1,6 @@
+---
+
+- ansible.builtin.include_tasks: ./yaml_patch_run.yaml
+  loop: "{{ cfg_patch_yaml_patch_specs }}"
+  loop_control:
+    loop_var: patch_spec

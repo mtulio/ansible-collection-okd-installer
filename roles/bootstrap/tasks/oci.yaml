@@ -1,0 +1,51 @@
+---
+# https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_object_storage_object_module.html#ansible-collections-oracle-oci-oci-object-storage-object-module
+# https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_object_storage_object_module.html#ansible-collections-oracle-oci-oci-object-storage-object-module
+
+- name: OCI | Get the namespace
+  oracle.oci.oci_object_storage_namespace_facts:
+    compartment_id: "{{ oci_compartment_id }}"
+  register: _objns
+
+- name: OCI | Create bucket
+  oracle.oci.oci_object_storage_bucket:
+    compartment_id: "{{ oci_compartment_id }}"
+    name: "{{ bootstrap_bucket }}"
+    namespace_name: "{{ _objns.namespace }}"
+    state: present
+
+# TODO: Make it indepotent
+- name: OCI | Upload bootstrap.ign
+  oracle.oci.oci_object_storage_object:
+    namespace_name: "{{ _objns.namespace }}"
+    bucket_name: "{{ bootstrap_bucket }}"
+    object_name: "/bootstrap.ign"
+    src: "{{ config_install_dir + '/' + bootstrap_src_ign }}"
+    force: false
+  register: _upload
+
+- name: OCI | Create expiration timestamp
+  ansible.builtin.command: "date +'%Y-%m-%dT%H:%M:%S%z' -d '+1 hour'"
+  register: _cmd
+  changed_when: false
+
+- name: OCI | Create preauthenticated_request
+  oracle.oci.oci_object_storage_preauthenticated_request:
+    name: par-bootstrap
+    access_type: ObjectRead
+    time_expires: "{{ _cmd.stdout }}"
+    namespace_name: "{{ _objns.namespace }}"
+    bucket_name: "{{ bootstrap_bucket }}"
+    object_name: "/bootstrap.ign"
+  register: _objpreauth
+  #when: _upload.changed
+
+- name: OCI | Show existing URLs
+  oracle.oci.oci_object_storage_preauthenticated_request_facts:
+    namespace_name: "{{ _objns.namespace }}"
+    bucket_name: "{{ bootstrap_bucket }}"
+  register: _pars
+
+- name: OCI | Create Signed URL to bootstrap_bucket_signed_url
+  ansible.builtin.set_fact:
+    bootstrap_bucket_signed_url: "https://objectstorage.{{ config_cluster_region }}.oraclecloud.com{{ _objpreauth.preauthenticated_request.access_uri }}"

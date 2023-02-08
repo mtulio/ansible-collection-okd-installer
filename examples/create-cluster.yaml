@@ -1,0 +1,14 @@
+---
+# Usage examples
+#
+# OCI Platform None/Agnostic:
+# $ ansible-playbook examples/create-cluster.yaml -e cluster_name
+#   -e @./examples/vars/common.yaml -e @./examples/vars/oci/common.yaml
+#   -e @./examples/vars/oci/ha-platform-none.yaml
+#
+
+- name: install clients
+  ansible.builtin.import_playbook: mtulio.okd_installer.install_clients.yaml
+
+- name: create cluster
+  ansible.builtin.import_playbook: mtulio.okd_installer.create_all.yaml

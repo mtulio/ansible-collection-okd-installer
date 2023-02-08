@@ -1,0 +1,38 @@
+# https://github.com/openshift/machine-config-operator/blob/master/templates/common/aws/files/usr-local-bin-aws-kubelet-providerid.yaml
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 00-{{ machine_role }}-kubelet-env
+spec:
+  config:
+    ignition:
+      version: 3.1.0
+    systemd:
+      units:
+      - name: kubelet-env.service
+        enabled: false
+        contents: |
+          [Unit]
+          Description=Fetch kubelet environments from Metadata
+          # Wait for NetworkManager to report it's online
+          #Wants=network-online.target
+          #Requires=crio.service kubelet-auto-node-size.service
+          #After=network-online.target
+          #After=ostree-finalize-staged.service
+          After=NetworkManager-wait-online.service
+          Before=kubelet.service
+          [Service]
+          User=root
+          Group=root
+          ExecStart=/opt/libexec/kubelet-env-workaround.sh
+          Type=oneshot
+          [Install]
+          WantedBy=network-online.target
+    storage:
+      files:
+      - mode: 0755
+        path: "/opt/libexec/kubelet-env-workaround.sh"
+        contents:
+          source: data:text/plain;charset=utf-8;base64,{{ lookup('template', './mc-kubelet-env_kubelet-providerID.sh.j2') | b64encode }}

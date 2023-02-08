@@ -50,7 +50,7 @@
 
   - name: Load | Set custom_image_id from os_mirror config
     when:
-    - os_mirror | d({}) | length > 0
+    - os_mirror | d(false)
     - os_mirror_from | d('') == 'stream_artifacts'
     block:
     - name: Load | Set custom_image_url from os_mirror config

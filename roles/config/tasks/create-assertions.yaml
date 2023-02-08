@@ -3,6 +3,12 @@
 - name: Create | Assertions | Variables
   ansible.builtin.include_tasks: check-vars.yaml
 
+- name: Create | Assertions | Check required provider
+  ansible.builtin.assert:
+    that:
+      - provider is in config_valid_providers
+    fail_msg: "'provider' is not a valid provider {{ config_valid_providers }}"
+
 - name: Create | Assrt. | Directories
   ansible.builtin.file:
     state: directory

@@ -115,10 +115,17 @@ You must be able to collect the user information.
 ### Generate the vars file
 
 ```bash
+cat <<EOF > ~/.oci/env
+OCI_COMPARTMENT_ID="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
+EOF
+
+source ~/.oci/env
 cat <<EOF > ./vars-oci-ha.yaml
 provider: oci
 cluster_name: ocp-oci
 config_cluster_region: us-sanjose-1
+
+oci_compartment_id: ${}
 
 config_base_domain: splat-oci.devcluster.openshift.com
 config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
@@ -136,6 +143,9 @@ compute_instance: VM.Standard3.Flex
 compute_instance_spec:
   cpu_count: 8
   memory_gb: 16
+
+# https://rhcos.mirror.openshift.com/art/storage/prod/streams/4.12/builds/412.86.202212081411-0/aarch64/rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
+custom_image_id: rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
 EOF
 ```
 
@@ -158,8 +168,7 @@ ansible-playbook mtulio.okd_installer.config \
 ### Create the Network Stack
 
 ```bash
-ansible-playbook mtulio.okd_installer.create_network \
-    -e mode=create \
+ansible-playbook mtulio.okd_installer.stack_network \
     -e @./vars-oci-ha.yaml
 ```
 

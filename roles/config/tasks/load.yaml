@@ -43,7 +43,7 @@
   block:
   - name: Load | Lookup ImageID | Check image
     ansible.builtin.set_fact:
-      image_id_stream: "{{ installer_coreos_stream.architectures[_arch].images[_provider].regions[_region].image }}"
+      image_id_stream: "{{ installer_coreos_stream.architectures[_arch].images[_provider].regions[_region].image | d('') }}"
     when:
       - _provider != 'NA'
   when:

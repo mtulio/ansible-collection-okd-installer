@@ -23,8 +23,13 @@
         file: "{{ profile_path }}/network.yaml"
       when: var_file is not defined
 
+    - debug: var=cloud_networks
+
   roles:
     - cloud_network
+
+  post_tasks:
+    - debug: var=cloud_networks_state
 
 - name: okd-installer | Stack | Network | Save state
   ansible.builtin.import_playbook: config.yaml

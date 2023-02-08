@@ -10,7 +10,7 @@
   amazon.aws.aws_s3:
     bucket: "{{ bootstrap_bucket }}"
     object: "/bootstrap.ign"
-    src: "{{ config_install_dir + '/bootstrap.ign' }}"
+    src: "{{ config_install_dir + '/' + bootstrap_src_ign }}"
     mode: put
     overwrite: different
   register: s3_put

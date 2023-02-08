@@ -1,0 +1,81 @@
+---
+# Vars used on Machine/Compute Stack
+_prefix: "{{ cluster_state.infra_id }}"
+_instance_type: "{{ controlplane_instance | d('m6i.xlarge') }}"
+_instance_profile: "{{ cluster_state.compute.iam_profile_controlplane }}"
+_image_id: "{{ custom_image_id | d(cluster_state.compute.image_id) }}"
+_security_groups:
+  - "{{ _prefix }}-bootstrap-sg"
+  - "{{ _prefix }}-controlplane-sg"
+_tags: "{{ cluster_state.tags }}"
+
+## User Data template
+_userdata_template: ocp-nodes-user-data.j2
+openshift_userdata:
+  config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/master"
+  ca_source: "{{ cluster_state.certificates.root_ca }}"
+
+## Common vars used in the Stack vars
+_common:
+  prefix: "{{ _prefix }}"
+  name: "{{ _prefix }}-master"
+  detailed_monitoring: yes
+  ebs_optimized: no
+  image_id: "{{ _image_id }}"
+  instance_role: "{{ _instance_profile }}"
+  instance_type: "{{ _instance_type }}"
+  security_groups: "{{ _security_groups }}"
+  state: present
+  tags: "{{ _tags }}"
+  termination_protection: no
+  volumes:
+  - device_name: /dev/xvda
+    ebs:
+      volume_size: 128
+      volume_type: gp3
+      delete_on_termination: true
+  - device_name: /dev/xvdd
+    ebs:
+      volume_size: 32
+      volume_type: gp3
+      delete_on_termination: true
+
+# Stack Compute (Ansible Role cloud_compute) options:
+compute_resources:
+    - provider: aws
+      type: machine
+      name: "{{ _common.name }}-1"
+      vpc_subnet_name: "{{ _common.prefix }}-net-private-1a"
+      filters:
+        tag:Name: "{{ _common.name }}-1"
+        instance-state-name: running
+      tags: "{% set x = _common.tags.__setitem__('Name', _common.name + '-1') %}{{ _common.tags }}"
+
+      detailed_monitoring: "{{ _common.detailed_monitoring }}"
+      ebs_optimized: "{{ _common.ebs_optimized }}"
+      image_id: "{{ _common.image_id }}"
+      instance_type: "{{ _common.instance_type }}"
+      security_groups: "{{ _common.security_groups }}"
+      state: "{{ _common.state }}"
+      termination_protection: "{{ _common.termination_protection }}"
+      user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string }}"
+      volumes: "{{ _common.volumes | d([]) }}"
+      wait: no
+
+      # Advanced IAM
+      instance_role: "{{ _common.instance_role }}"
+      # https://docs.openshift.com/container-platform/4.10/installing/installing_aws/installing-aws-user-infra.html#installation-aws-ami-stream-metadata_installing-aws-user-infra
+
+      register_resources:
+        - service: loadbalancer
+          service_type: nlb
+          resource_name: "{{ _common.prefix }}-aint"
+          resource_type: ip
+        - service: loadbalancer
+          service_type: nlb
+          resource_name: "{{ _common.prefix }}-aext"
+          resource_type: ip
+        - service: loadbalancer
+          service_type: nlb
+          resource_name: "{{ _common.prefix }}-sint"
+          resource_type: ip

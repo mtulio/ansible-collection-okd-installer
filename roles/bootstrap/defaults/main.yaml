@@ -1,1 +1,3 @@
 ---
+bootstrap_bucket: "{{ cluster_state.infra_id }}-infra"
+bootstrap_src_ign: "bootstrap.ign"

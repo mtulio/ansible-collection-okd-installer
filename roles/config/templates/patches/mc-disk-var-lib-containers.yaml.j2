@@ -1,0 +1,65 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: {{ machineconfiguration_role }}
+  name: 98-{{ machineconfiguration_role }}-var-lib-containers
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    systemd:
+      units:
+      - contents: |
+          [Unit]
+          Description=Mount {{ cfg_patch_mc_varlibcontainers.device_path }} to /var/lib/containers
+          Before=local-fs.target
+          Requires=systemd-mkfs@dev-{{ cfg_patch_mc_varlibcontainers.device_name }}.service
+          After=systemd-mkfs@dev-{{ cfg_patch_mc_varlibcontainers.device_name }}.service
+
+          [Mount]
+          What={{ cfg_patch_mc_varlibcontainers.device_path }}
+          Where=/var/lib/containers
+          Type=xfs
+          Options=defaults,prjquota
+
+          [Install]
+          WantedBy=local-fs.target
+        enabled: true
+        name: var-lib-containers.mount
+      - contents: |
+          [Unit]
+          Description=Make File System on {{ cfg_patch_mc_varlibcontainers.device_path }}
+          DefaultDependencies=no
+          BindsTo=dev-{{ cfg_patch_mc_varlibcontainers.device_name }}.device
+          After=dev-{{ cfg_patch_mc_varlibcontainers.device_name }}.device var.mount
+          Before=systemd-fsck@dev-{{ cfg_patch_mc_varlibcontainers.device_name }}.service
+
+          [Service]
+          Type=oneshot
+          RemainAfterExit=yes
+          ExecStart=-/bin/bash -c "/bin/rm -rf /var/lib/containers/*"
+          ExecStart=/usr/lib/systemd/systemd-makefs xfs {{ cfg_patch_mc_varlibcontainers.device_path }}
+          TimeoutSec=0
+
+          [Install]
+          WantedBy=var-lib-containers.mount
+        enabled: true
+        name: systemd-mkfs@dev-{{ cfg_patch_mc_varlibcontainers.device_name }}.service
+      - contents: |
+          [Unit]
+          Description=Restore recursive SELinux security contexts
+          DefaultDependencies=no
+          After=var-lib-containers.mount
+          Before=crio.service
+
+          [Service]
+          Type=oneshot
+          RemainAfterExit=yes
+          ExecStart=/sbin/restorecon -R /var/lib/containers/
+          TimeoutSec=0
+
+          [Install]
+          WantedBy=multi-user.target graphical.target
+        enabled: true
+        name: restorecon-var-lib-containers.service

@@ -9,86 +9,68 @@
 - name: okd-installer | Stack | Compute ALL | Create
   hosts: '{{ target|default("localhost") }}'
   connection: local
+  vars:
+    profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
   tasks:
     # Create Compute: Bootstrap node
-    - name: okd-installer | Stack | Compute | Set User provided (Bootstrap)
-      ansible.builtin.include_vars:
-        file: "{{ var_file_bootstrap }}"
-      when:
-        - var_file_bootstrap is defined
-        - topology_compute is not defined
+    - name: okd-installer | Stack | Compute | Bootstrap
+      block:
+      - name: okd-installer | Stack | Compute | Set User provided (Bootstrap)
+        ansible.builtin.include_vars:
+          file: "{{ var_file_bootstrap }}"
+        when: var_file_bootstrap is defined
 
-    - name: okd-installer | Stack | Compute | Set Topology - {{ topology_compute }}
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-bootstrap.yaml"
-      when:
-        - topology_compute is defined
+      - name: okd-installer | Stack | Compute | Include Topology - {{ cluster_profile }}
+        ansible.builtin.include_vars:
+          file: "{{ profile_path }}/node-bootstrap.yaml"
+        when: var_file_bootstrap is not defined
 
-    - name: okd-installer | Stack | Compute | Set Defaults
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/node-bootstrap.yaml"
-      when:
-        - topology_compute is not defined
-
-    - name: okd-installer | Stack | Compute | Create Bootstrap
-      ansible.builtin.include_role:
-        name: "{{ item }}"
-      loop:
-        - 'bootstrap'
-        - 'cloud_compute'
+      - name: okd-installer | Stack | Compute | Create Bootstrap
+        ansible.builtin.include_role:
+          name: "{{ item }}"
+        loop:
+          - "bootstrap"
+          - "cloud_compute"
 
     # Create Compute: Control Plane nodes
-    - name: okd-installer | Stack | Compute | Set User provided (CPlane)
-      ansible.builtin.include_vars:
-        file: "{{ var_file_controlplane }}"
-      when:
-        - var_file_controlplane is defined
-        - topology_compute is not defined
+    - name: okd-installer | Stack | Compute | Control Plane
+      block:
+      - name: okd-installer | Stack | Compute | Set User provided (CPlane)
+        ansible.builtin.include_vars:
+          file: "{{ var_file_controlplane }}"
+        when: var_file_controlplane is defined
 
-    - name: okd-installer | Stack | Compute | Set Topology - {{ topology_compute }}
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-controlplane.yaml"
-      when:
-        - topology_compute is defined
+      - name: okd-installer | Stack | Compute | Set Topology - {{ cluster_profile }}
+        ansible.builtin.include_vars:
+          file: "{{ profile_path }}/node-controlplane.yaml"
+        when: var_file_controlplane is not defined
 
-    - name: okd-installer | Stack | Compute | Set Defaults
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/node-controlplane.yaml"
-      when:
-        - topology_compute is not defined
-
-    - name: okd-installer | Stack | Compute | Create controlplane
-      ansible.builtin.include_role:
-        name: "{{ item }}"
-      loop:
-        - 'cloud_compute'      
+      - name: okd-installer | Stack | Compute | Create controlplane
+        ansible.builtin.include_role:
+          name: "{{ item }}"
+        loop:
+          - "cloud_compute"
 
     # Create Compute: Compute nodes
-    - name: okd-installer | Stack | Compute | Set User provided (CMP)
-      ansible.builtin.include_vars:
-        file: "{{ var_file_compute }}"
-      when:
-        - var_file_compute is defined
-        - topology_compute is not defined
+    - name: okd-installer | Stack | Compute | Worker
+      when: create_worker | d('yes') == 'yes'
+      block:
+      - name: okd-installer | Stack | Compute | Set User provided (CMP)
+        ansible.builtin.include_vars:
+          file: "{{ var_file_compute }}"
+        when: var_file_compute is defined
 
-    - name: okd-installer | Stack | Compute | Set Topology {{ topology_compute }}
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/topologies/{{ topology_compute }}/node-compute.yaml"
-      when:
-        - topology_compute is defined
+      - name: okd-installer | Stack | Compute | Include Topology {{ cluster_profile }}
+        ansible.builtin.include_vars:
+          file: "{{ profile_path }}/node-compute.yaml"
+        when: var_file_compute is not defined
 
-    - name: okd-installer | Stack | Compute | Set Default
-      ansible.builtin.include_vars:
-        file: "./vars/{{ provider }}/node-compute.yaml"
-      when:
-        - topology_compute is not defined
-
-    - name: okd-installer | Stack | Compute | Create compute nodes
-      ansible.builtin.include_role:
-        name: "{{ item }}"
-      loop:
-        - 'cloud_compute'    
+      - name: okd-installer | Stack | Compute | Create compute nodes
+        ansible.builtin.include_role:
+          name: "{{ item }}"
+        loop:
+          - "cloud_compute"
 
 - name: okd-installer | Stack | Compute ALL | Save state
   import_playbook: config.yaml

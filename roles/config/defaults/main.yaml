@@ -64,3 +64,19 @@ config_ssh_key: ''
 bin_openshift_install: openshift-install
 bin_oc: oc
 bin_kubectl: kubectl
+
+
+# Patches (Defaults)
+config_patches: []
+
+## name: mc_varlibcontainers
+## create customd disk for /var/lib/containers
+cfg_patch_mc_varlibcontainers:
+  device_path: /dev/nvme2n1
+  device_name: nvme2n1
+  machineconfiguration_roles:
+  - worker
+
+## name: mc_varlibetcd
+cfg_patch_mc_varlibetcd:
+  device_path: /dev/nvme1n1

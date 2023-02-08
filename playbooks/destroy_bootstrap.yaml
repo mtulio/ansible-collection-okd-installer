@@ -1,20 +1,28 @@
 ---
+- name: okd-installer | Bootstrap Destroy | Config load
+  ansible.builtin.import_playbook: config.yaml
+  vars:
+    mode: load
+
 - name: okd-installer | Bootstrap Destroy
   hosts: '{{ target|default("localhost") }}'
   connection: local
 
   tasks:
-    - name: EC2 | Destroying instance(s)
-      amazon.aws.ec2_instance:
-        state: absent
-        filters:
-          "tag:Name": "{{ machine.name }}"
-          instance-state-name: running
-        wait: "{{ machine.wait | d('no') }}"
-        wait_timeout: "{{ machine.wait_timeout | d(omit) }}"
-      with_items:
-        - name: "{{ cluster_state.infra_id }}-bootstrap"
-          wait: yes
-          wait_timeout: 120
-      loop_control:
-        loop_var: machine
+    - name: AWS | Destroy Bootstrap
+      when: provider == 'aws'
+      block:
+        - name: AWS | Destroying instance(s)
+          amazon.aws.ec2_instance:
+            state: absent
+            filters:
+              "tag:Name": "{{ machine.name }}"
+              instance-state-name: running
+            wait: "{{ machine.wait | d('no') }}"
+            wait_timeout: "{{ machine.wait_timeout | d(omit) }}"
+          with_items:
+            - name: "{{ cluster_state.infra_id }}-bootstrap"
+              wait: yes
+              wait_timeout: 120
+          loop_control:
+            loop_var: machine

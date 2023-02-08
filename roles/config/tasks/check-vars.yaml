@@ -7,7 +7,7 @@
       - config_metadata_name is defined
     fail_msg: "'cluster_name' is not defined"
 
-- name: Check Vars | config_base_domain
+- name: Check Vars | cluster_name
   ansible.builtin.assert:
     that:
       - config_metadata_name is defined

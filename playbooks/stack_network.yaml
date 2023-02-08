@@ -23,11 +23,6 @@
         file: "{{ profile_path }}/network.yaml"
       when: var_file is not defined
 
-    # - name: okd-installer | Stack | Network | Include Vars - Default
-    #   ansible.builtin.include_vars:
-    #     file: "./vars/{{ provider }}/profiles/default/network.yaml"
-    #   when: cloud_networks is not defined
-
   roles:
     - cloud_network
 

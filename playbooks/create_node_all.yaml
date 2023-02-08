@@ -26,12 +26,6 @@
           file: "{{ profile_path }}/node-bootstrap.yaml"
         when: var_file_bootstrap is not defined
 
-      # - name: okd-installer | Stack | Compute | Set Defaults
-      #   ansible.builtin.include_vars:
-      #     file: "./vars/{{ provider }}/node-bootstrap.yaml"
-      #   when:
-      #     - topology_compute is not defined
-
       - name: okd-installer | Stack | Compute | Create Bootstrap
         ansible.builtin.include_role:
           name: "{{ item }}"
@@ -52,12 +46,6 @@
           file: "{{ profile_path }}/node-controlplane.yaml"
         when: var_file_controlplane is not defined
 
-      # - name: okd-installer | Stack | Compute | Set Defaults
-      #   ansible.builtin.include_vars:
-      #     file: "./vars/{{ provider }}/node-controlplane.yaml"
-      #   when:
-      #     - topology_compute is not defined
-
       - name: okd-installer | Stack | Compute | Create controlplane
         ansible.builtin.include_role:
           name: "{{ item }}"
@@ -77,12 +65,6 @@
         ansible.builtin.include_vars:
           file: "{{ profile_path }}/node-compute.yaml"
         when: var_file_compute is not defined
-
-      # - name: okd-installer | Stack | Compute | Set Default
-      #   ansible.builtin.include_vars:
-      #     file: "./vars/{{ provider }}/node-compute.yaml"
-      #   when:
-      #     - topology_compute is not defined
 
       - name: okd-installer | Stack | Compute | Create compute nodes
         ansible.builtin.include_role:

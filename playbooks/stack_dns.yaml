@@ -23,12 +23,6 @@
         file: "{{ profile_path }}/dns.yaml"
       when: var_file is not defined
 
-    # - name: okd-installer | Stack | DNS | Include Vars - default
-    #   ansible.builtin.include_vars:
-    #     file: "./vars/{{ provider }}/profiles/default/dns.yaml"
-    #   when:
-    #     - (cloud_dns_zones is not defined) or (cloud_dns_zones | length <= 0)
-
   roles:
     - cloud_dns
 

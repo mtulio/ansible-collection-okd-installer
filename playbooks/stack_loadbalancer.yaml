@@ -23,12 +23,6 @@
         file: "{{ profile_path }}/loadbalancer.yaml"
       when: var_file is not defined
 
-    # - name: okd-installer | Stack | LB | Include vars - default
-    #   ansible.builtin.include_vars:
-    #     file: "./vars/{{ provider }}/profiles/default/loadbalancer.yaml"
-    #   when:
-    #     - (cloud_loadbalancers is not defined) or (cloud_loadbalancers | length <= 0)
-
   roles:
     - cloud_load_balancer
 

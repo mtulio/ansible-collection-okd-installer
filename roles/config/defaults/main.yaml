@@ -3,7 +3,6 @@
 #config_metadata_name: ''
 
 # Defaults
-cluster_topology: ha
 config_default_architecture: amd64
 config_default_hyperthreading: Enabled
 

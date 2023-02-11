@@ -1,0 +1,164 @@
+---
+
+cloud_load_balancer_provider: oci
+
+# BackendSet
+# https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_load_balancer_backend_set_module.html#ansible-collections-oracle-oci-oci-network-load-balancer-backend-set-module
+# cloud_loadbalancer_targets:
+#   - name: "{{ cluster_state.infra_id }}-aext"
+#     provider: oci
+#     spec:
+#       name: "{{ cluster_state.infra_id }}-aext"
+#       compartment_id: "{{ oci_compartment_id }}"
+#       is_preserve_source: no
+#       ip_version: IPV4
+#       #policy: TWO_TUPLE
+#       #backends: []
+#       health_checker:
+#         port: 6443
+#         protocol: HTTPS
+#         return_code: 200
+#         url_path: /readyz
+#         interval_in_millis: 10000
+#         timeout_in_millis: 3000
+
+
+# OCI NLB: https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_load_balancer_module.html#ansible-collections-oracle-oci-oci-network-load-balancer-module
+cloud_loadbalancers:
+  - name: "{{ cluster_state.infra_id }}-ext"
+    provider: oci
+    type: network
+
+    # Is it supported multi-subnets?
+    subnet_name: "{{ cluster_state.infra_id }}-net-public"
+    spec:
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-ext"
+      is_private: false
+      is_preserve_source_destination: true
+      nlb_ip_version: IPV4
+      #freeform_tags: "{{ cluster_state.tags }}"
+
+# BackendSet
+# https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_load_balancer_backend_set_module.html#ansible-collections-oracle-oci-oci-network-load-balancer-backend-set-module
+    backend_set:
+    - provider: oci
+      spec:
+        name: "{{ cluster_state.infra_id }}-aext"
+        is_preserve_source: no
+        ip_version: IPV4
+        #policy: TWO_TUPLE
+        #backends: []
+        health_checker:
+          port: 6443
+          protocol: HTTPS
+          return_code: 200
+          url_path: /readyz
+          interval_in_millis: 10000
+          timeout_in_millis: 3000
+
+    - provider: oci
+      spec:
+        name: "{{ cluster_state.infra_id }}-ig-80"
+        is_preserve_source: no
+        ip_version: IPV4
+        #policy: TWO_TUPLE
+        #backends: [] # TCP/31794
+        health_checker:
+          port: 31261
+          protocol: HTTP
+          return_code: 200
+          url_path: /healthz
+          interval_in_millis: 10000
+          timeout_in_millis: 3000
+
+    - provider: oci
+      spec:
+        name: "{{ cluster_state.infra_id }}-ig-443"
+        is_preserve_source: no
+        ip_version: IPV4
+        #policy: TWO_TUPLE
+        #backends: [] # TCP/32186
+        health_checker:
+          port: 31261
+          protocol: HTTP
+          return_code: 200
+          url_path: /healthz
+          interval_in_millis: 10000
+          timeout_in_millis: 3000
+
+    # https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_load_balancer_listener_module.html#ansible-collections-oracle-oci-oci-network-load-balancer-listener-module
+    listeners:
+      - spec:
+          name: "{{ cluster_state.infra_id }}-aext"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-aext"
+          ip_version: IPV4
+          port: 6443
+          protocol: TCP
+
+      - spec:
+          name: "{{ cluster_state.infra_id }}-ig-80"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-ig-80"
+          ip_version: IPV4
+          port: 80
+          protocol: TCP
+
+      - spec:
+          name: "{{ cluster_state.infra_id }}-ig-443"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-ig-443"
+          ip_version: IPV4
+          port: 443
+          protocol: TCP
+
+    callbacks:
+      - name: register_dns
+        rr_ip: public
+        spec:
+          zone_name_or_id: "{{ cluster_state.dns.base_domain }}"
+          compartment_id: "{{ oci_compartment_id }}"
+          scope: GLOBAL
+          patch_items:
+            - domain: "api.{{ cluster_state.dns.cluster_domain }}"
+              rtype: A
+              ttl: 300
+            - domain: "*.apps.{{ cluster_state.dns.cluster_domain }}"
+              rtype: A
+              ttl: 300
+      - name: register_dns
+        rr_ip: private
+        spec:
+          zone_name_or_id: "{{ cluster_state.dns.base_domain }}"
+          compartment_id: "{{ oci_compartment_id }}"
+          scope: GLOBAL
+          patch_items:
+            - domain: "api-int.{{ cluster_state.dns.cluster_domain }}"
+              rtype: A
+              ttl: 300
+      
+      # private address
+      - name: register_dns
+        rr_ip: private
+        view_name: "{{ cluster_state.infra_id }}-vpc"
+        spec:
+          zone_name_or_id: "{{ cluster_state.dns.cluster_domain }}"
+          compartment_id: "{{ oci_compartment_id }}"
+          scope: PRIVATE
+          patch_items:
+            - domain: "api-int.{{ cluster_state.dns.cluster_domain }}"
+              rtype: A
+              ttl: 300
+      
+      - name: register_dns
+        rr_ip: public
+        view_name: "{{ cluster_state.infra_id }}-vpc"
+        spec:
+          zone_name_or_id: "{{ cluster_state.dns.cluster_domain }}"
+          compartment_id: "{{ oci_compartment_id }}"
+          scope: PRIVATE
+          patch_items:
+            - domain: "api.{{ cluster_state.dns.cluster_domain }}"
+              rtype: A
+              ttl: 300
+            - domain: "*.apps.{{ cluster_state.dns.cluster_domain }}"
+              rtype: A
+              ttl: 300

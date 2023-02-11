@@ -1,0 +1,21 @@
+---
+
+# https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_dns_zone_module.html#ansible-collections-oracle-oci-oci-dns-zone-module
+
+cloud_dns_zones:
+  # public
+  - name: "{{ cluster_state.dns.base_domain }}"
+    provider: oci
+    spec:
+      # scope: GLOBAL
+      # zone_type: PRIMARY
+      compartment_id: "{{ oci_compartment_id }}" 
+
+  # private
+  - name: "{{ cluster_state.dns.cluster_domain }}"
+    provider: oci
+    view_name: "{{ cluster_state.infra_id }}-vpc"
+    spec:
+      scope: PRIVATE
+      zone_type: PRIMARY
+      compartment_id: "{{ oci_compartment_id }}"

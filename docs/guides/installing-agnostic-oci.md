@@ -125,7 +125,7 @@ provider: oci
 cluster_name: ocp-oci
 config_cluster_region: us-sanjose-1
 
-oci_compartment_id: ${}
+oci_compartment_id: ${OCI_COMPARTMENT_ID}
 
 config_base_domain: splat-oci.devcluster.openshift.com
 config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
@@ -172,3 +172,34 @@ ansible-playbook mtulio.okd_installer.stack_network \
     -e @./vars-oci-ha.yaml
 ```
 
+### IAM Stack
+
+N/A
+
+### DNS Stack
+
+```bash
+ansible-playbook mtulio.okd_installer.stack_dns \
+    -e @./vars-oci-ha.yaml
+```
+
+### Load Balancer Stack
+
+```bash
+ansible-playbook mtulio.okd_installer.stack_loadbalancer \
+    -e @./vars-oci-ha.yaml
+```
+
+### Compute Stack
+
+- Bootstrap
+
+TODO
+
+- Control Plane
+
+TODO
+
+- Compute
+
+TODO

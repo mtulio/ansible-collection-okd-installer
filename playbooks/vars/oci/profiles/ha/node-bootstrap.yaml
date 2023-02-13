@@ -1,0 +1,114 @@
+---
+_cluster_prefix: "{{ cluster_state.infra_id }}"
+
+# Vars used on Bootstrap
+bootstrap_bucket: "{{ _cluster_prefix }}-infra"
+
+# Vars used on Machine/Compute Stack
+_instance_type: "{{ bootstrap_instance | d('m6i.xlarge') }}"
+_instance_profile: "{{ cluster_state.compute.iam_profile_bootstrap }}"
+# _image_id: "{{ custom_image_id | d(cluster_state.compute.image_id) }}"
+_image_id: "rhcos-412.86.202212081411-0-openstack.x86_64"
+_subnet_name: "{{ _cluster_prefix }}-net-public-1a"
+
+_machine_suffix: ''
+
+## User Data template
+openshift_userdata:
+  # config_source: "{{ bootstrap_bucket_signed_url }}"
+  config_source: "{{ bootstrap_bucket_signed_url }}"
+
+## Common vars used in the Stack vars
+# _common:
+#   prefix: "{{ _cluster_prefix }}-bootstrap"
+#   detailed_monitoring: yes
+#   ebs_optimized: no
+#   image_id: "{{ _image_id }}"
+#   instance_role: "{{ _instance_profile }}"
+#   instance_type: "{{ _instance_type }}"
+#   security_groups:
+#     - "{{ _cluster_prefix }}-bootstrap-sg"
+#     - "{{ _cluster_prefix }}-controlplane-sg"
+#   state: present
+#   tags: "{{ cluster_state.tags }}"
+#   termination_protection: no
+#   volumes:
+#   - device_name: /dev/xvda
+#     ebs:
+#       volume_size: 128
+#       volume_type: gp3
+#       delete_on_termination: true
+#   - device_name: /dev/xvdd
+#     ebs:
+#       volume_size: 32
+#       volume_type: gp3
+#       delete_on_termination: true
+
+#   vpc_subnet_name: "{{ _subnet_name }}"
+#   wait: yes
+#   wait_timeout: 500
+
+# Stack Compute (Ansible Role cloud_compute) options:
+compute_resources:
+  - provider: oci
+    type: machine
+    # name: "{{ cluster_state.infra_id }}-bootstrap{{ _machine_suffix }}"
+    
+    # cloud_compute role to discovery for OCI:
+    image_name: rhcos-412.86.202212081411-0-openstack.x86_64
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-public-nodes"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-bootstrap"
+    # OCI spec
+    spec:
+      state: present
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-bootstrap{{ _machine_suffix }}"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
+      # platform_config:
+      #   type: AMD_VM
+      shape: "VM.Standard.E4.Flex"
+      shape_config:
+        ocpus: 4
+        memory_in_gbs: 16
+        #baseline_ocpu_utilization: BASELINE_1_8
+        #nvmes: 1
+      fault_domain: FAULT-DOMAIN-1
+      # availability_domain: Uocm:PHX-AD-1
+      agent_config:
+        are_all_plugins_disabled: true
+    
+      source_details:
+        source_type: image
+
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-bootstrap-vnic0"
+        assign_public_ip: true
+        assign_private_dns_record: true
+        hostname_label: "bootstrap{{ _machine_suffix }}"
+        # defined_tags: {'Operations': {'CostCenter': 'US'}}
+        # freeform_tags: {'Department': 'Finance'}
+        # private_ip: private_ip_example
+        # skip_source_dest_check: true
+        # vlan_id: "ocid1.vlan.oc1..xxxxxxEXAMPLExxxxxx"
+        #subnet_id: "{{ machine_subnet_id }}"
+        #nsg_ids: "{{ machine_nsg_ids }}"
+      metadata:
+        user_data: "{{ lookup('template', 'ocp-bootstrap-user-data.j2') | to_nice_json | string | b64encode }}"
+
+    callbacks:
+    - name: nlb
+      # nlb_name: ocp-nlb
+      nlb_name: "{{ cluster_state.infra_id }}-nlb"
+      backend_sets:
+      - name: "{{ cluster_state.infra_id }}-api"
+        port: 6443
+      - name: "{{ cluster_state.infra_id }}-mcs"
+        port: 22623
+      # - name: "6443"
+      #   port: 6443
+      # - name: "22623"
+      #   port: 22623

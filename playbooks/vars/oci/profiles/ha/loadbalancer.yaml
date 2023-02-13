@@ -25,15 +25,15 @@ cloud_load_balancer_provider: oci
 
 # OCI NLB: https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_load_balancer_module.html#ansible-collections-oracle-oci-oci-network-load-balancer-module
 cloud_loadbalancers:
-  - name: "{{ cluster_state.infra_id }}-ext"
+  - name: "{{ cluster_state.infra_id }}-nlb"
     provider: oci
     type: network
 
     # Is it supported multi-subnets?
-    subnet_name: "{{ cluster_state.infra_id }}-net-public"
+    subnet_name: "{{ cluster_state.infra_id }}-net-public-lb"
     spec:
       compartment_id: "{{ oci_compartment_id }}"
-      display_name: "{{ cluster_state.infra_id }}-ext"
+      display_name: "{{ cluster_state.infra_id }}-nlb"
       is_private: false
       is_preserve_source_destination: true
       nlb_ip_version: IPV4
@@ -44,10 +44,10 @@ cloud_loadbalancers:
     backend_set:
     - provider: oci
       spec:
-        name: "{{ cluster_state.infra_id }}-aext"
+        name: "{{ cluster_state.infra_id }}-api"
         is_preserve_source: no
         ip_version: IPV4
-        #policy: TWO_TUPLE
+        policy: FIVE_TUPLE
         #backends: []
         health_checker:
           port: 6443
@@ -59,10 +59,25 @@ cloud_loadbalancers:
 
     - provider: oci
       spec:
-        name: "{{ cluster_state.infra_id }}-ig-80"
+        name: "{{ cluster_state.infra_id }}-mcs"
         is_preserve_source: no
         ip_version: IPV4
-        #policy: TWO_TUPLE
+        policy: FIVE_TUPLE
+        #backends: []
+        health_checker:
+          port: 22623
+          protocol: HTTPS
+          return_code: 200
+          url_path: /healthz
+          interval_in_millis: 10000
+          timeout_in_millis: 3000
+
+    - provider: oci
+      spec:
+        name: "{{ cluster_state.infra_id }}-ing-http"
+        is_preserve_source: no
+        ip_version: IPV4
+        policy: FIVE_TUPLE
         #backends: [] # TCP/31794
         health_checker:
           port: 31261
@@ -74,7 +89,7 @@ cloud_loadbalancers:
 
     - provider: oci
       spec:
-        name: "{{ cluster_state.infra_id }}-ig-443"
+        name: "{{ cluster_state.infra_id }}-ing-https"
         is_preserve_source: no
         ip_version: IPV4
         #policy: TWO_TUPLE
@@ -90,22 +105,29 @@ cloud_loadbalancers:
     # https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_load_balancer_listener_module.html#ansible-collections-oracle-oci-oci-network-load-balancer-listener-module
     listeners:
       - spec:
-          name: "{{ cluster_state.infra_id }}-aext"
-          default_backend_set_name: "{{ cluster_state.infra_id }}-aext"
+          name: "{{ cluster_state.infra_id }}-api"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-api"
           ip_version: IPV4
           port: 6443
           protocol: TCP
 
       - spec:
-          name: "{{ cluster_state.infra_id }}-ig-80"
-          default_backend_set_name: "{{ cluster_state.infra_id }}-ig-80"
+          name: "{{ cluster_state.infra_id }}-mext"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-mcs"
+          ip_version: IPV4
+          port: 22623
+          protocol: TCP
+
+      - spec:
+          name: "{{ cluster_state.infra_id }}-ing-http"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-ing-http"
           ip_version: IPV4
           port: 80
           protocol: TCP
 
       - spec:
-          name: "{{ cluster_state.infra_id }}-ig-443"
-          default_backend_set_name: "{{ cluster_state.infra_id }}-ig-443"
+          name: "{{ cluster_state.infra_id }}-ing-https"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-ing-https"
           ip_version: IPV4
           port: 443
           protocol: TCP
@@ -138,7 +160,7 @@ cloud_loadbalancers:
       # private address
       - name: register_dns
         rr_ip: private
-        view_name: "{{ cluster_state.infra_id }}-vpc"
+        view_name: "{{ cluster_state.infra_id }}-vcn"
         spec:
           zone_name_or_id: "{{ cluster_state.dns.cluster_domain }}"
           compartment_id: "{{ oci_compartment_id }}"
@@ -150,7 +172,7 @@ cloud_loadbalancers:
       
       - name: register_dns
         rr_ip: public
-        view_name: "{{ cluster_state.infra_id }}-vpc"
+        view_name: "{{ cluster_state.infra_id }}-vcn"
         spec:
           zone_name_or_id: "{{ cluster_state.dns.cluster_domain }}"
           compartment_id: "{{ oci_compartment_id }}"

@@ -14,7 +14,7 @@ cloud_dns_zones:
   # private
   - name: "{{ cluster_state.dns.cluster_domain }}"
     provider: oci
-    view_name: "{{ cluster_state.infra_id }}-vpc"
+    view_name: "{{ cluster_state.infra_id }}-vcn"
     spec:
       scope: PRIVATE
       zone_type: PRIMARY

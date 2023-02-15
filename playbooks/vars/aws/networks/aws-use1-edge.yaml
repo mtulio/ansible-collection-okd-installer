@@ -92,7 +92,8 @@ cloud_networks:
     tags: "{{ cluster_state.tags | d({}) }}"
 
     internet_gateway: true
-    carrier_gateway: true
+    # CAGW module is not yet available: https://github.com/mtulio/ansible-collection-okd-installer/pull/12
+    # carrier_gateway: true
     nat_gateways:
       - name: "{{ cluster_state.infra_id }}-natgw-1a"
         subnet: "{{ cluster_state.infra_id }}-net-public-1a"
@@ -131,10 +132,10 @@ cloud_networks:
           - dest: 0.0.0.0/0
             gw_type: igw
 
-      - name: "{{ cluster_state.infra_id }}-rt-public-edge"
-        routes:
-          - dest: 0.0.0.0/0
-            gw_type: cagw
+      # - name: "{{ cluster_state.infra_id }}-rt-public-edge"
+      #   routes:
+      #     - dest: 0.0.0.0/0
+      #       gw_type: cagw
 
     subnets:
       - name: "{{ cluster_state.infra_id }}-net-public-1a"

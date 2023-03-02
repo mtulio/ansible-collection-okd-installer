@@ -168,7 +168,8 @@ compute_instance_spec:
   cpu_count: 8
   memory_gb: 16
 
-#> TODO extract from stream file
+# Define the OS Image
+#> extract from stream file
 # https://rhcos.mirror.openshift.com/art/storage/prod/streams/4.12/builds/412.86.202212081411-0/aarch64/rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
 # $ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json`
 custom_image_id: rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
@@ -228,7 +229,7 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
 > Currently the image is download manually, and added to the OCI Console as a image.
 
 
-Steps to mirror:
+Steps to mirror using OCI Console:
 
 - Get the artifact URL from stream-json
 - Create Bucket for images, if not exits
@@ -238,6 +239,10 @@ Steps to mirror:
 - Get the image ID, and set the global var `custom_image_id`
 
 > `$ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json`
+
+Proposal to automate:
+
+> Agnostic instalations frequently requires to upload to  the provider. why no create one internal Role to do it?! Steps: Download from stream URL, upload to Provider's image, Use it.
 
 ```bash
 os_mirror: yes

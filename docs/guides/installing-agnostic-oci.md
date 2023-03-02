@@ -1,8 +1,27 @@
 # Install OKD/OCP on OCI using agnostic method
 
-> This document is under development.
+> This document is under development on https://github.com/mtulio/ansible-collection-okd-installer/pull/26
 
 Install OCP/OKD Cluster on Oracle Cloud Infrastructure using agnostic installation/UPI.
+
+ToC
+
+- Prerequisites
+    - Setup Ansible Project
+    - Setup OCI Credentials
+- OCP/OKD Cluster setup on OCI
+    - Install the Clientes
+    - Setup the installer artifacts
+    - Setup IAM Stack
+    - Setup Network Stack
+    - Setup DNS Stack
+    - Setup Load Balancer Stack
+    - Setup Compute Stack
+       - Setup Bootstrap
+       - Setup Control Plane
+       - Setup Compute Pool
+- Review the Installation
+- Destroy the Clueter
 
 ## Prerequisites
 
@@ -156,7 +175,7 @@ custom_image_id: rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
 EOF
 ```
 
-### Install the OpenShift clients
+### Install the clients
 
 ```bash
 ansible-playbook mtulio.okd_installer.install_clients -e version=4.12.0

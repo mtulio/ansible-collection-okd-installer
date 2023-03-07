@@ -1,8 +1,27 @@
 # Install OKD/OCP on OCI using agnostic method
 
-> This document is under development.
+> This document is under development on https://github.com/mtulio/ansible-collection-okd-installer/pull/26
 
 Install OCP/OKD Cluster on Oracle Cloud Infrastructure using agnostic installation/UPI.
+
+ToC
+
+- Prerequisites
+    - Setup Ansible Project
+    - Setup OCI Credentials
+- OCP/OKD Cluster setup on OCI
+    - Install the Clientes
+    - Setup the installer artifacts
+    - Setup IAM Stack
+    - Setup Network Stack
+    - Setup DNS Stack
+    - Setup Load Balancer Stack
+    - Setup Compute Stack
+       - Setup Bootstrap
+       - Setup Control Plane
+       - Setup Compute Pool
+- Review the Installation
+- Destroy the Clueter
 
 ## Prerequisites
 
@@ -157,14 +176,15 @@ compute_instance_spec:
   cpu_count: 8
   memory_gb: 16
 
-#> TODO extract from stream file
+# Define the OS Image
+#> extract from stream file
 # https://rhcos.mirror.openshift.com/art/storage/prod/streams/4.12/builds/412.86.202212081411-0/aarch64/rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
 # $ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json
 custom_image_id: rhcos-413.86.202302150245-0-openstack.x86_64.qcow2.gz
 EOF
 ```
 
-### Install the OpenShift clients
+### Install the clients
 
 ```bash
 ansible-playbook mtulio.okd_installer.install_clients -e @./vars-oci-ha.yaml
@@ -219,7 +239,8 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
 
 > Currently the image is download manually, and added to the OCI Console as a image.
 
-Steps to mirror:
+
+Steps to mirror using OCI Console:
 
 - Get the artifact URL from stream-json
 - Create Bucket for images, if not exits
@@ -229,6 +250,10 @@ Steps to mirror:
 - Get the image ID, and set the global var `custom_image_id`
 
 > `$ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json`
+
+Proposal to automate:
+
+> Agnostic instalations frequently requires to upload to  the provider. why no create one internal Role to do it?! Steps: Download from stream URL, upload to Provider's image, Use it.
 
 ```bash
 os_mirror: yes

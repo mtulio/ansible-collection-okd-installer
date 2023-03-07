@@ -82,7 +82,7 @@ compute_resources:
     image_name: "{{ custom_image_id }}"
     vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
     network_security_group_names:
-    - "{{ cluster_state.infra_id }}-nsg-controlplane"
+    - "{{ cluster_state.infra_id }}-nsg-compute"
 
     # OCI spec
     spec:
@@ -137,7 +137,7 @@ compute_resources:
     image_name: "{{ custom_image_id }}"
     vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
     network_security_group_names:
-    - "{{ cluster_state.infra_id }}-nsg-controlplane"
+    - "{{ cluster_state.infra_id }}-nsg-compute"
 
     # OCI spec
     spec:

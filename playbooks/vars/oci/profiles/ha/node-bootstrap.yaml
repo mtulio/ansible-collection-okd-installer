@@ -8,7 +8,7 @@ bootstrap_bucket: "{{ _cluster_prefix }}-infra"
 _instance_type: "{{ bootstrap_instance | d('m6i.xlarge') }}"
 _instance_profile: "{{ cluster_state.compute.iam_profile_bootstrap }}"
 # _image_id: "{{ custom_image_id | d(cluster_state.compute.image_id) }}"
-_image_id: "rhcos-412.86.202212081411-0-openstack.x86_64"
+_image_id: "{{ custom_image_id }}"
 _subnet_name: "{{ _cluster_prefix }}-net-public-1a"
 
 _machine_suffix: ''
@@ -55,10 +55,10 @@ compute_resources:
     # name: "{{ cluster_state.infra_id }}-bootstrap{{ _machine_suffix }}"
     
     # cloud_compute role to discovery for OCI:
-    image_name: rhcos-412.86.202212081411-0-openstack.x86_64
-    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-public-nodes"
+    image_name: "{{ custom_image_id }}"
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-public"
     network_security_group_names:
-    - "{{ cluster_state.infra_id }}-nsg-bootstrap"
+    - "{{ cluster_state.infra_id }}-nsg-controlplane"
     # OCI spec
     spec:
       state: present
@@ -83,6 +83,8 @@ compute_resources:
     
       source_details:
         source_type: image
+        boot_volume_size_in_gbs: 120
+        boot_volume_vpus_per_gb: 30
 
       create_vnic_details:
         display_name: "{{ cluster_state.infra_id }}-bootstrap-vnic0"

@@ -27,11 +27,13 @@ cloud_networks:
         is_enabled: yes
         display_name: "{{ cluster_state.infra_id }}-igw"
 
-    # nat_gateways:
-    #   - name: "{{ cluster_state.infra_id }}-natgw-1a"
-    #     subnet: "{{ cluster_state.infra_id }}-net-public-1a"
-    #     tags: "{{ cluster_state.tags | d({}) }}"
-    #     wait: false
+    nat_gateway:
+      spec:
+        display_name: "{{ cluster_state.infra_id }}-natgw"
+      # route_table_name: "{{ cluster_state.infra_id }}-rt-private"
+          
+        # tags: "{{ cluster_state.tags | d({}) }}"
+        # wait: false
     #   - name: "{{ cluster_state.infra_id }}-natgw-1b"
     #     subnet: "{{ cluster_state.infra_id }}-net-public-1b"
     #     tags: "{{ cluster_state.tags | d({}) }}"
@@ -41,49 +43,61 @@ cloud_networks:
     #     tags: "{{ cluster_state.tags | d({}) }}"
     #     wait: true
 
-    route_tables:
-      - public: yes
-        spec:
-          display_name: "{{ cluster_state.infra_id }}-rt-public-lb"
-        route_rules:
-        - spec:
-            destination: "0.0.0.0/0"
-            destination_type: "CIDR_BLOCK"
-          network_entity_type: internet-gateway
-          network_entity_name: "{{ cluster_state.infra_id }}-igw"
+    #> TODO use generic list
+    route_table_public:
+      spec:
+        display_name: "{{ cluster_state.infra_id }}-rt-public"
+      route_rules:
+      - spec:
+          destination: "0.0.0.0/0"
+          destination_type: "CIDR_BLOCK"
+        network_entity_type: internet-gateway
+        network_entity_name: "{{ cluster_state.infra_id }}-igw"
 
-      - public: yes
-        spec:
-          display_name: "{{ cluster_state.infra_id }}-rt-public-nodes"
-        route_rules:
-        - spec:
-            destination: "0.0.0.0/0"
-            destination_type: "CIDR_BLOCK"
-          network_entity_type: internet-gateway
-          network_entity_name: "{{ cluster_state.infra_id }}-igw"
+    route_table_private:
+      spec:
+        display_name: "{{ cluster_state.infra_id }}-rt-private"
+      route_rules:
+      - spec:
+          destination: "0.0.0.0/0"
+          destination_type: "CIDR_BLOCK"
+        network_entity_type: nat-gateway
+        network_entity_name: "{{ cluster_state.infra_id }}-natgw"
 
-      # - public: no
-      #   spec:
-      #     display_name: "{{ cluster_state.infra_id }}-rt-private-app"
-      #   route_rules:
-      #   - spec:
-      #       destination: "0.0.0.0/0"
-      #       destination_type: "CIDR_BLOCK"
-      #     network_entity_type: nat-gateway
-      #     network_entity_name: "{{ cluster_state.infra_id }}-natgw"
+    # # Generic list
+    # route_tables:
+    #   - public: yes
+    #     spec:
+    #       display_name: "{{ cluster_state.infra_id }}-rt-public"
+    #     route_rules:
+    #     - spec:
+    #         destination: "0.0.0.0/0"
+    #         destination_type: "CIDR_BLOCK"
+    #       network_entity_type: internet-gateway
+    #       network_entity_name: "{{ cluster_state.infra_id }}-igw"
+
+    #   - public: no
+    #     spec:
+    #       display_name: "{{ cluster_state.infra_id }}-rt-private"
+    #     route_rules:
+    #     - spec:
+    #         destination: "0.0.0.0/0"
+    #         destination_type: "CIDR_BLOCK"
+    #       network_entity_type: nat-gateway
+    #       network_entity_name: "{{ cluster_state.infra_id }}-natgw"
 
 
     # create permissive security Lists to force to use NSGs
     # https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_security_list_module.html#ansible-collections-oracle-oci-oci-network-security-list-module
     security_lists:
     - spec:
-        display_name: "{{ cluster_state.infra_id }}-seclist-default"
-        ingress_security_rules:
-        - protocol: all
-          source: 0.0.0.0/0
-          is_stateless: false
-          source_type: CIDR_BLOCK
-          description: Allow all inbound
+        display_name: "{{ cluster_state.infra_id }}-seclist-public"
+        ingress_security_rules: []
+        # - protocol: all
+        #   source: 0.0.0.0/0
+        #   is_stateless: false
+        #   source_type: CIDR_BLOCK
+        #   description: Allow all inbound
         egress_security_rules:
         - destination: 0.0.0.0/0
           protocol: all
@@ -92,33 +106,38 @@ cloud_networks:
           description: Allow All Outbound
 
     - spec:
-        display_name: "{{ cluster_state.infra_id }}-seclist-lb"
+        display_name: "{{ cluster_state.infra_id }}-seclist-private"
         # TODO restrict only for I/O of listeners/backendSet
-        ingress_security_rules:
-        - protocol: all
-          source: 0.0.0.0/0
-          is_stateless: false
-          source_type: CIDR_BLOCK
-          description: Allow all inbound
+        ingress_security_rules: []
+        # - protocol: all
+        #   source: 0.0.0.0/0
+        #   is_stateless: false
+        #   source_type: CIDR_BLOCK
+        #   description: Allow all inbound
         egress_security_rules:
-        - destination: "10.0.0.0/16"
-          protocol: 6
-          tcp_options:
-            destination_port_range:
-              min: 6443
-              max: 6443
+        - destination: 0.0.0.0/0
+          protocol: all
           destination_type: CIDR_BLOCK
           is_stateless: false
-          description: Allow API Outbound
-        - destination: "10.0.0.0/16"
-          protocol: 6
-          tcp_options:
-            destination_port_range:
-              min: 22623
-              max: 22623
-          destination_type: CIDR_BLOCK
-          is_stateless: false
-          description: Allow MCS Outbound
+          description: Allow All Outbound
+        # - destination: "10.0.0.0/16"
+        #   protocol: 6
+        #   tcp_options:
+        #     destination_port_range:
+        #       min: 6443
+        #       max: 6443
+        #   destination_type: CIDR_BLOCK
+        #   is_stateless: false
+        #   description: Allow API Outbound
+        # - destination: "10.0.0.0/16"
+        #   protocol: 6
+        #   tcp_options:
+        #     destination_port_range:
+        #       min: 22623
+        #       max: 22623
+        #   destination_type: CIDR_BLOCK
+        #   is_stateless: false
+        #   description: Allow MCS Outbound
 
     subnets:
     # Best practice create dedicated LB Subnet/Rtb? 
@@ -131,14 +150,26 @@ cloud_networks:
       #     cidr_block: "10.0.0.0/22"
       #     prohibit_public_ip_on_vnic: true
 
-      - public: yes
-        route_table_name: "{{ cluster_state.infra_id }}-rt-public-nodes"
-        security_list_names:
-          - "{{ cluster_state.infra_id }}-seclist-default"
-        spec:
-          cidr_block: "10.0.16.0/22"
-          display_name: "{{ cluster_state.infra_id }}-net-public-nodes"
+      - spec:
+          display_name: "{{ cluster_state.infra_id }}-net-public"
+          cidr_block: "10.0.0.0/20"
           dns_label: pub
+          prohibit_internet_ingress: false
+        public: true
+        route_table_name: "{{ cluster_state.infra_id }}-rt-public"
+        security_list_names:
+          - "{{ cluster_state.infra_id }}-seclist-public"
+
+      - spec:
+          display_name: "{{ cluster_state.infra_id }}-net-private"
+          cidr_block: "10.0.16.0/20"
+          dns_label: priv
+          prohibit_internet_ingress: true
+        public: false
+        route_table_name: "{{ cluster_state.infra_id }}-rt-private"
+        security_list_names:
+          - "{{ cluster_state.infra_id }}-seclist-private"
+
 
       # - public: no
       #   security_list_names:
@@ -150,19 +181,19 @@ cloud_networks:
       #     prohibit_public_ip_on_vnic: true
       #     dns_label: nodes
 
-      - public: yes
-        route_table_name: "{{ cluster_state.infra_id }}-rt-public-lb"
-        security_list_names:
-          - "{{ cluster_state.infra_id }}-seclist-lb"
-        spec:
-          cidr_block: "10.0.0.0/24"
-          display_name: "{{ cluster_state.infra_id }}-net-public-lb"
+      # - public: yes
+      #   route_table_name: "{{ cluster_state.infra_id }}-rt-public-lb"
+      #   security_list_names:
+      #     - "{{ cluster_state.infra_id }}-seclist-lb"
+      #   spec:
+      #     cidr_block: "10.0.0.0/24"
+      #     display_name: "{{ cluster_state.infra_id }}-net-public-lb"
 
 
     # https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_security_list_module.html#ansible-collections-oracle-oci-oci-network-security-list-module
     network_security_groups:
     - spec:
-        display_name: "{{ cluster_state.infra_id }}-nsg-bootstrap"
+        display_name: "{{ cluster_state.infra_id }}-nsg-controlplane"
       rules:
         spec:
           security_rules:
@@ -195,6 +226,103 @@ cloud_networks:
               destination_port_range:
                 min: 6443
                 max: 6443
+
+          # EGRESS
+          - description: allow all outbound subnet
+            destination: "0.0.0.0/0"
+            destination_type: "CIDR_BLOCK"
+            direction: EGRESS
+            is_stateless: false
+            protocol: all
+
+    - spec:
+        display_name: "{{ cluster_state.infra_id }}-nsg-compute"
+      rules:
+        spec:
+          security_rules:
+          # INGRESS
+          - description: allow all inbound subnet
+            source: "10.0.0.0/16"
+            source_type: "CIDR_BLOCK"
+            direction: INGRESS
+            is_stateless: false
+            protocol: all
+
+          - description: allow ssh
+            source: "0.0.0.0/0"
+            source_type: "CIDR_BLOCK"
+            direction: INGRESS
+            is_stateless: false
+            protocol: 6
+            tcp_options:
+              destination_port_range:
+                min: 22
+                max: 22
+
+          # EGRESS
+          - description: allow all outbound subnet
+            destination: "0.0.0.0/0"
+            destination_type: "CIDR_BLOCK"
+            direction: EGRESS
+            is_stateless: false
+            protocol: all
+
+    - spec:
+        display_name: "{{ cluster_state.infra_id }}-nsg-nlb"
+      rules:
+        spec:
+          security_rules:
+          # INGRESS
+          - description: allow all inbound subnet
+            source: "10.0.0.0/16"
+            source_type: "CIDR_BLOCK"
+            direction: INGRESS
+            is_stateless: false
+            protocol: all
+
+          - description: allow KAPI
+            source: "0.0.0.0/0"
+            source_type: "CIDR_BLOCK"
+            direction: INGRESS
+            is_stateless: false
+            protocol: 6
+            tcp_options:
+              destination_port_range:
+                min: 6443
+                max: 6443
+
+          - description: allow MCS
+            source: "0.0.0.0/0"
+            source_type: "CIDR_BLOCK"
+            direction: INGRESS
+            is_stateless: false
+            protocol: 6
+            tcp_options:
+              destination_port_range:
+                min: 22623
+                max: 22623
+
+          - description: allow IG-HTTP
+            source: "0.0.0.0/0"
+            source_type: "CIDR_BLOCK"
+            direction: INGRESS
+            is_stateless: false
+            protocol: 6
+            tcp_options:
+              destination_port_range:
+                min: 80
+                max: 80
+
+          - description: allow IG-HTTPS
+            source: "0.0.0.0/0"
+            source_type: "CIDR_BLOCK"
+            direction: INGRESS
+            is_stateless: false
+            protocol: 6
+            tcp_options:
+              destination_port_range:
+                min: 443
+                max: 443
 
           # EGRESS
           - description: allow all outbound subnet

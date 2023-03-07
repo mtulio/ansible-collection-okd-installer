@@ -18,6 +18,7 @@ cat <<EOF > ansible.cfg
 inventory = ./inventories
 collections_path=./collections
 callbacks_enabled=ansible.posix.profile_roles,ansible.posix.profile_tasks
+hash_behavior=merge
 
 [inventory]
 enable_plugins = yaml, ini
@@ -127,17 +128,24 @@ source ~/.oci/env
 
 cat <<EOF > ./vars-oci-ha.yaml
 provider: oci
-cluster_name: mrb
+cluster_name: oci
 config_cluster_region: us-sanjose-1
 
 oci_compartment_id: ${OCI_COMPARTMENT_ID}
-
-config_base_domain: splat-oci.devcluster.openshift.com
-config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
-config_pull_secret_file: ${HOME}/.openshift/pull-secret-latest.json
+oci_compartment_id_dns: ${OCI_COMPARTMENT_ID_DNS}
+oci_compartment_id_image: ${OCI_COMPARTMENT_ID_IMAGE}
 
 cluster_profile: ha
 destroy_bootstrap: no
+
+config_base_domain: splat-oci.devcluster.openshift.com
+config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
+config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
+
+config_cluster_version: 4.13.0-ec.4-x86_64
+version: 4.13.0-ec.4
+config_installer_environment:
+  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
 
 controlplane_instance: VM.Standard3.Flex
 controlplane_instance_spec:
@@ -151,22 +159,25 @@ compute_instance_spec:
 
 #> TODO extract from stream file
 # https://rhcos.mirror.openshift.com/art/storage/prod/streams/4.12/builds/412.86.202212081411-0/aarch64/rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
-# $ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json`
-custom_image_id: rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
+# $ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json
+custom_image_id: rhcos-413.86.202302150245-0-openstack.x86_64.qcow2.gz
 EOF
 ```
 
 ### Install the OpenShift clients
 
 ```bash
-ansible-playbook mtulio.okd_installer.install_clients -e version=4.12.0
+ansible-playbook mtulio.okd_installer.install_clients -e @./vars-oci-ha.yaml
 ```
 
 ### Create the Installer Configuration
 
 Create the installation configuration:
 
+
 ```bash
+rm -rf ~/.ansible/okd-installer/clusters/oci
+
 ansible-playbook mtulio.okd_installer.config \
     -e mode=create \
     -e @./vars-oci-ha.yaml
@@ -207,7 +218,6 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
 > TODO: config to mirror from openstack image to OCI 
 
 > Currently the image is download manually, and added to the OCI Console as a image.
-
 
 Steps to mirror:
 
@@ -252,12 +262,42 @@ ansible-playbook mtulio.okd_installer.create_node \
 
 - Create the Compute nodes
 
+```bash
+ansible-playbook mtulio.okd_installer.create_node \
+    -e node_role=compute \
+    -e @./vars-oci-ha.yaml
+```
+
 > TODO: create instance Pool
 
 > TODO: Approve certificates (bash loop or use existing playbook)
 
 ```
 oc adm certificate approve $(oc get csr  -o json |jq -r '.items[] | select(.status.certificate == null).metadata.name')
+```
+
+- Create the OPCT node
+
+```
+ansible-playbook mtulio.okd_installer.create_node \
+    -e node_role=opct \
+    -e @./vars-oci-ha.yaml
+
+# https://redhat-openshift-ecosystem.github.io/provider-certification-tool/user/#option-a-command-line
+oc label node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests=""
+oc adm taint node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests="":NoSchedule
+
+# Set the OPCT requirements (registry, labels, COs stable)
+ansible-playbook ../opct/hack/opct-runner/opct-run-tool-preflight.yaml -e cluster_name=oci -D
+```
+
+### Create all
+
+```bash
+ansible-playbook mtulio.okd_installer.create_all \
+    -e @./vars-oci-ha.yaml \
+    -e certs_max_retries=20 \
+    -e cert_wait_interval_sec=60
 ```
 
 ## Review the cluster

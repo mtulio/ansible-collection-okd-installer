@@ -9,13 +9,13 @@ cloud_dns_zones:
     spec:
       # scope: GLOBAL
       # zone_type: PRIMARY
-      compartment_id: "{{ oci_compartment_id }}" 
+      compartment_id: "{{ oci_compartment_id_dns | d(oci_compartment_id) }}"
 
   # private
-  - name: "{{ cluster_state.dns.cluster_domain }}"
-    provider: oci
-    view_name: "{{ cluster_state.infra_id }}-vcn"
-    spec:
-      scope: PRIVATE
-      zone_type: PRIMARY
-      compartment_id: "{{ oci_compartment_id }}"
+  # - name: "{{ cluster_state.dns.cluster_domain }}"
+  #   provider: oci
+  #   view_name: "{{ cluster_state.infra_id }}-vcn"
+  #   spec:
+  #     scope: PRIVATE
+  #     zone_type: PRIMARY
+  #     compartment_id: "{{ oci_compartment_id_dns | d(oci_compartment_id) }}"

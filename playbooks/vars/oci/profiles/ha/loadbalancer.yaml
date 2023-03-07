@@ -30,12 +30,13 @@ cloud_loadbalancers:
     type: network
 
     # Is it supported multi-subnets?
-    subnet_name: "{{ cluster_state.infra_id }}-net-public-lb"
+    subnet_name: "{{ cluster_state.infra_id }}-net-public"
+    nsg_name: "{{ cluster_state.infra_id }}-nsg-nlb"
     spec:
       compartment_id: "{{ oci_compartment_id }}"
       display_name: "{{ cluster_state.infra_id }}-nlb"
       is_private: false
-      is_preserve_source_destination: true
+      is_preserve_source_destination: false
       nlb_ip_version: IPV4
       #freeform_tags: "{{ cluster_state.tags }}"
 
@@ -45,7 +46,7 @@ cloud_loadbalancers:
     - provider: oci
       spec:
         name: "{{ cluster_state.infra_id }}-api"
-        is_preserve_source: no
+        is_preserve_source: false
         ip_version: IPV4
         policy: FIVE_TUPLE
         #backends: []
@@ -60,7 +61,7 @@ cloud_loadbalancers:
     - provider: oci
       spec:
         name: "{{ cluster_state.infra_id }}-mcs"
-        is_preserve_source: no
+        is_preserve_source: false
         ip_version: IPV4
         policy: FIVE_TUPLE
         #backends: []
@@ -74,31 +75,31 @@ cloud_loadbalancers:
 
     - provider: oci
       spec:
-        name: "{{ cluster_state.infra_id }}-ing-http"
-        is_preserve_source: no
+        name: "{{ cluster_state.infra_id }}-ingress-http"
+        is_preserve_source: false
         ip_version: IPV4
         policy: FIVE_TUPLE
         #backends: [] # TCP/31794
         health_checker:
-          port: 31261
-          protocol: HTTP
-          return_code: 200
-          url_path: /healthz
+          port: 80
+          protocol: TCP
+          # return_code: 200
+          # url_path: /healthz
           interval_in_millis: 10000
           timeout_in_millis: 3000
 
     - provider: oci
       spec:
-        name: "{{ cluster_state.infra_id }}-ing-https"
-        is_preserve_source: no
+        name: "{{ cluster_state.infra_id }}-ingress-https"
+        is_preserve_source: false
         ip_version: IPV4
         #policy: TWO_TUPLE
         #backends: [] # TCP/32186
         health_checker:
-          port: 31261
-          protocol: HTTP
-          return_code: 200
-          url_path: /healthz
+          port: 443
+          protocol: TCP
+          # return_code: 200
+          # url_path: /healthz
           interval_in_millis: 10000
           timeout_in_millis: 3000
 
@@ -112,22 +113,22 @@ cloud_loadbalancers:
           protocol: TCP
 
       - spec:
-          name: "{{ cluster_state.infra_id }}-mext"
+          name: "{{ cluster_state.infra_id }}-mcs"
           default_backend_set_name: "{{ cluster_state.infra_id }}-mcs"
           ip_version: IPV4
           port: 22623
           protocol: TCP
 
       - spec:
-          name: "{{ cluster_state.infra_id }}-ing-http"
-          default_backend_set_name: "{{ cluster_state.infra_id }}-ing-http"
+          name: "{{ cluster_state.infra_id }}-ingress-http"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-ingress-http"
           ip_version: IPV4
           port: 80
           protocol: TCP
 
       - spec:
-          name: "{{ cluster_state.infra_id }}-ing-https"
-          default_backend_set_name: "{{ cluster_state.infra_id }}-ing-https"
+          name: "{{ cluster_state.infra_id }}-ingress-https"
+          default_backend_set_name: "{{ cluster_state.infra_id }}-ingress-https"
           ip_version: IPV4
           port: 443
           protocol: TCP
@@ -137,7 +138,7 @@ cloud_loadbalancers:
         rr_ip: public
         spec:
           zone_name_or_id: "{{ cluster_state.dns.base_domain }}"
-          compartment_id: "{{ oci_compartment_id }}"
+          compartment_id: "{{ oci_compartment_id_dns | d(oci_compartment_id) }}"
           scope: GLOBAL
           patch_items:
             - domain: "api.{{ cluster_state.dns.cluster_domain }}"
@@ -150,37 +151,37 @@ cloud_loadbalancers:
         rr_ip: private
         spec:
           zone_name_or_id: "{{ cluster_state.dns.base_domain }}"
-          compartment_id: "{{ oci_compartment_id }}"
+          compartment_id: "{{ oci_compartment_id_dns | d(oci_compartment_id) }}"
           scope: GLOBAL
           patch_items:
             - domain: "api-int.{{ cluster_state.dns.cluster_domain }}"
               rtype: A
               ttl: 300
       
-      # private address
-      - name: register_dns
-        rr_ip: private
-        view_name: "{{ cluster_state.infra_id }}-vcn"
-        spec:
-          zone_name_or_id: "{{ cluster_state.dns.cluster_domain }}"
-          compartment_id: "{{ oci_compartment_id }}"
-          scope: PRIVATE
-          patch_items:
-            - domain: "api-int.{{ cluster_state.dns.cluster_domain }}"
-              rtype: A
-              ttl: 300
+      # # private address
+      # - name: register_dns
+      #   rr_ip: private
+      #   view_name: "{{ cluster_state.infra_id }}-vcn"
+      #   spec:
+      #     zone_name_or_id: "{{ cluster_state.dns.cluster_domain }}"
+      #     compartment_id: "{{ oci_compartment_id }}"
+      #     scope: PRIVATE
+      #     patch_items:
+      #       - domain: "api-int.{{ cluster_state.dns.cluster_domain }}"
+      #         rtype: A
+      #         ttl: 300
       
-      - name: register_dns
-        rr_ip: public
-        view_name: "{{ cluster_state.infra_id }}-vcn"
-        spec:
-          zone_name_or_id: "{{ cluster_state.dns.cluster_domain }}"
-          compartment_id: "{{ oci_compartment_id }}"
-          scope: PRIVATE
-          patch_items:
-            - domain: "api.{{ cluster_state.dns.cluster_domain }}"
-              rtype: A
-              ttl: 300
-            - domain: "*.apps.{{ cluster_state.dns.cluster_domain }}"
-              rtype: A
-              ttl: 300
+      # - name: register_dns
+      #   rr_ip: public
+      #   view_name: "{{ cluster_state.infra_id }}-vcn"
+      #   spec:
+      #     zone_name_or_id: "{{ cluster_state.dns.cluster_domain }}"
+      #     compartment_id: "{{ oci_compartment_id }}"
+      #     scope: PRIVATE
+      #     patch_items:
+      #       - domain: "api.{{ cluster_state.dns.cluster_domain }}"
+      #         rtype: A
+      #         ttl: 300
+      #       - domain: "*.apps.{{ cluster_state.dns.cluster_domain }}"
+      #         rtype: A
+      #         ttl: 300

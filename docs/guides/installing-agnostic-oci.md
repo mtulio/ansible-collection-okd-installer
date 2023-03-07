@@ -230,7 +230,6 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
 
 ### Compute Stack
 
-
 #### Bootstrap
 
 - Mirror image (Ansible Role+Playbook Not implemented)
@@ -301,19 +300,26 @@ ansible-playbook mtulio.okd_installer.create_node \
 oc adm certificate approve $(oc get csr  -o json |jq -r '.items[] | select(.status.certificate == null).metadata.name')
 ```
 
-- Create the OPCT node
+- Create the OPCT [dedicated] node
 
-```
+> https://redhat-openshift-ecosystem.github.io/provider-certification-tool/user/#option-a-command-line
+
+```bash
+# Create OPCT node
 ansible-playbook mtulio.okd_installer.create_node \
     -e node_role=opct \
     -e @./vars-oci-ha.yaml
 
-# https://redhat-openshift-ecosystem.github.io/provider-certification-tool/user/#option-a-command-line
-oc label node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests=""
-oc adm taint node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests="":NoSchedule
-
-# Set the OPCT requirements (registry, labels, COs stable)
+# Set the OPCT requirements (registry, labels, wait-for COs stable)
 ansible-playbook ../opct/hack/opct-runner/opct-run-tool-preflight.yaml -e cluster_name=oci -D
+
+# Run OPCT
+~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 run -w
+
+# Get the results and explore it
+~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 retrieve
+~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 results *.tar.gz
+~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 report *.tar.gz
 ```
 
 ### Create all
@@ -325,6 +331,8 @@ ansible-playbook mtulio.okd_installer.create_all \
     -e cert_wait_interval_sec=60
 ```
 
+> TO DO: measure total time
+
 ## Review the cluster
 
 ```bash
@@ -333,3 +341,7 @@ export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${cluster_name}/auth/k
 oc get nodes
 oc get co
 ```
+
+## Destroy
+
+> TODO

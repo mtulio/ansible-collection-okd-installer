@@ -50,6 +50,10 @@ openshift_userdata:
 
 # Stack Compute (Ansible Role cloud_compute) options:
 compute_resources:
+  #
+  # Node role: bootstrap
+  # Node: bootstrap
+  #
   - provider: oci
     type: machine
     # name: "{{ cluster_state.infra_id }}-bootstrap{{ _machine_suffix }}"

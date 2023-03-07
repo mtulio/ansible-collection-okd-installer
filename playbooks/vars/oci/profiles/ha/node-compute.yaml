@@ -16,109 +16,120 @@ openshift_userdata:
 
 # Stack Compute (Ansible Role cloud_compute) options:
 compute_resources:
-
-  # - provider: oci
-  #   type: machine
+  #
+  # Node role: compute
+  # Node: worker-01
+  #
+  - provider: oci
+    type: machine
     
-  #   # cloud_compute role to discovery for OCI:
-  #   image_name: "{{ custom_image_id }}"
-  #   vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
-  #   network_security_group_names:
-  #   - "{{ cluster_state.infra_id }}-nsg-compute"
+    # cloud_compute role to discovery for OCI:
+    image_name: "{{ custom_image_id }}"
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-compute"
 
-  #   # OCI spec
-  #   spec:
-  #     state: present
-  #     compartment_id: "{{ oci_compartment_id }}"
-  #     display_name: "{{ cluster_state.infra_id }}-worker-01"
-  #     region: "{{ config_cluster_region }}"
-  #     #freeform_tags: {'Department': 'Finance'}
-  #     #defined_tags: {'Operations': {'CostCenter': 'US'}}
-  #     availability_domain: "gzqB:US-SANJOSE-1-AD-1"
-  #     fault_domain: FAULT-DOMAIN-1
+    # OCI spec
+    spec:
+      state: present
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-worker-01"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
+      fault_domain: FAULT-DOMAIN-1
 
-  #     # platform_config:
-  #     #   type: AMD_VM
-  #     shape: "VM.Standard.E4.Flex"
-  #     shape_config:
-  #       ocpus: 4
-  #       memory_in_gbs: 16
-  #       #baseline_ocpu_utilization: BASELINE_1_8
-  #       #nvmes: 1
-  #     agent_config:
-  #       are_all_plugins_disabled: true
+      # platform_config:
+      #   type: AMD_VM
+      shape: "VM.Standard.E4.Flex"
+      shape_config:
+        ocpus: 4
+        memory_in_gbs: 16
+        #baseline_ocpu_utilization: BASELINE_1_8
+        #nvmes: 1
+      agent_config:
+        are_all_plugins_disabled: true
     
-  #     source_details:
-  #       source_type: image
+      source_details:
+        source_type: image
 
-  #     create_vnic_details:
-  #       display_name: "{{ cluster_state.infra_id }}-worker-01-vnic0"
-  #       assign_public_ip: false
-  #       assign_private_dns_record: true
-  #       hostname_label: "worker-01"
-  #     metadata:
-  #       user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-worker-01-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "worker-01"
+      metadata:
+        user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
 
-  #   callbacks:
-  #   - name: nlb
-  #     nlb_name: "{{ cluster_state.infra_id }}-nlb"
-  #     backend_sets:
-  #     - name: "{{ cluster_state.infra_id }}-ingress-http"
-  #       port: 80
-  #     - name: "{{ cluster_state.infra_id }}-ingress-https"
-  #       port: 443
+    callbacks:
+    - name: nlb
+      nlb_name: "{{ cluster_state.infra_id }}-nlb"
+      backend_sets:
+      - name: "{{ cluster_state.infra_id }}-ingress-http"
+        port: 80
+      - name: "{{ cluster_state.infra_id }}-ingress-https"
+        port: 443
 
-  # - provider: oci
-  #   type: machine
+  #
+  # Node role: compute
+  # Node: worker-02
+  #
+  - provider: oci
+    type: machine
     
-  #   # cloud_compute role to discovery for OCI:
-  #   image_name: "{{ custom_image_id }}"
-  #   vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
-  #   network_security_group_names:
-  #   - "{{ cluster_state.infra_id }}-nsg-controlplane"
+    # cloud_compute role to discovery for OCI:
+    image_name: "{{ custom_image_id }}"
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-controlplane"
 
-  #   # OCI spec
-  #   spec:
-  #     state: present
-  #     compartment_id: "{{ oci_compartment_id }}"
-  #     display_name: "{{ cluster_state.infra_id }}-worker-02"
-  #     region: "{{ config_cluster_region }}"
-  #     #freeform_tags: {'Department': 'Finance'}
-  #     #defined_tags: {'Operations': {'CostCenter': 'US'}}
-  #     availability_domain: "gzqB:US-SANJOSE-1-AD-1"
-  #     fault_domain: FAULT-DOMAIN-2
+    # OCI spec
+    spec:
+      state: present
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-worker-02"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
+      fault_domain: FAULT-DOMAIN-2
 
-  #     # platform_config:
-  #     #   type: AMD_VM
-  #     shape: "VM.Standard.E4.Flex"
-  #     shape_config:
-  #       ocpus: 4
-  #       memory_in_gbs: 16
-  #       #baseline_ocpu_utilization: BASELINE_1_8
-  #       #nvmes: 1
-  #     agent_config:
-  #       are_all_plugins_disabled: true
+      # platform_config:
+      #   type: AMD_VM
+      shape: "VM.Standard.E4.Flex"
+      shape_config:
+        ocpus: 4
+        memory_in_gbs: 16
+        #baseline_ocpu_utilization: BASELINE_1_8
+        #nvmes: 1
+      agent_config:
+        are_all_plugins_disabled: true
     
-  #     source_details:
-  #       source_type: image
+      source_details:
+        source_type: image
 
-  #     create_vnic_details:
-  #       display_name: "{{ cluster_state.infra_id }}-worker-02-vnic0"
-  #       assign_public_ip: false
-  #       assign_private_dns_record: true
-  #       hostname_label: "worker-02"
-  #     metadata:
-  #       user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-worker-02-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "worker-02"
+      metadata:
+        user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
 
-  #   callbacks:
-  #   - name: nlb
-  #     nlb_name: "{{ cluster_state.infra_id }}-nlb"
-  #     backend_sets:
-  #     - name: "{{ cluster_state.infra_id }}-ingress-http"
-  #       port: 80
-  #     - name: "{{ cluster_state.infra_id }}-ingress-https"
-  #       port: 443
+    callbacks:
+    - name: nlb
+      nlb_name: "{{ cluster_state.infra_id }}-nlb"
+      backend_sets:
+      - name: "{{ cluster_state.infra_id }}-ingress-http"
+        port: 80
+      - name: "{{ cluster_state.infra_id }}-ingress-https"
+        port: 443
 
+  #
+  # Node role: compute
+  # Node: worker-03
+  #
   - provider: oci
     type: machine
     

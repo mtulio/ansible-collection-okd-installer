@@ -51,7 +51,7 @@ EOF
 - Create a virtual ennv
 
 ```bash
-python3.8 -m venv ./.venv-oci
+python3.9 -m venv ./.venv-oci
 source ./.venv-oci/bin/activate
 ```
 
@@ -97,7 +97,7 @@ ansible-galaxy collection install -r requirements.yml
 > https://github.com/mtulio/ansible-collection-okd-installer/pull/26
 
 ```bash
-git clone -b feat-add-provider-oci --recursive \
+git clone -b feat-added-provider-oci --recursive \
     git@github.com:mtulio/ansible-collection-okd-installer.git \
     collections/ansible_collections/mtulio/okd_installer
 ```
@@ -141,7 +141,15 @@ You must be able to collect the user information.
 
 ```bash
 cat <<EOF > ~/.oci/env
+# Compartment that the cluster will be installed
 OCI_COMPARTMENT_ID="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
+
+# Compartment that the DNS Zone is created (based domain)
+# Only RR will be added
+OCI_COMPARTMENT_ID_DNS="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
+
+# Compartment that the OS Image will be created
+OCI_COMPARTMENT_ID_IMAGE="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
 EOF
 source ~/.oci/env
 
@@ -161,10 +169,10 @@ config_base_domain: splat-oci.devcluster.openshift.com
 config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
-config_cluster_version: 4.13.0-ec.4-x86_64
-version: 4.13.0-ec.4
-config_installer_environment:
-  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
+config_cluster_version: 4.13.0-ec.3-x86_64
+version: 4.13.0-ec.3
+#config_installer_environment:
+#  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
 
 controlplane_instance: VM.Standard3.Flex
 controlplane_instance_spec:
@@ -176,11 +184,26 @@ compute_instance_spec:
   cpu_count: 8
   memory_gb: 16
 
-# Define the OS Image
-#> extract from stream file
-# https://rhcos.mirror.openshift.com/art/storage/prod/streams/4.12/builds/412.86.202212081411-0/aarch64/rhcos-412.86.202212081411-0-openstack.aarch64.qcow2.gz
-# $ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json
-custom_image_id: rhcos-413.86.202302150245-0-openstack.x86_64.qcow2.gz
+# Define the OS Image mirror
+# custom_image_id: rhcos-412.86.202212081411-0-openstack.x86_64
+
+os_mirror: yes
+os_mirror_from: stream_artifacts
+os_mirror_stream:
+  architecture: x86_64
+  artifact: openstack
+  format: qcow2.gz
+  # TO test:
+  #artifact: aws
+  #format: vmdk.gz
+
+os_mirror_to_provider: oci
+os_mirror_to_oci:
+  compartment_id: ${OCI_COMPARTMENT_ID_IMAGE}
+  bucket: rhcos-images
+  image_type: QCOW2
+  #image_type: VMDK
+
 EOF
 ```
 
@@ -196,11 +219,19 @@ Create the installation configuration:
 
 
 ```bash
-rm -rf ~/.ansible/okd-installer/clusters/oci
-
 ansible-playbook mtulio.okd_installer.config \
     -e mode=create \
     -e @./vars-oci-ha.yaml
+```
+
+### Mirror the image
+
+- Mirror image
+
+> Example: `$ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json`
+
+```bash
+ansible-playbook mtulio.okd_installer.os_mirror -e @./vars-oci-ha.yaml
 ```
 
 ### Create the Network Stack
@@ -232,42 +263,6 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
 
 #### Bootstrap
 
-- Mirror image (Ansible Role+Playbook Not implemented)
-
-> TODO: config to mirror from openstack image to OCI 
-
-> Currently the image is download manually, and added to the OCI Console as a image.
-
-
-Steps to mirror using OCI Console:
-
-- Get the artifact URL from stream-json
-- Create Bucket for images, if not exits
-- Upload the image qcow2.gz
-- Get the signed URL for the image object
-- Create an image from signed URL
-- Get the image ID, and set the global var `custom_image_id`
-
-> `$ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json`
-
-Proposal to automate:
-
-> Agnostic instalations frequently requires to upload to  the provider. why no create one internal Role to do it?! Steps: Download from stream URL, upload to Provider's image, Use it.
-
-```bash
-os_mirror: yes
-os_mirror_src: stream
-os_mirror_stream:
-  architecture: x86_64
-  platform: openstack
-  format: qcow2.gz
-
-os_mirror_dest_provider: oci
-os_mirror_dest_oci:
-  compartment_id: 
-  bucket:
-```
-
 - Upload the bootstrap ignition to blob and Create the Bootstrap Instance
 
 ```bash
@@ -296,7 +291,7 @@ ansible-playbook mtulio.okd_installer.create_node \
 
 > TODO: Approve certificates (bash loop or use existing playbook)
 
-```
+```bash
 oc adm certificate approve $(oc get csr  -o json |jq -r '.items[] | select(.status.certificate == null).metadata.name')
 ```
 
@@ -309,10 +304,23 @@ oc adm certificate approve $(oc get csr  -o json |jq -r '.items[] | select(.stat
 ansible-playbook mtulio.okd_installer.create_node \
     -e node_role=opct \
     -e @./vars-oci-ha.yaml
+```
+
+- OPCT dedicated node setup
+
+```bash
 
 # Set the OPCT requirements (registry, labels, wait-for COs stable)
 ansible-playbook ../opct/hack/opct-runner/opct-run-tool-preflight.yaml -e cluster_name=oci -D
 
+oc label node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests=""
+oc adm taint node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests="":NoSchedule
+
+```
+
+- OPCT regular
+
+```bash
 # Run OPCT
 ~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 run -w
 
@@ -321,6 +329,21 @@ ansible-playbook ../opct/hack/opct-runner/opct-run-tool-preflight.yaml -e cluste
 ~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 results *.tar.gz
 ~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 report *.tar.gz
 ```
+
+- OPCT upgrade mode
+
+```bash
+# from a cluster 4.12.1, run upgrade conformance to 4.13
+~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 run -w \
+  --mode=upgrade \
+  --upgrade-to-image=$(oc adm release info 4.13.0-ec.2 -o jsonpath={.image})
+
+# Get the results and explore it
+~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 retrieve
+~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 results *.tar.gz
+~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 report *.tar.gz
+```
+
 
 ### Create all
 
@@ -344,4 +367,7 @@ oc get co
 
 ## Destroy
 
-> TODO
+```bash
+ansible-playbook mtulio.okd_installer.destroy_cluster \
+    -e @./vars-oci-ha.yaml
+```

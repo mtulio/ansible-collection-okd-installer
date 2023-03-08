@@ -39,6 +39,22 @@
     _provider: "{{ provider | d('NA') }}"
     _arch: "{{ arch | d('x86_64') }}"
 
+- name: Load | Set custom_image_id from os_mirror config
+  when: os_mirror and (os_mirror_from == 'stream_artifacts')
+  block:
+  - name: Load | Set custom_image_url from os_mirror config
+    ansible.builtin.set_fact:
+      custom_image_url: "{{ \
+        installer_coreos_stream\
+        .architectures[os_mirror_stream.architecture]\
+        .artifacts[os_mirror_stream.artifact]\
+        .formats[os_mirror_stream.format]\
+        .disk.location | d('') }}"
+
+  - name: Load | Set custom_image_id from os_mirror config
+    ansible.builtin.set_fact:
+      custom_image_id: "{{ custom_image_url | basename }}"
+
 - name: Load | Lookup ImageID
   block:
   - name: Load | Lookup ImageID | Check image
@@ -83,6 +99,7 @@
       loadbalancers: {}
       compute:
         image_id: "{{ custom_image_id | d(image_id_stream) | d(image_id_ign) }}"
+        image_url: "{{ custom_image_url | d('') }}"
         iam_profile_bootstrap: "{{ _installer_metadata.infraID }}-instance-bootstrap"
         iam_profile_compute: "{{ _installer_metadata.infraID }}-instance-compute"
         iam_profile_controlplane: "{{ _installer_metadata.infraID }}-instance-controlPlane"

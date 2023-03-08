@@ -1,0 +1,12 @@
+---
+- name: okd-installer | Create Stack | Compute | Load Config
+  ansible.builtin.import_playbook: config.yaml
+  vars:
+    mode: load
+
+- name: okd-installer | OS Mirror
+  hosts: localhost
+  connection: local
+
+  roles:
+    - os_mirror

@@ -19,9 +19,12 @@ compute_resources:
 
   - provider: oci
     type: machine
-    
-    # cloud_compute role to discovery for OCI:
-    image_name: "{{ custom_image_id }}"
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
     vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
     network_security_group_names:
     - "{{ cluster_state.infra_id }}-nsg-compute"
@@ -48,6 +51,8 @@ compute_resources:
     
       source_details:
         source_type: image
+        boot_volume_size_in_gbs: 120
+        boot_volume_vpus_per_gb: 20
 
       create_vnic_details:
         display_name: "{{ cluster_state.infra_id }}-opct-01-vnic0"

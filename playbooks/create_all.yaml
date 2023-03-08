@@ -17,6 +17,10 @@
   vars:
     mode: create
 
+- name: OKD Installer | Create all | os_mirror
+  ansible.builtin.import_playbook: os_mirror.yaml
+  when: os_mirror | d(false)
+
 - name: OKD Installer | Create all | create stack | network
   ansible.builtin.import_playbook: stack_network.yaml
 

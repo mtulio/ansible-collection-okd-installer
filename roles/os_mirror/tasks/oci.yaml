@@ -1,0 +1,41 @@
+---
+
+- name: OCI | Get the namespace
+  oracle.oci.oci_object_storage_namespace_facts:
+    compartment_id: "{{ os_mirror_to_oci.compartment_id }}"
+  register: _objns
+
+- name: OCI | Create bucket
+  oracle.oci.oci_object_storage_bucket:
+    state: present
+    compartment_id: "{{ os_mirror_to_oci.compartment_id }}"
+    name: "{{ os_mirror_to_oci.bucket }}"
+    namespace_name: "{{ _objns.namespace }}"
+
+- name:  OCI | Show Summary of OS Mirroring
+  debug:
+    msg:
+    - "Bucket/image object: {{ os_mirror_to_oci.bucket }}/{{ cluster_state.compute.image_id }}"
+    - "Image name: {{ cluster_state.compute.image_id }}"
+  when: not(_st_image.stat.exists)
+
+- name: OCI | Upload image to bucket
+  oracle.oci.oci_object_storage_object:
+    namespace_name: "{{ _objns.namespace }}"
+    bucket_name: "{{ os_mirror_to_oci.bucket }}"
+    object_name: "{{ cluster_state.compute.image_id }}"
+    src: "{{ collection_bin_dir + '/' +  cluster_state.compute.image_id }}"
+    force: false
+  register: _upload
+
+- name: OCI | Creating Custom Image
+  oracle.oci.oci_compute_image:
+    compartment_id: "{{ os_mirror_to_oci.compartment_id }}"
+    image_source_details:
+      bucket_name: "{{ os_mirror_to_oci.bucket }}"
+      namespace_name: "{{ _objns.namespace }}"
+      object_name: "{{ cluster_state.compute.image_id }}"
+      source_type: objectStorageTuple
+      source_image_type: "{{ os_mirror_to_oci.image_type }}"
+    launch_mode: PARAVIRTUALIZED
+    display_name: "{{ cluster_state.compute.image_id }}"

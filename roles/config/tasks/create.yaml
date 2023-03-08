@@ -45,8 +45,7 @@
       {{ bin_openshift_install }} create ignition-configs --dir {{ config_install_dir }}
     environment: "{{ config_installer_environment | d(omit) }}"
 
-
-# Render Stream JSON
+# Saving JSON image stream from installer
 - name: Create | Check exists coreos-stream.json
   ansible.builtin.stat:
     path: "{{ config_install_dir }}/coreos-stream.json"

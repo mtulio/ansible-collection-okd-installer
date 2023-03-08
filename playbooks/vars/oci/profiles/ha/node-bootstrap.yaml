@@ -57,9 +57,12 @@ compute_resources:
   - provider: oci
     type: machine
     # name: "{{ cluster_state.infra_id }}-bootstrap{{ _machine_suffix }}"
-    
-    # cloud_compute role to discovery for OCI:
-    image_name: "{{ custom_image_id }}"
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
     vnic_subnet_name: "{{ cluster_state.infra_id }}-net-public"
     network_security_group_names:
     - "{{ cluster_state.infra_id }}-nsg-controlplane"

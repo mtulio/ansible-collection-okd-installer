@@ -1,0 +1,16 @@
+---
+- name: from stream_artifact | Check exists locally
+  stat:
+    path: "{{ collection_bin_dir }}/{{ cluster_state.compute.image_id }}"
+  register: _st_image
+
+- name: stream_artifact | show
+  debug:
+    msg: "Downloading image: {{ cluster_state.compute.image_url }}"
+  when: not(_st_image.stat.exists)
+
+- name: from stream_artifact | Downloading {{ cluster_state.compute.image_url }}
+  get_url:
+    url: "{{ cluster_state.compute.image_url }}"
+    dest: "{{ collection_bin_dir }}/{{ cluster_state.compute.image_id }}"
+  when: not(_st_image.stat.exists)

@@ -1,0 +1,37 @@
+---
+- name: OCI | Compute | Discovery Instance ID
+  tags: compute
+  loop_control:
+    loop_var: instance
+  loop: "{{ okd_cluster_destroy_instances }}"
+  register: _instances
+  oracle.oci.oci_compute_instance_facts:
+    compartment_id: "{{ okd_cluster_destroy_instances_compartment_id }}"
+    display_name: "{{ instance.name }}"
+
+- name: OCI | LB | Show Delete
+  tags: compute
+  loop_control:
+    loop_var: results
+  loop: "{{ _instances.results }}"
+  when:
+    - _instances.results | length > 0
+    - results.instances is defined and results.instances | length > 0  
+  debug:
+    msg: "Deleting Instance: {{ results.instances[0].display_name }}({{ results.instances[0].id }})"
+
+- name: OCI | Compute | Delete instance
+  tags: compute
+  loop_control:
+    loop_var: inst
+  loop: "{{ _instances.results }}"
+  when:
+    - _instances.results | length > 0
+    - inst.instances is defined and inst.instances | length > 0  
+  oracle.oci.oci_compute_instance:
+    state: absent
+    compartment_id: "{{ okd_cluster_destroy_instances_compartment_id }}"
+    id: "{{ inst.instances[0].id }}"
+    preserve_boot_volume: false
+    wait: no
+

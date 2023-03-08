@@ -1,0 +1,37 @@
+---
+- name: OCI | LB | Discovery IDs
+  loop: "{{ cloud_loadbalancers }}"
+  loop_control:
+    loop_var: lb
+  register: _lb_out
+  oracle.oci.oci_network_load_balancer_facts:
+    compartment_id: "{{ lb.spec.compartment_id }}"
+    display_name: "{{ lb.name }}"
+
+# - debug: var=_lb_out
+
+- name: OCI | LB | Show Delete
+  loop: "{{ _lb_out.results }}"
+  loop_control:
+    loop_var: lb
+  register: _lb_del_out
+  debug:
+    msg: "Deleting Load Balancer ID: {{ lb.network_load_balancers[0].id }}"
+  when: 
+    - debug | d(false)
+    - _lb_out.results is defined and _lb_out.results | length > 0
+  check_mode: no
+
+- name: OCI | LB | Delete
+  loop: "{{ _lb_out.results }}"
+  loop_control:
+    loop_var: lb
+  register: _lb_del_out
+  oracle.oci.oci_network_load_balancer:
+    state: absent
+    id: "{{ lb.network_load_balancers[0].id }}"
+  when:
+    - _lb_out.results is defined and _lb_out.results | length > 0
+    - lb.network_load_balancers is defined and lb.network_load_balancers | length > 0
+
+# - debug: var=_lb_del_out

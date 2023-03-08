@@ -1,0 +1,27 @@
+---
+- name: OCI | Load Balancer
+  ansible.builtin.include_tasks: "{{ provider }}/loadbalancer.yaml"
+  tags: loadbalancer
+
+- name: OCI | Compute
+  ansible.builtin.include_tasks: "{{ provider }}/compute.yaml"
+  tags: compute
+
+- name: OCI | IAM
+  ansible.builtin.include_tasks: "{{ provider }}/iam.yaml"
+  tags: iam
+
+- name: OCI | DNS
+  ansible.builtin.include_tasks: "{{ provider }}/dns.yaml"
+  tags: dns
+
+- name: OCI | Network
+  ansible.builtin.include_tasks: "{{ provider }}/network.yaml"
+  tags: network
+  loop: "{{ cloud_networks }}"
+  loop_control:
+    loop_var: vcn
+
+- name: OCI | Bucket
+  ansible.builtin.include_tasks: "{{ provider }}/bucket.yaml"
+  tags: bucket

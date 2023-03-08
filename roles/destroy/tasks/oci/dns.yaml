@@ -1,0 +1,12 @@
+---
+- name: OCI | DNS | Remove records
+  oracle.oci.oci_dns_zone_records:
+    compartment_id: "{{ okd_cluster_destroy_dns_compartment_id }}"
+    zone_name_or_id: "{{ okd_cluster_destroy_dns_records.zone_name_or_id }}"
+    patch_items: "{{ okd_cluster_destroy_dns_records.patch_items_spec }}"
+  #     - operation: REMOVE
+  #       domain: "{{ rr.domain }}"
+  # loop: "{{ okd_cluster_destroy_dns_records }}"
+  # loop_control:
+  #   loop_var: rr
+  # register: _rr

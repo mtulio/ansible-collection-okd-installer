@@ -86,7 +86,6 @@ cloud_networks:
     #       network_entity_type: nat-gateway
     #       network_entity_name: "{{ cluster_state.infra_id }}-natgw"
 
-
     # create permissive security Lists to force to use NSGs
     # https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_network_security_list_module.html#ansible-collections-oracle-oci-oci-network-security-list-module
     security_lists:

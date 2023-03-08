@@ -11,6 +11,9 @@ cloud_dns_zones:
       # zone_type: PRIMARY
       compartment_id: "{{ oci_compartment_id_dns | d(oci_compartment_id) }}"
 
+  # OCI is using subnet's zone.
+  # TODO: Need to check if will not conflict with custom private zone.
+  # Currently the cluster is resolving the DNS using the public zone.
   # private
   # - name: "{{ cluster_state.dns.cluster_domain }}"
   #   provider: oci

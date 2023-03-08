@@ -34,7 +34,7 @@
 
   - name: openshift-install | Download msg
     ansible.builtin.debug:
-      msg: "Donwloading tools [{{ release_image_version_arch | d(local_version) }}] using secret [{{ config_pull_secret_file }}]"
+      msg: "Downloading tools [{{ release_image_version_arch | d(local_version) }}] using secret [{{ config_pull_secret_file }}]"
     when: not(check_tar_inst.stat.exists)
 
   - name: openshift-install | Check vars
@@ -142,7 +142,9 @@
 
 - name: Show clients path
   ansible.builtin.debug:
-    msg: "binary=[{{ item.src }}] link=[{{ item.link }}]"
+    msg:
+      - "binary=[{{ collection_bin_dir }}/{{ item.src }}]"
+      - "link=[{{ collection_bin_dir }}/{{ item.link }}]"
   with_items:
     - src: "{{ bin_installer }}"
       link: openshift-install

@@ -39,3 +39,20 @@
       source_image_type: "{{ os_mirror_to_oci.image_type }}"
     launch_mode: PARAVIRTUALIZED
     display_name: "{{ cluster_state.compute.image_id }}"
+  register: _custom_image
+
+- name: OCI | Get image capability schema
+  oracle.oci.oci_compute_image_capability_schema_facts:
+    display_name: OCI.ComputeGlobalImageCapabilitySchema
+    image_id: "{{ _custom_image.image.id }}"
+    sort_by: TIMECREATED
+    sort_order: ASC
+  register: _custom_image_capability_schema
+
+- name: OCI | Patch image capability schema
+  oracle.oci.oci_compute_image_capability_schema:
+    state: present
+    compartment_id: "{{ os_mirror_to_oci.compartment_id }}"
+    compute_global_image_capability_schema_version_name: "{{ (_custom_image_capability_schema.compute_image_capability_schemas | first).compute_global_image_capability_schema_version_name }}"
+    compute_image_capability_schema_id: "{{ (_custom_image_capability_schema.compute_image_capability_schemas | first).id }}"
+    schema_data: "{{ (_custom_image_capability_schema.compute_image_capability_schemas | first).schema_data | combine(oci.image_capability_schema_patch, recursive=True) }}"

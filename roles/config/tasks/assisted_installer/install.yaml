@@ -1,0 +1,40 @@
+- name: Create | Load vars
+  ansible.builtin.include_tasks: "{{ installation_method }}/load.yaml"
+
+- name: Install | Wait for all hosts to be discovered
+  ansible.builtin.command: >-
+    aicli wait hosts "{{ cluster_name }}"  -n "{{ config_compute_replicas + config_controlplane_replicas }}"
+
+- name: Install | List all hosts
+  ansible.builtin.command: >-
+    aicli -o json list hosts
+  register: _ai_all_hosts_table
+
+- name: Install | Filter hosts on infraenv
+  ansible.builtin.set_fact:
+    _ai_infraenv_hosts: "{{ _ai_all_hosts_table.stdout | from_json | community.general.json_query(select_infraenv_query) }}"
+  vars:
+    select_infraenv_query: "[?infra_env_id==`{{ cluster_state.assisted_installer.infraenv_definition.id }}`]"
+
+- name: Install | Update host roles
+  karmab.aicli.ai_host:
+      state: updated
+      name: "{{ item.requested_hostname  }}"
+      parameters:
+        infraenv: "{{ cluster_state.assisted_installer.infraenv_definition.name }}"
+        role: "{% if config_controlplane.name in item.requested_hostname %}master{% else %}worker{% endif %}"
+  loop: "{{ _ai_infraenv_hosts }}"
+
+- name: Install | Start installation
+  karmab.aicli.ai_cluster:
+    name: "{{ cluster_name }}"
+    state: started
+
+- name: Install | Follow installation progress on the console
+  ansible.builtin.debug:
+    msg: "https://console.redhat.com/openshift/assisted-installer/clusters/{{ cluster_state.assisted_installer.cluster_definition.id }}"
+
+- name: Install | Wait for install to complete
+  karmab.aicli.ai_cluster:
+    name: "{{ cluster_name }}"
+    state: installed

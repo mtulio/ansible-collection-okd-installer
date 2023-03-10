@@ -15,6 +15,7 @@
   tasks:
     # Create Compute: Bootstrap node
     - name: okd-installer | Stack | Compute | Bootstrap
+      when: installation_method is not defined
       block:
       - name: okd-installer | Stack | Compute | Set User provided (Bootstrap)
         ansible.builtin.include_vars:

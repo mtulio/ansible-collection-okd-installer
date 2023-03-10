@@ -1,0 +1,27 @@
+---
+
+- name: Load | Retrieve cluster definition
+  karmab.aicli.ai_cluster_info:
+    name: "{{ cluster_name }}"
+  register: _ai_cluster_definition
+
+- name: Load | Retrieve infraenv definition
+  karmab.aicli.ai_infraenv_info :
+    name: "{{ cluster_name }}"
+  register: _ai_infraenv_definition
+
+- name: Load | Create initial cluster_state
+  ansible.builtin.set_fact:
+    cluster_state:
+      infra_id: "{{ _ai_infraenv_definition.name }}"
+      compute:
+        image_id: "discovery-{{ _ai_infraenv_definition.name }}"
+        image_url: "{{ _ai_infraenv_definition.download_url }}"
+      dns:
+        base_domain: "{{ _ai_cluster_definition.base_dns_domain }}"
+        cluster_domain: "{{ _ai_cluster_definition.name }}.{{ _ai_cluster_definition.base_dns_domain }}"
+      certificates:
+        root_ca: "this is a workaround"
+      assisted_installer:
+        cluster_definition: "{{ _ai_cluster_definition }}"
+        infraenv_definition: "{{ _ai_infraenv_definition }}"

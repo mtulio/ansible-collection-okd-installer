@@ -2,3 +2,8 @@
 
 - name: Init tasks for mode - {{ mode | d('check') }}
   ansible.builtin.include_tasks: "{{ mode | d('check') }}.yaml"
+  when: installation_method is not defined
+
+- name: Init tasks for mode - {{ mode | d('check') }}
+  ansible.builtin.include_tasks: "{{ installation_method }}/{{ mode | d('check') }}.yaml"
+  when: installation_method is defined

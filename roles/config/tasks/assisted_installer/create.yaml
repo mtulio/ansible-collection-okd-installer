@@ -1,0 +1,11 @@
+- name: Create | Define cluster in Assisted Installer
+  karmab.aicli.ai_cluster:
+    name: "{{ cluster_name }}"
+    state: present
+    parameters:
+      base_dns_domain: "{{ config_base_domain }}"
+      minimal: True # request a minimal iso
+      openshift_version: "{{ config_cluster_version }}"
+      pull_secret: "{{ config_pull_secret_file }}"
+      ssh_public_key: "{{ config_ssh_key }}"
+      user_managed_networking: True # =none platform

@@ -1,6 +1,6 @@
 oci:
   image_capability_schema_patch:
     Compute.Firmware:
-      default_value: UEFI_64
-      values:
+      enum_string_default_value: UEFI_64
+      enum_string_values:
         - UEFI_64

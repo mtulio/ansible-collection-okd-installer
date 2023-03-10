@@ -62,17 +62,23 @@
   vars:
     certs_max_retries: 8
     cert_wait_interval_sec: 60
-  when: config_platform == 'none'
+  when: installation_method is not defined and config_platform == 'none'
 
 - name: OKD Installer | Create all | Load Config
   ansible.builtin.import_playbook: config.yaml
   vars:
     mode: load
+  when: installation_method is not defined
 
 - name: OKD Installer | Create all | Bootstrap Destroy
   ansible.builtin.import_playbook: destroy_bootstrap.yaml
-  when: destroy_bootstrap | d('yes') == 'yes'
+  when: installation_method is not defined and destroy_bootstrap | d('yes') == 'yes'
 
+- name: OKD Installer | Create all | Trigger installation in Assisted Installer
+  ansible.builtin.import_playbook: config.yaml
+  vars:
+    mode: install
+  when: installation_method == 'assisted_installer'
 
 - name: OKD Installer | Create ALL | End
   hosts: '{{ target|default("localhost") }}'

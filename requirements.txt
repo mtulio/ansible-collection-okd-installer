@@ -12,3 +12,6 @@ botocore
 
 # kubernetes Collection
 kubernetes
+
+# assisted-installer
+aicli

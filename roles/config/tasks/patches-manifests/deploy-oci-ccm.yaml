@@ -1,0 +1,30 @@
+---
+- name: Patch | Create OCI CCM NS
+  ansible.builtin.template:
+    src: patches/oci-ccm-ns.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-00-namespace.yaml"
+    mode: 0644
+
+- name: Patch | Create OCI CCM RBAC
+  ansible.builtin.template:
+    src: patches/oci-cloud-controller-manager-rbac.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-01-rbac.yaml"
+    mode: 0644
+
+- name: Patch | Create OCI CCM Secret
+  ansible.builtin.set_fact:
+    oci_ccm_secret_data: "{{ lookup('template', 'patches/oci-ccm-secret-data.yaml.j2') | from_yaml }}"
+
+- name: Patch | Create OCI CCM Secret
+  ansible.builtin.template:
+    src: patches/oci-ccm-secret.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-01-secret.yaml"
+    mode: 0644
+  vars:
+    oci_compartment_id: oci_compartment_id
+
+- name: Patch | Create OCI CCM
+  ansible.builtin.template:
+    src: patches/oci-cloud-controller-manager.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-02.yaml"
+    mode: 0644

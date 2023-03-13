@@ -87,12 +87,21 @@ compute_resources:
       # availability_domain: Uocm:PHX-AD-1
       agent_config:
         are_all_plugins_disabled: true
-    
+
+      # Disk Configuration
+      preserve_boot_volume: false
       source_details:
         source_type: image
         boot_volume_size_in_gbs: 120
         boot_volume_vpus_per_gb: 30
 
+      # that config will prevent actions like stop/start (not desired)
+      # preemptible_instance_config:
+      #   preemption_action:
+      #     preserve_boot_volume: false
+      #     type: TERMINATE
+
+      # Network
       create_vnic_details:
         display_name: "{{ cluster_state.infra_id }}-bootstrap-vnic0"
         assign_public_ip: true
@@ -107,6 +116,10 @@ compute_resources:
         #nsg_ids: "{{ machine_nsg_ids }}"
       metadata:
         user_data: "{{ lookup('template', 'ocp-bootstrap-user-data.j2') | to_nice_json | string | b64encode }}"
+
+      # launch_options:
+      #   firmware: BIOS
+      #   boot_volume_type: PARAVIRTUALIZED
 
     callbacks:
     - name: nlb

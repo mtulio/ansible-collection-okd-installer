@@ -153,11 +153,21 @@ OCI_COMPARTMENT_ID_IMAGE="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
 EOF
 source ~/.oci/env
 
-cat <<EOF > ./vars-oci-ha.yaml
+cat <<EOF > ~/.openshift/env
+export OCP_CUSTOM_RELEASE="docker.io/mtulio/ocp-release:latest"
+
+OCP_RELEASE_413="quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
+EOF
+source ~/.openshift/env
+
+CLUSTER_NAME=oci-cr3cmo
+cat <<EOF > ./vars-oci-ha_${CLUSTER_NAME}.yaml
 provider: oci
-cluster_name: oci
+cluster_name: ${CLUSTER_NAME}
 config_cluster_region: us-sanjose-1
 
+#TODO: create compartment validations
+#TODO: allow create compartment from a parent
 oci_compartment_id: ${OCI_COMPARTMENT_ID}
 oci_compartment_id_dns: ${OCI_COMPARTMENT_ID_DNS}
 oci_compartment_id_image: ${OCI_COMPARTMENT_ID_IMAGE}
@@ -169,10 +179,10 @@ config_base_domain: splat-oci.devcluster.openshift.com
 config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
-config_cluster_version: 4.13.0-ec.3-x86_64
+#config_cluster_version: 4.13.0-ec.3-x86_64
 version: 4.13.0-ec.3
-#config_installer_environment:
-#  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
+config_installer_environment:
+  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "${OCP_CUSTOM_RELEASE}"
 
 controlplane_instance: VM.Standard3.Flex
 controlplane_instance_spec:
@@ -204,7 +214,41 @@ os_mirror_to_oci:
   image_type: QCOW2
   #image_type: VMDK
 
+
+## Apply patches to installer manifests (WIP)
+
+# TODO: we must keep the OCI CCM manifests patch more generic
+
+config_patches:
+- rm-capi-machines
+#- platform-external-kubelet # PROBLEM hangin kubelete (network)
+#- platform-external-kcmo
+- deploy-oci-ccm
+- yaml_patch # working for OCI, but need to know the path
+#- line_regex_patch # ideal, but not working as expected
+
+cfg_patch_yaml_patch_specs:
+    ## patch infra object to create External provider
+  - manifest: /manifests/cluster-infrastructure-02-config.yml
+    patch: '{"spec":{"platformSpec":{"type":"External","external":{"platformName":"oci"}}},"status":{"platform":"External","platformStatus":{"type":"External","external":{}}}}'
+
+    ## OCI : Change the namespace from downloaded assets
+  #- manifest: /manifests/oci-cloud-controller-manager-02.yaml
+  #  patch: '{"metadata":{"namespace":"oci-cloud-controller-manager"}}'
+
+cfg_patch_line_regex_patch_specs:
+  - manifest: /manifests/oci-cloud-controller-manager-01-rbac.yaml
+    #search_string: 'namespace: kube-system'
+    regexp: '^(.*)(namespace\\: kube-system)$'
+    #line: 'namespace: oci-cloud-controller-manager'
+    line: '\\1namespace: oci-cloud-controller-manager'
+
+  - manifest:  /manifests/oci-cloud-controller-manager-02.yaml
+    regexp: '^(.*)(namespace\\: kube-system)$'
+    line: '\\1namespace: oci-cloud-controller-manager'
 EOF
+
+
 ```
 
 ### Install the clients
@@ -295,6 +339,28 @@ ansible-playbook mtulio.okd_installer.create_node \
 oc adm certificate approve $(oc get csr  -o json |jq -r '.items[] | select(.status.certificate == null).metadata.name')
 ```
 
+### Create all
+
+```bash
+ansible-playbook mtulio.okd_installer.create_all \
+    -e certs_max_retries=20 \
+    -e cert_wait_interval_sec=60 \
+    -e @./vars-oci-ha.yaml
+```
+
+> TO DO: measure total time
+
+## Review the cluster
+
+```bash
+export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${cluster_name}/auth/kubeconfig
+
+oc get nodes
+oc get co
+```
+
+## OPCT setup
+
 - Create the OPCT [dedicated] node
 
 > https://redhat-openshift-ecosystem.github.io/provider-certification-tool/user/#option-a-command-line
@@ -344,30 +410,14 @@ oc adm taint node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests="
 ~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 report *.tar.gz
 ```
 
+## Generate custom image
 
-### Create all
-
-```bash
-ansible-playbook mtulio.okd_installer.create_all \
-    -e @./vars-oci-ha.yaml \
-    -e certs_max_retries=20 \
-    -e cert_wait_interval_sec=60
 ```
 
-> TO DO: measure total time
-
-## Review the cluster
-
-```bash
-export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${cluster_name}/auth/kubeconfig
-
-oc get nodes
-oc get co
 ```
 
 ## Destroy
 
 ```bash
-ansible-playbook mtulio.okd_installer.destroy_cluster \
-    -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.destroy_cluster -e @./vars-oci-ha.yaml
 ```

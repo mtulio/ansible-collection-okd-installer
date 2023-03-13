@@ -1,0 +1,17 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: {{ _machine_config_role }}
+  name: 02-{{ _machine_config_role }}-kubelet
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+      - overwrite: true
+        path: /etc/kubernetes/kubelet-workaround
+        contents:
+          source: "data:text/plain;charset=utf-8;base64,{{ _mc_kubelet_workaround | ansible.builtin.b64encode }}"
+        mode: 640

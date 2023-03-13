@@ -35,6 +35,7 @@ compute_resources:
     # OCI spec
     spec:
       state: present
+      wait: no
       compartment_id: "{{ oci_compartment_id }}"
       display_name: "{{ cluster_state.infra_id }}-worker-01"
       region: "{{ config_cluster_region }}"
@@ -95,6 +96,7 @@ compute_resources:
     # OCI spec
     spec:
       state: present
+      wait: no
       compartment_id: "{{ oci_compartment_id }}"
       display_name: "{{ cluster_state.infra_id }}-worker-02"
       region: "{{ config_cluster_region }}"
@@ -155,6 +157,7 @@ compute_resources:
     # OCI spec
     spec:
       state: present
+      wait: no
       compartment_id: "{{ oci_compartment_id }}"
       display_name: "{{ cluster_state.infra_id }}-worker-03"
       region: "{{ config_cluster_region }}"

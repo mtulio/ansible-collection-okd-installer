@@ -1,0 +1,11 @@
+--- # step will run to patch manifests before ignitions creation based on config_patches list.
+
+- name: Create | Manifests | Run Load vars
+  ansible.builtin.include_tasks: load.yaml
+
+- name: Create | Apply patches on manifest stage
+  ansible.builtin.include_tasks:
+    file: "patches-manifests/{{ patch_name }}.yaml"
+  loop_control:
+    loop_var: patch_name
+  loop: "{{ config_patches | d('rm-capi-machines') }}"

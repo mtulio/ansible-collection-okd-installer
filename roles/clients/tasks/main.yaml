@@ -18,6 +18,9 @@
     bin_clients: "openshift-client-{{ client_os }}-{{ version | d(release_version) }}"
     bin_oc: "oc-{{ client_os }}-{{ version | d(release_version) }}"
     bin_kubectl: "kubectl-{{ client_os }}-{{ version | d(release_version) }}"
+    bin_butane: "{{ cli_butane_bin }}-{{ cli_butane_version }}"
+
+# Client: openshift-install
 
 - name: openshift-install | Check is present
   ansible.builtin.stat:
@@ -86,6 +89,8 @@
       path: "{{ collection_tmp_dir }}/openshift-install"
     when: ext_bin_inst.changed
 
+# Client: oc
+
 - name: oc | Check openshift client is present
   ansible.builtin.stat:
     path: "{{ collection_bin_dir }}/{{ bin_oc }}"
@@ -127,6 +132,38 @@
       path: "{{ collection_tmp_dir }}/kubectl"
     when: ext_bin_cli.changed
 
+# Client: butane
+
+- name: butane | Check butane client is present
+  ansible.builtin.stat:
+    path: "{{ collection_bin_dir }}/{{ bin_butane }}"
+  register: check_bin_butane
+
+- name: butane | Install clients
+  when: not(check_bin_butane.stat.exists)
+  block:
+  - name: butane | Extract from tarball
+    ansible.builtin.get_url:
+      url: "{{ cli_butane_url }}"
+      dest: "{{ collection_tmp_dir }}/butane"
+      mode: '0440'
+    register: ext_bin_butane
+
+  - name: butane | Copy to bin path
+    ansible.builtin.copy:
+      src: "{{ collection_tmp_dir }}/butane"
+      dest: "{{ collection_bin_dir }}/{{ bin_butane }}"
+      mode: 0755
+    when: ext_bin_butane.changed
+
+  - name: butane | Remove tmp file
+    ansible.builtin.file:
+      state: absent
+      path: "{{ collection_tmp_dir }}/butane"
+    when: ext_bin_butane.changed
+
+# Creating links to binaries
+
 - name: Ensure file links are present
   ansible.builtin.file:
     state: link
@@ -139,6 +176,8 @@
       link: oc
     - src: "{{ bin_kubectl }}"
       link: kubectl
+    - src: "{{ bin_butane }}"
+      link: butane
 
 - name: Show clients path
   ansible.builtin.debug:
@@ -152,3 +191,5 @@
       link: oc
     - src: "{{ bin_kubectl }}"
       link: kubectl
+    - src: "{{ bin_butane }}"
+      link: butane

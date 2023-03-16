@@ -1,10 +1,4 @@
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: cloud-controller-manager
-  namespace: oci-cloud-controller-manager
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -147,16 +141,11 @@ rules:
   - list
   - watch
   - patch
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: oci-cloud-controller-manager
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: system:cloud-controller-manager
-subjects:
-- kind: ServiceAccount
-  name: cloud-controller-manager
-  namespace: oci-cloud-controller-manager
+
+# FIXME: OCP Woraround: allow all
+#- apiGroups:
+#  - "*"
+#  resources:
+#  - "*"
+#  verbs:
+#  - "*"

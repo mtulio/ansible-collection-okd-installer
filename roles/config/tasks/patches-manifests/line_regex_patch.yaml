@@ -2,8 +2,6 @@
 - name: Config | Patch manifests | Line regex
   ansible.builtin.lineinfile:
     path: "{{ config_install_dir }}{{ patch_spec.manifest }}"
-    # search_string: "{{ patch_spec.search_string }}"
-    # line: "{{ patch_spec.line }}"
     backrefs: true
     regexp: "{{ patch_spec.regexp }}"
     line: "{{ patch_spec.line }}"

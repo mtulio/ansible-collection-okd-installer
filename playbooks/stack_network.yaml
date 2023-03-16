@@ -10,9 +10,10 @@
   hosts: '{{target | default("localhost")}}'
   connection: local
   vars:
+    cloud_networks_state: []
     profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
-  pre_tasks:
+  tasks:
     - name: okd-installer | Stack | Network | Include Vars - User Provided
       ansible.builtin.include_vars:
         file: "{{ var_file }}"
@@ -23,16 +24,16 @@
         file: "{{ profile_path }}/network.yaml"
       when: var_file is not defined
 
-    - debug: var=cloud_networks
+    - name: okd-installer | Stack | Network | setup
+      ansible.builtin.include_role:
+        name: cloud_network
 
-  roles:
-    - cloud_network
+    - name: okd-installer | Stack | Network | update cluster_state
+      ansible.builtin.set_fact:
+        cluster_state: "{{ cluster_state | combine({'networks': cloud_networks_state}) }}"
 
-  post_tasks:
-    - debug: var=cloud_networks_state
-
-- name: okd-installer | Stack | Network | Save state
-  ansible.builtin.import_playbook: config.yaml
-  vars:
-    mode: save-state
-    cluster_state: "{{ cluster_state | combine({'network': cloud_networks_state}) }}"
+    - name: okd-installer | Stack | Network | save cluster_state
+      ansible.builtin.include_role:
+        name: config
+      vars:
+        mode: save-state

@@ -1,0 +1,42 @@
+---
+- name: Patch | OCI | CSI | Create Namespace
+  ansible.builtin.template:
+    src: patches/oci/oci-csi-00-namespace.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-csi-00-namespace.yaml"
+    mode: 0644
+
+- name: Patch | OCI | CSI | Load OCI Secret data
+  ansible.builtin.set_fact:
+    oci_ccm_secret_data: "{{ lookup('template', 'patches/oci/oci-ccm-01-secret-data.yaml.j2') | from_yaml }}"
+
+- name: Patch | OCI | CSI | Create Secret
+  ansible.builtin.template:
+    src: patches/oci/oci-csi-01-secret.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-csi-01-secret.yaml"
+    mode: 0644
+  vars:
+    oci_compartment_id: oci_compartment_id
+
+- name: Patch | OCI | CSI | Create RBAC
+  ansible.builtin.template:
+    src: patches/oci/oci-csi-02-rbac.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-csi-02-rbac.yaml"
+    mode: 0644
+
+- name: Patch | OCI | CSI | Create Controller Driver Deployment
+  ansible.builtin.template:
+    src: patches/oci/oci-csi-03-controller-driver.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-csi-03-controller-driver.yaml"
+    mode: 0644
+
+- name: Patch | OCI | CSI | Create Node Driver DaemonSet
+  ansible.builtin.template:
+    src: patches/oci/oci-csi-04-node-driver.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-csi-04-node-driver.yaml"
+    mode: 0644
+
+- name: Patch | OCI | CSI | Create StorageClass
+  ansible.builtin.template:
+    src: patches/oci/oci-csi-05-storageclass.yaml.j2
+    dest: "{{ config_install_dir }}/manifests/oci-csi-05-storageclass.yaml"
+    mode: 0644

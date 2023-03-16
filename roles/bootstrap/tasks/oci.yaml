@@ -7,8 +7,6 @@
     compartment_id: "{{ oci_compartment_id }}"
   register: _objns
 
-- debug: var=_objns
-
 - name: OCI | Create bucket
   oracle.oci.oci_object_storage_bucket:
     compartment_id: "{{ oci_compartment_id }}"
@@ -42,15 +40,11 @@
   register: _objpreauth
   #when: _upload.changed
 
-- debug: var=_objpreauth
-
 - name: OCI | Show existing URLs
   oracle.oci.oci_object_storage_preauthenticated_request_facts:
     namespace_name: "{{ _objns.namespace }}"
     bucket_name: "{{ bootstrap_bucket }}"
   register: _pars
-
-- debug: var=_pars
 
 - name: OCI | Create Signed URL to bootstrap_bucket_signed_url
   ansible.builtin.set_fact:

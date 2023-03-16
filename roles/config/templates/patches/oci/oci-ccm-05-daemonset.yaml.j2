@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: oci-cloud-controller-manager
-  namespace: oci-cloud-controller-manager
+  namespace: {{ oci_ccm_namespace }}
   labels:
     k8s-app: oci-cloud-controller-manager
 spec:
@@ -59,3 +59,20 @@ spec:
             - name: kubernetes
               mountPath: /etc/kubernetes
               readOnly: true
+          env:
+          - name: KUBERNETES_PORT
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP_ADDR
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_PORT_443_TCP_PORT
+            value: "6443"
+          - name: KUBERNETES_PORT_443_TCP_PROTO
+            value: "tcp"
+          - name: KUBERNETES_SERVICE_HOST
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_SERVICE_PORT
+            value: "6443"
+          - name: KUBERNETES_SERVICE_PORT_HTTPS
+            value: "6443"

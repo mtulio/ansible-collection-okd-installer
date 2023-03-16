@@ -7,10 +7,11 @@ bootstrap_bucket: "{{ _cluster_prefix }}-infra"
 # Vars used on Machine/Compute Stack
 _instance_type: "{{ bootstrap_instance | d('m6i.xlarge') }}"
 
-_userdata_template: ocp-nodes-user-data.j2
-openshift_userdata:
-  config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/master"
-  ca_source: "{{ cluster_state.certificates.root_ca }}"
+_userdata_path: "{{ config_install_dir }}/master.ign"
+#_userdata_template: ocp-nodes-user-data.j2
+#openshift_userdata:
+#  config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/master"
+#  ca_source: "{{ cluster_state.certificates.root_ca }}"
 
 
 # Stack Compute (Ansible Role cloud_compute) options:
@@ -65,7 +66,7 @@ compute_resources:
         assign_private_dns_record: true
         hostname_label: "master-01"
       metadata:
-        user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
 
     callbacks:
     - name: nlb
@@ -75,6 +76,7 @@ compute_resources:
         port: 6443
       - name: "{{ cluster_state.infra_id }}-mcs"
         port: 22623
+
 
   #
   # Node role: controlplane
@@ -126,7 +128,7 @@ compute_resources:
         assign_private_dns_record: true
         hostname_label: "master-02"
       metadata:
-        user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
 
     callbacks:
     - name: nlb
@@ -187,7 +189,7 @@ compute_resources:
         assign_private_dns_record: true
         hostname_label: "master-03"
       metadata:
-        user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
 
     callbacks:
     - name: nlb

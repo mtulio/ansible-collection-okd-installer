@@ -1,0 +1,9 @@
+#!/bin/bash
+
+{{ cfg_patch_kubelet_env_workaround_content }}
+
+echo "#> Setting permissions 0644 for /etc/kubernetes/kubelet-workaround"
+sudo chmod 0755 /etc/kubernetes/kubelet-workaround
+
+echo "#> Checking value of /etc/kubernetes/kubelet-workaround"
+cat /etc/kubernetes/kubelet-workaround

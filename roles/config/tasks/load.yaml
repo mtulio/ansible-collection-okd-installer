@@ -1,4 +1,5 @@
 ---
+# This step must run after create-manifest stage
 
 - name: Load | Check required vars - provider
   ansible.builtin.assert:
@@ -18,100 +19,118 @@
       - st_dir.stat.isdir
     fail_msg: "installer dir [{{ config_install_dir }}] is not present. Create config first."
 
-- name: Load | Set bootstrap ignition filename for HA
-  ansible.builtin.set_fact:
-    _filename_bootstrap_ign: "bootstrap.ign"
-
-- name: Load | Variables from ignition files
-  ansible.builtin.set_fact:
-    _installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"
-    _installer_metadata: "{{ lookup('file', config_install_dir + '/metadata.json') }}"
-    _ignition_bootstrap: "{{ lookup('file', config_install_dir + '/' + _filename_bootstrap_ign) }}"
-    installer_coreos_stream: "{{ lookup('file', config_install_dir + '/coreos-stream.json') }}"
-  no_log: true
-
-- name: Load | Set defaults short vars
-  ansible.builtin.set_fact:
-    base_domain: "{{ _installer_state[\"*installconfig.InstallConfig\"][\"config\"][\"baseDomain\"] }}"
-    tags: {}
-    image_id_ign: "{{ _installer_state[\"*rhcos.Image\"] | d('') }}"
-    _region: "{{ config_cluster_region | d(lookup('env', 'CONFIG_REGION')) }}"
-    _provider: "{{ provider | d('NA') }}"
-    _arch: "{{ arch | d('x86_64') }}"
-
-- name: Load | Set custom_image_id from os_mirror config
-  when: os_mirror and (os_mirror_from == 'stream_artifacts')
-  block:
-  - name: Load | Set custom_image_url from os_mirror config
-    ansible.builtin.set_fact:
-      custom_image_url: "{{ \
-        installer_coreos_stream\
-        .architectures[os_mirror_stream.architecture]\
-        .artifacts[os_mirror_stream.artifact]\
-        .formats[os_mirror_stream.format]\
-        .disk.location | d('') }}"
-
-  - name: Load | Set custom_image_id from os_mirror config
-    ansible.builtin.set_fact:
-      custom_image_id: "{{ custom_image_url | basename }}"
-
-- name: Load | Lookup ImageID
-  block:
-  - name: Load | Lookup ImageID | Check image
-    ansible.builtin.set_fact:
-      image_id_stream: "{{ installer_coreos_stream.architectures[_arch].images[_provider].regions[_region].image | d('') }}"
-    when:
-      - _provider != 'NA'
-  when:
-    - custom_image_id | d('') == ''
-    - image_id_ign == ''
+# - name: Load | Set bootstrap ignition filename for HA
+#   ansible.builtin.set_fact:
+#     _filename_bootstrap_ign: "bootstrap.ign"
 
 - name: Load | Check if cluster_state file
   ansible.builtin.stat:
     path: "{{ config_install_dir + '/cluster_state.json' }}"
   register: st_out
 
+- name: Load | Create initial cluster_state
+  when: not(st_out.stat.exists)
+  block:
+  - name: Load | Load variables from manifests
+    ansible.builtin.set_fact:
+      #_installer_state: "{{ lookup('file', config_install_dir + '/.openshift_install_state.json') }}"
+      #_installer_metadata: "{{ lookup('file', config_install_dir + '/metadata.json') }}"
+      #_ignition_bootstrap: "{{ lookup('file', config_install_dir + '/' + _filename_bootstrap_ign) }}"
+      _installer_coreos_stream: "{{ lookup('file', config_install_dir + '/coreos-stream.json') }}"
+      _manifest_capi_userdata_master_secret: "{{ lookup('file', config_install_dir + '/openshift/99_openshift-cluster-api_master-user-data-secret.yaml') | from_yaml }}"
+      _manifest_capi_userdata_worker_secret: "{{ lookup('file', config_install_dir + '/openshift/99_openshift-cluster-api_worker-user-data-secret.yaml') | from_yaml }}"
+      _manifest_infrastructure_obj: "{{ lookup('file', config_install_dir + '/manifests/cluster-infrastructure-02-config.yml') | from_yaml }}"
+      _manifest_installconfig_cm: "{{ lookup('file', config_install_dir + '/manifests/cluster-config.yaml') | from_yaml }}"
+    # no_log: true
+
+  - name: Load | Load from install-config
+    ansible.builtin.set_fact:
+      _manifest_installconfig: "{{ _manifest_installconfig_cm.data['install-config'] | from_yaml }}"
+      _manifest_capi_userdata_master: "{{ _manifest_capi_userdata_master_secret.data.userData | b64decode }}"
+      _manifest_capi_userdata_worker: "{{ _manifest_capi_userdata_worker_secret.data.userData | b64decode }}"
+
+  # - debug: var=_manifest_installconfig_cm
+  # - debug: var=_manifest_installconfig
+  # - debug: var=_manifest_infrastructure_obj
+  # - debug: var=_manifest_capi_userdata_master_secret
+  # - debug: var=_manifest_capi_userdata_master
+
+  - name: Load | Set defaults short vars
+    ansible.builtin.set_fact:
+      #base_domain: "{{ _installer_state[\"*installconfig.InstallConfig\"][\"config\"][\"baseDomain\"] }}"
+      #base_domain: 
+      #image_id_ign: "{{ _installer_state[\"*rhcos.Image\"] | d('') }}"
+      tags: {}
+      _infrastructureName: "{{ _manifest_infrastructure_obj.status.infrastructureName }}"
+      _region: "{{ config_cluster_region | d(lookup('env', 'CONFIG_REGION')) }}"
+      _provider: "{{ provider | d('NA') }}"
+      _arch: "{{ arch | d('x86_64') }}"
+
+  - name: Load | Set custom_image_id from os_mirror config
+    when: os_mirror and (os_mirror_from == 'stream_artifacts')
+    block:
+    - name: Load | Set custom_image_url from os_mirror config
+      ansible.builtin.set_fact:
+        custom_image_url: "{{ \
+          _installer_coreos_stream\
+          .architectures[os_mirror_stream.architecture]\
+          .artifacts[os_mirror_stream.artifact]\
+          .formats[os_mirror_stream.format]\
+          .disk.location | d('') }}"
+
+    - name: Load | Set custom_image_id from os_mirror config
+      ansible.builtin.set_fact:
+        custom_image_id: "{{ custom_image_url | basename }}"
+
+  - name: Load | Lookup ImageID
+    block:
+    - name: Load | Lookup ImageID | Check image
+      ansible.builtin.set_fact:
+        image_id_stream: "{{ _installer_coreos_stream.architectures[_arch].images[_provider].regions[_region].image | d('') }}"
+      when:
+        - _provider != 'NA'
+    when:
+      - custom_image_id | d('') == ''
+      - image_id_ign == ''
+  - name: Load | Create initial cluster_state
+    ansible.builtin.set_fact:
+      cluster_state:
+        cluster_name: "{{ _manifest_installconfig.metadata.name }}"
+        cluster_id: "{{ _infrastructureName }}"
+        infra_id: "{{ _infrastructureName }}"
+        tags: "{% set x = tags.__setitem__('kubernetes.io/cluster/' + _infrastructureName, 'owned') %}{{ tags }}"
+        region: "{{ _region }}"
+        platform:
+          provider: "{{ _provider }}"
+          platform: "{{ config_platform | d('none') }}"
+        dns:
+          base_domain: "{{ _manifest_installconfig.baseDomain  }}"
+          base_domain_id: ''
+          cluster_domain: "{{ _manifest_installconfig.metadata.name }}.{{ _manifest_installconfig.baseDomain  }}"
+          cluster_domain_id: ''
+          registers: []
+        network:
+          vpc_id: ''
+          subnets: []
+        loadbalancers: {}
+        compute:
+          image_id: "{{ custom_image_id | d(image_id_stream) | d(image_id_ign) }}"
+          image_url: "{{ custom_image_url | d('') }}"
+          iam_profile_bootstrap: "{{ _infrastructureName }}-instance-bootstrap"
+          iam_profile_compute: "{{ _infrastructureName }}-instance-compute"
+          iam_profile_controlplane: "{{ _infrastructureName }}-instance-controlPlane"
+          user_data_master: "{{ _manifest_capi_userdata_master }}"
+          user_data_worker: "{{ _manifest_capi_userdata_worker }}"
+        iam:
+          profile_bootstrap: "{{ _infrastructureName }}-instance-bootstrap"
+          profile_controlplane: "{{ _infrastructureName }}-instance-controlplane"
+          profile_compute: "{{ _infrastructureName }}-instance-compute"
+
 - name: Load | Set local cluster_state
   ansible.builtin.set_fact:
     cluster_state: "{{ lookup('file', config_install_dir + '/cluster_state.json', errors='ignore') }}"
   when: st_out.stat.exists
 
-- name: Load | Create initial cluster_state
-  ansible.builtin.set_fact:
-    cluster_state:
-      cluster_name: "{{ _installer_metadata.clusterName }}"
-      cluster_id: "{{ _installer_metadata.clusterID }}"
-      infra_id: "{{ _installer_metadata.infraID }}"
-      tags: "{% set x = tags.__setitem__('kubernetes.io/cluster/' + _installer_metadata.infraID, 'owned') %}{{ tags }}"
-      region: "{{ _region }}"
-      platform:
-        provider: "{{ _provider }}"
-        platform: "{{ config_platform | d('none') }}"
-      dns:
-        base_domain: "{{ base_domain }}"
-        base_domain_id: ''
-        cluster_domain: "{{ _installer_metadata.clusterName }}.{{ base_domain }}"
-        cluster_domain_id: ''
-        registers: []
-      network:
-        vpc_id: ''
-        subnets: []
-      loadbalancers: {}
-      compute:
-        image_id: "{{ custom_image_id | d(image_id_stream) | d(image_id_ign) }}"
-        image_url: "{{ custom_image_url | d('') }}"
-        iam_profile_bootstrap: "{{ _installer_metadata.infraID }}-instance-bootstrap"
-        iam_profile_compute: "{{ _installer_metadata.infraID }}-instance-compute"
-        iam_profile_controlplane: "{{ _installer_metadata.infraID }}-instance-controlPlane"
-      certificates:
-        root_ca: "{{ _ignition_bootstrap | json_query(query_root_ca) | join('') }}"
-      iam:
-        profile_bootstrap: "{{ _installer_metadata.infraID }}-instance-bootstrap"
-        profile_controlplane: "{{ _installer_metadata.infraID }}-instance-controlplane"
-        profile_compute: "{{ _installer_metadata.infraID }}-instance-compute"
-  vars:
-    query_root_ca: "storage.files[?path=='/opt/openshift/tls/root-ca.crt'].contents.source"
-  when: not(st_out.stat.exists)
 
 - name: Load | Save state
   ansible.builtin.include_tasks: save-state.yaml

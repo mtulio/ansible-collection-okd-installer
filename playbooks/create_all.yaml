@@ -12,17 +12,18 @@
 # - name: OKD Installer | Create all | check required vars
 #   ansible.builtin.import_playbook: var_check_required.yaml
 
-- name: OKD Installer | Create all | create config
+- name: OKD Installer | Create all | Config | create config
   ansible.builtin.import_playbook: config.yaml
   vars:
-    mode: create
+    mode: create-config
+
+- name: OKD Installer | Create all | Config | create config
+  ansible.builtin.import_playbook: config.yaml
+  vars:
+    mode: create-manifests
 
 - name: OKD Installer | Create all | create stack | IAM
   ansible.builtin.import_playbook: stack_iam.yaml
-
-- name: OKD Installer | Create all | os_mirror
-  ansible.builtin.import_playbook: os_mirror.yaml
-  when: os_mirror | d(false)
 
 - name: OKD Installer | Create all | create stack | network
   ansible.builtin.import_playbook: stack_network.yaml
@@ -32,6 +33,20 @@
 
 - name: OKD Installer | Create all | create stack | Load Balancer
   ansible.builtin.import_playbook: stack_loadbalancer.yaml
+
+- name: OKD Installer | Create all | Config | patch manifests
+  ansible.builtin.import_playbook: config.yaml
+  vars:
+    mode: patch-manifests
+
+- name: OKD Installer | Create all | Config | create ignitions
+  ansible.builtin.import_playbook: config.yaml
+  vars:
+    mode: create-ignitions
+
+- name: OKD Installer | Create all | os_mirror
+  ansible.builtin.import_playbook: os_mirror.yaml
+  when: os_mirror | d(false)
 
 - name: OKD Installer | Create all | create stack | Compute
   ansible.builtin.import_playbook: create_node_all.yaml

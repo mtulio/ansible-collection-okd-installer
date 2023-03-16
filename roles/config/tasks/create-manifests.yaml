@@ -1,0 +1,28 @@
+--- # create-config manages the install-config.yaml
+
+- name: Create | Manifests | Run Check vars
+  ansible.builtin.include_tasks: check.yaml
+
+- name: Create | Manifests | Run custom assertions
+  ansible.builtin.include_tasks: create-assertions.yaml
+
+- name: Create | Manifests | Check
+  when: _installconfig.stat.exists
+  ansible.builtin.debug:
+    msg: "install-config must be created first with 'create-config'"
+
+- name: Create | Manifests | Generate
+  when:
+    - not(_manifests.stat.exists)
+    - not(_metadata.stat.exists)
+  block:
+  - name: Create | Create manifests
+    ansible.builtin.shell: |
+      {{ bin_openshift_install }} create manifests --dir {{ config_install_dir }}
+    environment: "{{ config_installer_environment | d(omit) }}"
+
+- name: Create | Manifests | CoreOS Stream JSON
+  ansible.builtin.include_tasks: create-coreostream.yml
+
+- name: Create | Manifests | Load/Create cluster_state.json
+  ansible.builtin.include_tasks: load.yaml

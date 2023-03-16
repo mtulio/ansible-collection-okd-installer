@@ -1,6 +1,0 @@
----
-- name: Patch | Create KCMO Config for External provider
-  ansible.builtin.template:
-    src: patches/cm-kcmo-external.yaml.j2
-    dest: "{{ config_install_dir }}/manifests/kube-controller-manager-operator-configmap.yaml"
-    mode: 0644

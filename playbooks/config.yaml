@@ -2,6 +2,7 @@
 - name: okd-installer | Installer Configuration
   hosts: localhost
   connection: local
+  #gather_facts: yes
 
   roles:
     - config

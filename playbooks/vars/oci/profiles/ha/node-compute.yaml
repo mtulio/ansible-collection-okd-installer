@@ -1,18 +1,6 @@
 ---
-_cluster_prefix: "{{ cluster_state.infra_id }}"
-
-# Vars used on Bootstrap
-bootstrap_bucket: "{{ _cluster_prefix }}-infra"
-
 # Vars used on Machine/Compute Stack
-_instance_type: "{{ bootstrap_instance | d('m6i.xlarge') }}"
-_instance_profile: "{{ cluster_state.compute.iam_profile_bootstrap }}"
-_image_id: "{{ custom_image_id | d(cluster_state.compute.image_id) }}"
-
-_userdata_template: ocp-nodes-user-data.j2
-openshift_userdata:
-  config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/worker"
-  ca_source: "{{ cluster_state.certificates.root_ca }}"
+_userdata_path: "{{ config_install_dir }}/worker.ign"
 
 # Stack Compute (Ansible Role cloud_compute) options:
 compute_resources:
@@ -35,7 +23,7 @@ compute_resources:
     # OCI spec
     spec:
       state: present
-      wait: no
+      wait: yes
       compartment_id: "{{ oci_compartment_id }}"
       display_name: "{{ cluster_state.infra_id }}-worker-01"
       region: "{{ config_cluster_region }}"
@@ -48,8 +36,8 @@ compute_resources:
       #   type: AMD_VM
       shape: "VM.Standard.E4.Flex"
       shape_config:
-        ocpus: 4
-        memory_in_gbs: 16
+        ocpus: 2
+        memory_in_gbs: 8
         #baseline_ocpu_utilization: BASELINE_1_8
         #nvmes: 1
       agent_config:
@@ -66,7 +54,7 @@ compute_resources:
         assign_private_dns_record: true
         hostname_label: "worker-01"
       metadata:
-        user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
 
     callbacks:
     - name: nlb
@@ -96,7 +84,7 @@ compute_resources:
     # OCI spec
     spec:
       state: present
-      wait: no
+      wait: yes
       compartment_id: "{{ oci_compartment_id }}"
       display_name: "{{ cluster_state.infra_id }}-worker-02"
       region: "{{ config_cluster_region }}"
@@ -109,8 +97,8 @@ compute_resources:
       #   type: AMD_VM
       shape: "VM.Standard.E4.Flex"
       shape_config:
-        ocpus: 4
-        memory_in_gbs: 16
+        ocpus: 2
+        memory_in_gbs: 8
         #baseline_ocpu_utilization: BASELINE_1_8
         #nvmes: 1
       agent_config:
@@ -127,7 +115,7 @@ compute_resources:
         assign_private_dns_record: true
         hostname_label: "worker-02"
       metadata:
-        user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
 
     callbacks:
     - name: nlb
@@ -170,8 +158,8 @@ compute_resources:
       #   type: AMD_VM
       shape: "VM.Standard.E4.Flex"
       shape_config:
-        ocpus: 4
-        memory_in_gbs: 16
+        ocpus: 2
+        memory_in_gbs: 8
         #baseline_ocpu_utilization: BASELINE_1_8
         #nvmes: 1
       agent_config:
@@ -188,7 +176,7 @@ compute_resources:
         assign_private_dns_record: true
         hostname_label: "worker-03"
       metadata:
-        user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string | b64encode }}"
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
 
     callbacks:
     - name: nlb

@@ -5,4 +5,4 @@
     dest: "{{ config_install_dir + '/cluster_state.json' }}"
     content: "{{ cluster_state }}"
     mode: 0644
-  changed_when: false
+  #changed_when: false

@@ -14,9 +14,7 @@ _subnet_name: "{{ _cluster_prefix }}-net-public-1a"
 _machine_suffix: ''
 
 ## User Data template
-openshift_userdata:
-  # config_source: "{{ bootstrap_bucket_signed_url }}"
-  config_source: "{{ bootstrap_bucket_signed_url }}"
+userdata_config_source: "{{ bootstrap_bucket_signed_url }}"
 
 ## Common vars used in the Stack vars
 # _common:

@@ -1,22 +1,6 @@
 ---
 
-- ansible.builtin.include_tasks: ./yaml_patch_exec.yaml
+- ansible.builtin.include_tasks: ./yaml_patch_run.yaml
   loop: "{{ cfg_patch_yaml_patch_specs }}"
   loop_control:
     loop_var: patch_spec
-
-# - name: patch | reading file {{ config_install_dir + cfg_patch_generic_update.filename }}
-#   set_fact:
-#     patch_file: "{{ lookup('file', config_install_dir + cfg_patch_generic_update.filename) | from_yaml }}"
-
-# - debug: var=patch_file
-# - debug: var=cfg_patch_generic_update.patch
-
-# - name: patch | patching content
-#   set_fact:
-#     new_content: "{{ patch_file | combine(cfg_patch_generic_update.patch|from_json, recursive=True) }}"
-
-# - name: patch | saving file {{ config_install_dir + cfg_patch_generic_update.filename }}
-#   copy:
-#     dest: "{{ config_install_dir + cfg_patch_generic_update.filename }}"
-#     content: "{{ new_content | to_nice_yaml(indent=2) }}"

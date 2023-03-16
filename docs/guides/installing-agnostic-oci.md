@@ -160,8 +160,9 @@ OCP_RELEASE_413="quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
 EOF
 source ~/.openshift/env
 
-CLUSTER_NAME=oci-cr3cmo
-cat <<EOF > ./vars-oci-ha_${CLUSTER_NAME}.yaml
+CLUSTER_NAME=oci-t10
+VAR_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
+cat <<EOF > ${VAR_FILE}
 provider: oci
 cluster_name: ${CLUSTER_NAME}
 config_cluster_region: us-sanjose-1
@@ -176,7 +177,7 @@ cluster_profile: ha
 destroy_bootstrap: no
 
 config_base_domain: splat-oci.devcluster.openshift.com
-config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
+config_ssh_key: "$(cat ~/.ssh/id_rsa.pub;cat ~/.ssh/openshift-dev.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
 #config_cluster_version: 4.13.0-ec.3-x86_64
@@ -221,7 +222,8 @@ os_mirror_to_oci:
 
 config_patches:
 - rm-capi-machines
-#- platform-external-kubelet # PROBLEM hangin kubelete (network)
+#- mc-kubelet-env-workaround # PROBLEM hangin kubelet (network)
+- mc-kubelet-providerid
 #- platform-external-kcmo
 - deploy-oci-ccm
 - yaml_patch # working for OCI, but need to know the path
@@ -231,10 +233,6 @@ cfg_patch_yaml_patch_specs:
     ## patch infra object to create External provider
   - manifest: /manifests/cluster-infrastructure-02-config.yml
     patch: '{"spec":{"platformSpec":{"type":"External","external":{"platformName":"oci"}}},"status":{"platform":"External","platformStatus":{"type":"External","external":{}}}}'
-
-    ## OCI : Change the namespace from downloaded assets
-  #- manifest: /manifests/oci-cloud-controller-manager-02.yaml
-  #  patch: '{"metadata":{"namespace":"oci-cloud-controller-manager"}}'
 
 cfg_patch_line_regex_patch_specs:
   - manifest: /manifests/oci-cloud-controller-manager-01-rbac.yaml
@@ -246,15 +244,21 @@ cfg_patch_line_regex_patch_specs:
   - manifest:  /manifests/oci-cloud-controller-manager-02.yaml
     regexp: '^(.*)(namespace\\: kube-system)$'
     line: '\\1namespace: oci-cloud-controller-manager'
-EOF
 
+#cfg_patch_kubelet_providerid_script: |
+#    KUBELET_PROVIDERID=\$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/#instance/ | jq -r .id); echo "KUBELET_PROVIDERID=\$KUBELET_PROVIDERID}" | sudo tee -a /etc/#kubernetes/kubelet-workaround
+
+cfg_patch_kubelet_providerid_script: |
+    PROVIDERID=$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/instance/ | jq -r .id);
+
+EOF
 
 ```
 
 ### Install the clients
 
 ```bash
-ansible-playbook mtulio.okd_installer.install_clients -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.install_clients -e @$VAR_FILE
 ```
 
 ### Create the Installer Configuration
@@ -263,77 +267,140 @@ Create the installation configuration:
 
 
 ```bash
-ansible-playbook mtulio.okd_installer.config \
-    -e mode=create \
-    -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.config -e mode=create-config -e @$VAR_FILE
 ```
 
-### Mirror the image
+The rendered install-config.yaml will be available on the following path:
 
-- Mirror image
+- `~/.ansible/okd-installer/clusters/$CLUSTER_NAME/install-config.yaml`
 
-> Example: `$ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json`
+If you want to skip this part, place your own install-config.yaml on the same
+path and go to the next step.
+
+### Create the Installer manifests
+
+Create the installation configuration:
 
 ```bash
-ansible-playbook mtulio.okd_installer.os_mirror -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.config -e mode=create-manifests -e @$VAR_FILE
 ```
 
-### Create the Network Stack
+The manifests will be rendered and saved on the install directory:
 
-```bash
-ansible-playbook mtulio.okd_installer.stack_network \
-    -e @./vars-oci-ha.yaml
-```
+- `~/.ansible/okd-installer/clusters/$CLUSTER_NAME/`
+
+If you want to skip that part, with your own manifests, you must be able to run
+the `openshift-install create manifests` under the install dir, and the file
+`manifests/cluster-config.yaml` is created correctly.
+
+The infrastructure manifest also must exist on path: `manifests/cluster-infrastructure-02-config.yml`.
+
+
+**After this stage, the file `$install_dir/cluster_state.json` will be created and populated with the stack results.**
 
 ### IAM Stack
 
 N/A
 
+> TODO: create Compartment validations
+
+### Create the Network Stack
+
+```bash
+ansible-playbook mtulio.okd_installer.stack_network -e @$VAR_FILE
+```
+
 ### DNS Stack
 
 ```bash
-ansible-playbook mtulio.okd_installer.stack_dns \
-    -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.stack_dns -e @$VAR_FILE
 ```
 
 ### Load Balancer Stack
 
 ```bash
-ansible-playbook mtulio.okd_installer.stack_loadbalancer \
-    -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.stack_loadbalancer -e @$VAR_FILE
+```
+
+### Config Commit
+
+This stage allows the user to modify the cluster configurations (manifests),
+then generate the ignition files used to create the cluster.
+
+#### Manifest patches (pre-ign)
+
+> TODO/WIP
+
+In this step the playbooks will apply any patchs to the manifests,
+according to the vars file `config_patches`.
+
+The `config_patches` are predefined tasks that will run to reach specific goals.
+
+If you wouldn't like to apply patches, leave the empty value `config_patches: []`.
+
+If you would like to apply patches manually, you can do it changing the manifests
+on the install dir. Default install dir path: `~/.ansible/okd-installer/clusters/${cluster_name}/*`
+
+```bash
+ansible-playbook mtulio.okd_installer.config -e mode=patch-manifests -e @$VAR_FILE
+```
+
+#### Config generation (ignitions)
+
+> TODO/WIP
+
+This steps should be the last before the configuration be 'commited':
+
+- `create ignitions` when using `openshift-install` as config provider
+- `` when using `assisted installer` as a config provider
+
+```bash
+ansible-playbook mtulio.okd_installer.config -e mode=create-ignitions -e @$VAR_FILE
+```
+
+<!-- #### Ignition patchs (Post)
+
+> TODO? there's no used case to patch the ingnition files, and it's not recommended. So keeping this section hiden to the document for future review. -->
+
+### Mirror OS boot image
+
+- Download image from URL provided by openshift-install coreos-stream
+
+> Example: `$ jq -r '.architectures["x86_64"].artifacts.openstack.formats["qcow2.gz"].disk.location' ~/.ansible/okd-installer/clusters/ocp-oci/coreos-stream.json`
+
+```bash
+ansible-playbook mtulio.okd_installer.os_mirror -e @$VAR_FILE
 ```
 
 ### Compute Stack
 
-#### Bootstrap
+#### Bootstrap node
 
 - Upload the bootstrap ignition to blob and Create the Bootstrap Instance
 
 ```bash
-ansible-playbook mtulio.okd_installer.create_node \
-    -e node_role=bootstrap \
-    -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.create_node -e node_role=bootstrap -e @$VAR_FILE
 ```
+
+#### Control Plane nodes
 
 - Create the Control Plane nodes
 
 ```bash
-ansible-playbook mtulio.okd_installer.create_node \
-    -e node_role=controlplane \
-    -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.create_node -e node_role=controlplane -e @$VAR_FILE
 ```
+
+#### Compute/worker nodes
 
 - Create the Compute nodes
 
 ```bash
-ansible-playbook mtulio.okd_installer.create_node \
-    -e node_role=compute \
-    -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.create_node -e node_role=compute -e @$VAR_FILE
 ```
 
 > TODO: create instance Pool
 
-> TODO: Approve certificates (bash loop or use existing playbook)
+- Approve worker nodes certificates signing requests (CSR)
 
 ```bash
 oc adm certificate approve $(oc get csr  -o json |jq -r '.items[] | select(.status.certificate == null).metadata.name')
@@ -345,10 +412,8 @@ oc adm certificate approve $(oc get csr  -o json |jq -r '.items[] | select(.stat
 ansible-playbook mtulio.okd_installer.create_all \
     -e certs_max_retries=20 \
     -e cert_wait_interval_sec=60 \
-    -e @./vars-oci-ha.yaml
+    -e @$VAR_FILE
 ```
-
-> TO DO: measure total time
 
 ## Review the cluster
 
@@ -359,65 +424,8 @@ oc get nodes
 oc get co
 ```
 
-## OPCT setup
-
-- Create the OPCT [dedicated] node
-
-> https://redhat-openshift-ecosystem.github.io/provider-certification-tool/user/#option-a-command-line
-
-```bash
-# Create OPCT node
-ansible-playbook mtulio.okd_installer.create_node \
-    -e node_role=opct \
-    -e @./vars-oci-ha.yaml
-```
-
-- OPCT dedicated node setup
-
-```bash
-
-# Set the OPCT requirements (registry, labels, wait-for COs stable)
-ansible-playbook ../opct/hack/opct-runner/opct-run-tool-preflight.yaml -e cluster_name=oci -D
-
-oc label node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests=""
-oc adm taint node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests="":NoSchedule
-
-```
-
-- OPCT regular
-
-```bash
-# Run OPCT
-~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 run -w
-
-# Get the results and explore it
-~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 retrieve
-~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 results *.tar.gz
-~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 report *.tar.gz
-```
-
-- OPCT upgrade mode
-
-```bash
-# from a cluster 4.12.1, run upgrade conformance to 4.13
-~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 run -w \
-  --mode=upgrade \
-  --upgrade-to-image=$(oc adm release info 4.13.0-ec.2 -o jsonpath={.image})
-
-# Get the results and explore it
-~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 retrieve
-~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 results *.tar.gz
-~/opct/bin/openshift-provider-cert-linux-amd64-v0.3.0 report *.tar.gz
-```
-
-## Generate custom image
-
-```
-
-```
-
 ## Destroy
 
 ```bash
-ansible-playbook mtulio.okd_installer.destroy_cluster -e @./vars-oci-ha.yaml
+ansible-playbook mtulio.okd_installer.destroy_cluster -e @$VAR_FILE
 ```

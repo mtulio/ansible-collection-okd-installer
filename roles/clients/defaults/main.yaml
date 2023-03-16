@@ -20,3 +20,10 @@ release_image_version_arch: "{{ release_image }}:{{ release_version }}"
 
 workdir: "{{ lookup('env', 'HOME') }}/.ansible/okd-installer"
 client_os: linux
+
+## Butane https://github.com/coreos/butane
+cli_butane_version: v0.17.0
+cli_butane_arch: x86_64
+cli_butane_os: unknown-linux-gnu
+cli_butane_bin: "butane-{{ cli_butane_arch }}-{{ cli_butane_os }}"
+cli_butane_url: "https://github.com/coreos/butane/releases/download/{{ cli_butane_version }}/{{ cli_butane_bin }}"

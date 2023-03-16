@@ -1,0 +1,9 @@
+---
+
+- name: Create | Create CoreOS Stream JSON
+  when: not(_coreosstream.stat.exists)
+  ansible.builtin.shell: |
+    {{ bin_openshift_install }} coreos print-stream-json \
+      > {{ config_install_dir }}/coreos-stream.json
+  environment: "{{ config_installer_environment | d(omit) }}"
+

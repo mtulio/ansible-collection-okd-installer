@@ -10,6 +10,7 @@
   hosts: '{{target|default("localhost")}}'
   connection: local
   vars:
+    cloud_loadbalancers_state: []
     profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
   pre_tasks:
@@ -23,11 +24,16 @@
         file: "{{ profile_path }}/loadbalancer.yaml"
       when: var_file is not defined
 
-  roles:
-    - cloud_load_balancer
+    - name: okd-installer | Stack | LB | setup
+      ansible.builtin.include_role:
+        name: cloud_load_balancer
 
-- name: okd-installer | Stack | LB | Save state
-  ansible.builtin.import_playbook: config.yaml
-  vars:
-    mode: save-state
-    cluster_state: "{{ cluster_state | combine({'load_balancers': cloud_load_balancers_state}) }}"
+    - name: okd-installer | Stack | LB | update cluster_state
+      ansible.builtin.set_fact:
+        cluster_state: "{{ cluster_state | combine({'loadbalancers': cloud_loadbalancers_state}) }}"
+
+    - name: okd-installer | Stack | LB | save cluster_state
+      ansible.builtin.include_role:
+        name: config
+      vars:
+        mode: save-state

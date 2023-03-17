@@ -160,7 +160,7 @@ OCP_RELEASE_413="quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
 EOF
 source ~/.openshift/env
 
-CLUSTER_NAME=oci-t12
+CLUSTER_NAME=oci-t13
 VAR_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VAR_FILE}
@@ -227,7 +227,7 @@ config_patches:
 - mc-kubelet-providerid
 #- platform-external-kcmo
 - deploy-oci-ccm
-- deploy-oci-csi
+#- deploy-oci-csi
 - yaml_patch # working for OCI, but need to know the path
 #- line_regex_patch # ideal, but not working as expected
 

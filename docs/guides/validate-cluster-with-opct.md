@@ -7,7 +7,8 @@
 ```bash
 # Create OPCT node
 ansible-playbook mtulio.okd_installer.create_node \
-    -e node_role=opct \
+    -e node_role=generic -e sufix=opct-01 -e cpu=4 -e mem=16 \
+    -e subnet=private -e nsg=compute \
     -e @$VAR_FILE
 ```
 
@@ -16,10 +17,10 @@ ansible-playbook mtulio.okd_installer.create_node \
 ```bash
 
 # Set the OPCT requirements (registry, labels, wait-for COs stable)
-ansible-playbook ../opct/hack/opct-runner/opct-run-tool-preflight.yaml -e cluster_name=oci-t11 -D
-
 oc label node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests=""
 oc adm taint node opct-01.priv.ocp.oraclevcn.com node-role.kubernetes.io/tests="":NoSchedule
+
+ansible-playbook ../opct/hack/opct-runner/opct-run-tool-preflight.yaml -e cluster_name=oci-t11 -D
 
 ```
 

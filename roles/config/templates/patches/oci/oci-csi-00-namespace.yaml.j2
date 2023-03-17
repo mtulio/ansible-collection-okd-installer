@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: oci-csi
+  name: {{ oci_csi_namespace }}
   annotations:
     workload.openshift.io/allowed: management
   labels:

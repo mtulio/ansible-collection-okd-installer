@@ -5,7 +5,7 @@ metadata:
     deprecated.daemonset.template.generation: "1"
   generation: 1
   name: csi-oci-controller
-  namespace: oci-csi
+  namespace: {{ oci_csi_namespace }}
 spec:
   revisionHistoryLimit: 10
   selector:
@@ -29,13 +29,31 @@ spec:
             - --feature-gates=Topology=true
             - --timeout=120s
             - --leader-election
-            - --leader-election-namespace=kube-system
+            - --leader-election-namespace={{ oci_csi_namespace }}
           volumeMounts:
             - name: config
               mountPath: /etc/oci/
               readOnly: true
             - mountPath: /var/run/shared-tmpfs
               name: shared-tmpfs
+          env:
+          - name: KUBERNETES_PORT
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP_ADDR
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_PORT_443_TCP_PORT
+            value: "6443"
+          - name: KUBERNETES_PORT_443_TCP_PROTO
+            value: "tcp"
+          - name: KUBERNETES_SERVICE_HOST
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_SERVICE_PORT
+            value: "6443"
+          - name: KUBERNETES_SERVICE_PORT_HTTPS
+            value: "6443"
+
         - name: csi-fss-volume-provisioner
           image: k8s.gcr.io/sig-storage/csi-provisioner:v3.2.1
           args:
@@ -44,26 +62,62 @@ spec:
             - --feature-gates=Topology=true
             - --timeout=120s
             - --leader-election
-            - --leader-election-namespace=kube-system
+            - --leader-election-namespace={{ oci_csi_namespace }}
           volumeMounts:
             - name: config
               mountPath: /etc/oci/
               readOnly: true
             - mountPath: /var/run/shared-tmpfs
               name: shared-tmpfs
+          env:
+          - name: KUBERNETES_PORT
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP_ADDR
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_PORT_443_TCP_PORT
+            value: "6443"
+          - name: KUBERNETES_PORT_443_TCP_PROTO
+            value: "tcp"
+          - name: KUBERNETES_SERVICE_HOST
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_SERVICE_PORT
+            value: "6443"
+          - name: KUBERNETES_SERVICE_PORT_HTTPS
+            value: "6443"
+
         - name: csi-attacher
           image: k8s.gcr.io/sig-storage/csi-attacher:v4.2.0
           args:
             - --csi-address=/var/run/shared-tmpfs/csi.sock
             - --timeout=120s
             - --leader-election=true
-            - --leader-election-namespace=kube-system
+            - --leader-election-namespace={{ oci_csi_namespace }}
           volumeMounts:
             - name: config
               mountPath: /etc/oci/
               readOnly: true
             - mountPath: /var/run/shared-tmpfs
               name: shared-tmpfs
+          env:
+          - name: KUBERNETES_PORT
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP_ADDR
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_PORT_443_TCP_PORT
+            value: "6443"
+          - name: KUBERNETES_PORT_443_TCP_PROTO
+            value: "tcp"
+          - name: KUBERNETES_SERVICE_HOST
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_SERVICE_PORT
+            value: "6443"
+          - name: KUBERNETES_SERVICE_PORT_HTTPS
+            value: "6443"
+
         - name: csi-resizer
           image: k8s.gcr.io/sig-storage/csi-resizer:v1.7.0
           args:
@@ -73,6 +127,24 @@ spec:
           volumeMounts:
             - mountPath: /var/run/shared-tmpfs
               name: shared-tmpfs
+          env:
+          - name: KUBERNETES_PORT
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP_ADDR
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_PORT_443_TCP_PORT
+            value: "6443"
+          - name: KUBERNETES_PORT_443_TCP_PROTO
+            value: "tcp"
+          - name: KUBERNETES_SERVICE_HOST
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_SERVICE_PORT
+            value: "6443"
+          - name: KUBERNETES_SERVICE_PORT_HTTPS
+            value: "6443"
+        
         - name: oci-csi-controller-driver
           args:
             - --endpoint=unix://var/run/shared-tmpfs/csi.sock
@@ -90,6 +162,24 @@ spec:
               readOnly: true
             - mountPath: /var/run/shared-tmpfs
               name: shared-tmpfs
+          env:
+          - name: KUBERNETES_PORT
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP
+            value: "tcp://api-int.{{ cluster_name }}.{{ config_base_domain }}:6443"
+          - name: KUBERNETES_PORT_443_TCP_ADDR
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_PORT_443_TCP_PORT
+            value: "6443"
+          - name: KUBERNETES_PORT_443_TCP_PROTO
+            value: "tcp"
+          - name: KUBERNETES_SERVICE_HOST
+            value: "api-int.{{ cluster_name }}.{{ config_base_domain }}"
+          - name: KUBERNETES_SERVICE_PORT
+            value: "6443"
+          - name: KUBERNETES_SERVICE_PORT_HTTPS
+            value: "6443"
+
       volumes:
         - name: config
           secret:

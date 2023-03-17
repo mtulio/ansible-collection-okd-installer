@@ -1,8 +1,8 @@
 ---
 - name: Patch | OCI | CCM | Set namespace oci_ccm_namespace
   ansible.builtin.set_fact:
+    # default provided by repo is kube-system
     oci_ccm_namespace: oci-cloud-controller-manager
-    #oci_ccm_namespace: kube-system
   when: oci_ccm_namespace is not defined
 
 - name: Patch | OCI | CCM | Create Namespace

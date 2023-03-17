@@ -2,18 +2,11 @@
 # NOTE: there is not guarantee that it would work.
 # The Platform=External should have precedence before testing this approach.
 
-# Requires to cfg_patch_kubelet_env_workaround_content
-## Each line should have the script generating the data to append to the
-## kubelet workaround file.
-
-# TODO render the butane
-
 - name: Patch | mc-kubelet-providerid | Check requirements
   ansible.builtin.assert:
     that:
     - cfg_patch_kubelet_providerid_script is defined
     fail_msg: "'cfg_patch_kubelet_providerid_script' is required to use patch 'mc-kubelet-providerid'"
-
 
 - name: Patch | mc-kubelet-providerid | Set tmp dir
   ansible.builtin.set_fact:

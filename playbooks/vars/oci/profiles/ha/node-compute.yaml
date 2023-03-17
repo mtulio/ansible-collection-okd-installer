@@ -36,8 +36,8 @@ compute_resources:
       #   type: AMD_VM
       shape: "VM.Standard.E4.Flex"
       shape_config:
-        ocpus: 2
-        memory_in_gbs: 8
+        ocpus: 4
+        memory_in_gbs: 16
         #baseline_ocpu_utilization: BASELINE_1_8
         #nvmes: 1
       agent_config:
@@ -97,8 +97,8 @@ compute_resources:
       #   type: AMD_VM
       shape: "VM.Standard.E4.Flex"
       shape_config:
-        ocpus: 2
-        memory_in_gbs: 8
+        ocpus: 4
+        memory_in_gbs: 16
         #baseline_ocpu_utilization: BASELINE_1_8
         #nvmes: 1
       agent_config:
@@ -158,8 +158,8 @@ compute_resources:
       #   type: AMD_VM
       shape: "VM.Standard.E4.Flex"
       shape_config:
-        ocpus: 2
-        memory_in_gbs: 8
+        ocpus: 4
+        memory_in_gbs: 16
         #baseline_ocpu_utilization: BASELINE_1_8
         #nvmes: 1
       agent_config:

@@ -160,8 +160,9 @@ OCP_RELEASE_413="quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
 EOF
 source ~/.openshift/env
 
-CLUSTER_NAME=oci-t10
+CLUSTER_NAME=oci-t12
 VAR_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
+
 cat <<EOF > ${VAR_FILE}
 provider: oci
 cluster_name: ${CLUSTER_NAME}
@@ -226,6 +227,7 @@ config_patches:
 - mc-kubelet-providerid
 #- platform-external-kcmo
 - deploy-oci-ccm
+- deploy-oci-csi
 - yaml_patch # working for OCI, but need to know the path
 #- line_regex_patch # ideal, but not working as expected
 
@@ -245,11 +247,8 @@ cfg_patch_line_regex_patch_specs:
     regexp: '^(.*)(namespace\\: kube-system)$'
     line: '\\1namespace: oci-cloud-controller-manager'
 
-#cfg_patch_kubelet_providerid_script: |
-#    KUBELET_PROVIDERID=\$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/#instance/ | jq -r .id); echo "KUBELET_PROVIDERID=\$KUBELET_PROVIDERID}" | sudo tee -a /etc/#kubernetes/kubelet-workaround
-
 cfg_patch_kubelet_providerid_script: |
-    PROVIDERID=$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/instance/ | jq -r .id);
+    PROVIDERID=\$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/instance/ | jq -r .id);
 
 EOF
 
@@ -328,8 +327,6 @@ This stage allows the user to modify the cluster configurations (manifests),
 then generate the ignition files used to create the cluster.
 
 #### Manifest patches (pre-ign)
-
-> TODO/WIP
 
 In this step the playbooks will apply any patchs to the manifests,
 according to the vars file `config_patches`.

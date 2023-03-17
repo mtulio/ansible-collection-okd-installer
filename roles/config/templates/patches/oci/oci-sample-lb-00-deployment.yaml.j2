@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
-  namespace: oci-csi
+  namespace: {{ oci_samples_namespace | d('oci-samples') }}
 spec:
   replicas: 1
   template:
@@ -16,17 +16,3 @@ spec:
         image: nginx
         ports:
         - containerPort: 80
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: nginx-service
-  namespace: oci-csi
-spec:
-  selector:
-    app: nginx
-  type: LoadBalancer
-  ports:
-  - name: http
-    port: 81
-    targetPort: 80

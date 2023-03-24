@@ -13,9 +13,9 @@
 - name: Load | Create initial cluster_state
   ansible.builtin.set_fact:
     cluster_state:
-      infra_id: "{{ _ai_infraenv_definition.name }}"
+      infra_id: "{{ cluster_name }}-{{ _ai_infraenv_definition.id | split('-') | last }}"
       compute:
-        image_id: "discovery-{{ _ai_infraenv_definition.name }}"
+        image_id: "discovery-{{ cluster_name }}-{{ _ai_infraenv_definition.id | split('-') | last }}"
         image_url: "{{ _ai_infraenv_definition.download_url }}"
       dns:
         base_domain: "{{ _ai_cluster_definition.base_dns_domain }}"

@@ -1,0 +1,5 @@
+{
+  "installCommand": "make docs-ci-install",
+  "buildCommand": "make docs-build",
+  "outputDirectory": "site"
+}

@@ -1,0 +1,74 @@
+site_name: "@okd-installer (Ansible Collection)"
+#site_url: https://mtulio.net
+#site_author: 'Marco Braga'
+site_description: >-
+  Ansible Collection okd-installer
+repo_url: https://github.com/mtulio/ansible-collection-okd-installer
+edit_uri: edit/main/docs/
+docs_dir: ./
+site_dir: ../site
+dev_addr: 127.0.0.1:8080
+
+theme:
+  # https://github.com/squidfunk/mkdocs-material/blob/master/mkdocs.yml
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: slate
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: default
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    #- navigation.sections
+    - navigation.top
+    #- navigation.indexes
+
+    # integrate menus
+    #- toc.integrate
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.tabs.link
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+plugins:
+  - search:
+      lang:
+      - en
+      - pt
+  - diagrams:
+      file_extension: ".diagram.py"
+      max_workers: 5
+
+markdown_extensions:
+  # - toc:
+  #     permalink: true
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  # enable mermaid
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home:
+    - index.md
+  - Documentation: TODO.md
+  - Guides: TODO.md
+  - Development: TODO.md

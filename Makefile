@@ -1,6 +1,6 @@
 VENV_DOCS ?= ./.venv-docs
 VENV_REQ ?= docs/requirements.txt
-MKDOCS_ARGS ?= -f ./docs/mkdocs.yaml
+MKDOCS_ARGS ?= -f ./mkdocs.yaml
 .PHONY: venv
 venv:
 	test -d $(VENV_DOCS) || python3 -m venv $(VENV_DOCS)

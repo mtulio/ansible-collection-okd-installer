@@ -1,10 +1,11 @@
-# AWS Single Node Openshift
+# AWS Single Node Openshift/OKD (SingleReplica Topology)
 
 Install a single node replica OpenShift/OKD.
 
 The steps will create every infrastrucure stack to deploy a SNO on the AWS provider.
 
 The infra resources created will be:
+
 - VPC and it's subnets on a single AZ
 - Security Groups
 - Load Balancers for API (public and private) and Apps
@@ -14,6 +15,7 @@ The infra resources created will be:
 ## Deployment considerations
 
 The deployment described in this document is introducing a more performant disk layout to avoid disruptions and concurrency between resources on the same disk (by default). The disk layout is when using EC2 instance `m6id.xlarge`:
+
 - Ephemeral disk (local storage) for `/var/lib/containers`
 - Dedicated etcd EBS mounted on `/var/lib/etcd`
 
@@ -33,6 +35,7 @@ nvme2n1     259:2    0 220.7G  0 disk /var/lib/containers
 Using this layout we decreased the amount of memory used by monitoring stack (Prometheus), and, consequently the etcd when using a single/shared-disk deployment. The API disruptions decreased drastically, allowing to use smaller instance types with 16GiB of RAM and 4 vCPU.
 
 Steps:
+
 - Generate the SNO ignitions
 - Create the Stacks: Network, IAM, DNS, LB
 - Create the Compute with ignition
@@ -85,6 +88,9 @@ cfg_patch_mc_varlibcontainers:
   device_name: nvme2n1
   machineconfiguration_roles:
   - master
+
+# TODO: create cfg for patch mc_varlibetcd to receive the disk
+
 EOF
 ```
 
@@ -102,16 +108,18 @@ ansible-playbook mtulio.okd_installer.config \
     -e @./vars-sno.yaml
 ```
 
-## Deploy each stack
+## Deploy each stack (optional)
 
-### Network Stack
+> the playbook `create_all` can be used to deploy all stacks
+
+- Network Stack
 
 ```bash
 ansible-playbook mtulio.okd_installer.stack_network \
     -e @./vars-sno.yaml
 ```
 
-### IAM Stack
+- IAM Stack
 
 
 ```bash
@@ -119,19 +127,21 @@ ansible-playbook mtulio.okd_installer.stack_iam \
     -e @./vars-sno.yaml
 ```
 
-### DNS Stack
+- DNS Stack
 
 ```bash
 ansible-playbook mtulio.okd_installer.stack_dns \
     -e @./vars-sno.yaml
 ```
 
+- Load Balancer Stack
+
 ```bash
 ansible-playbook mtulio.okd_installer.stack_loadbalancer \
     -e @./vars-sno.yaml
 ```
 
-### Compute Stack
+- Compute Stack: Deploy the bootstrap node
 
 - Create the Bootstrap Node
 
@@ -144,6 +154,8 @@ ansible-playbook mtulio.okd_installer.create_node \
 ## Deploy cluster
 
 Deploy a cluster creating all the resources with a single execution/playbook:
+
+> This steps will deploy all the stacks
 
 ```bash
 ansible-playbook mtulio.okd_installer.create_all \
@@ -160,6 +172,8 @@ ip-10-0-50-187   Ready    control-plane,master,tests,worker   24m   v1.25.4+77be
 ```
 
 The you can destroy the bootstrap node:
+
+> Alternatively you can opt to remove the flag `destroy_bootstrap` to your var file
 
 ```bash
 ansible-playbook mtulio.okd_installer.destroy_bootstrap \

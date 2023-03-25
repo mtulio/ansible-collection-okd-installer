@@ -1,6 +1,8 @@
 # okd-installer - Getting Started
 
-> WIP
+!!! warning "TODO / WIP page"
+    This page is not completed!
+
 
 > TODO Content for Getting started
 

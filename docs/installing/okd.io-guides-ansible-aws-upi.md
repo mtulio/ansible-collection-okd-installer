@@ -1,5 +1,9 @@
 # AWS deployment using Ansible Collection okd-installer
 
+!!! warning "Oops... TODO / WIP page"
+    This page is not completed!
+
+
 > This document is under development to be published on https://www.okd.io/guides/overview/
 
 This document describes how to deploy OKD clusters on AWS with user-provisioned infrastructure, using the okd_installer Ansible Collection to provision the cloud resources.

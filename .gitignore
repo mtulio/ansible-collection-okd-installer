@@ -1,1 +1,4 @@
 build/
+# docs artifacts
+.venv-docs/
+site/

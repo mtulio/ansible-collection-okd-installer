@@ -6,6 +6,9 @@ metadata:
   namespace: {{ oci_samples_namespace | d('oci-samples') }}
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
   template:
     metadata:
       labels:

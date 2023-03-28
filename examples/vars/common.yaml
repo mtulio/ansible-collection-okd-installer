@@ -1,0 +1,8 @@
+---
+config_base_domain: "{{ ansible_env['OKD_CONFIG_BASE_DOMAIN'] }}"
+config_ssh_key: "{{ lookup('file', ansible_env['HOME'] + '/.ssh/id_rsa.pub') }}"
+config_pull_secret_file: "{{ ansible_env['HOME'] }}/.openshift/pull-secret-latest.json"
+
+version: 4.12.8
+
+destroy_bootstrap: no

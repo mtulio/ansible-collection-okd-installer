@@ -9,7 +9,7 @@
   ansible.builtin.set_fact:
     oci_ccm_secret_data: "{{ lookup('template', 'patches/oci/oci-ccm-01-secret-data.yaml.j2') | from_yaml }}"
 
-- name: Patch | OCI | CSI | Create Manifests {{ manifest }}
+- name: Patch | OCI | CSI | Create Manifests to install dir manifests/
   ansible.builtin.template:
     src: "patches/oci/{{ manifest }}.j2"
     dest: "{{ config_install_dir }}/manifests/{{ manifest }}"
@@ -30,3 +30,13 @@
   - oci-csi-04-node-driver-04-daemonset.yaml
   - oci-csi-05-storage-class-00-bv.yaml
   - oci-csi-05-storage-class-01-bv-enc.yaml
+
+- name: Patch | OCI | CSI | Create MachineConfig iscsid.service
+  ansible.builtin.template:
+    src: patches/mc-iscsid-service.yaml.j2
+    dest: "{{ config_install_dir }}/openshift//99_openshift-machineconfig_99-{{ machine_role }}-iscsid.yaml"
+  loop_control:
+    loop_var: machine_role
+  loop:
+  - master
+  - worker

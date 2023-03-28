@@ -1,0 +1,6 @@
+---
+cluster_profile: ha
+
+config_patches:
+- rm-capi-machines
+- deploy-oci-csi

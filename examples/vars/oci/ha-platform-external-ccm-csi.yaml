@@ -1,0 +1,21 @@
+---
+cluster_profile: ha
+
+version: 4.13.0-rc.0
+config_installer_environment:
+  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/mrbraga/ocp-release:4.13.0-rc.0-x86_64_platexternal-kcmo-mco-3cmo"
+
+config_patches:
+- rm-capi-machines
+- mc-kubelet-providerid
+- deploy-oci-ccm
+- deploy-oci-csi
+- yaml_patch
+
+cfg_patch_yaml_patch_specs:
+    ## patch infra object to create External provider
+  - manifest: /manifests/cluster-infrastructure-02-config.yml
+    patch: '{"spec":{"platformSpec":{"type":"External","external":{"platformName":"oci"}}},"status":{"platform":"External","platformStatus":{"type":"External","external":{}}}}'
+
+cfg_patch_kubelet_providerid_script: |
+    PROVIDERID=\$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/instance/ | jq -r .id);

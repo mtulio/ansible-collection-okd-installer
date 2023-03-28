@@ -17,7 +17,7 @@
     dest: "{{ cluster_tmp_dir }}"
     state: directory
 
-- name: Patch | Crete kubelet providerID
+- name: Patch | mc-kubelet-providerid | Create kubelet providerID
   ansible.builtin.template:
     src: patches/mc-kubelet-providerid.bu.j2
     dest: "{{ cluster_tmp_dir }}/99_openshift-machineconfig_00-{{ machine_role }}-kubelet-providerid.bu"
@@ -27,7 +27,7 @@
   - master
   - worker
 
-- name: Patch | Render butane config
+- name: Patch | mc-kubelet-providerid | Render butane config
   ansible.builtin.shell: |
     {{ bin_butane }} \
       {{ cluster_tmp_dir }}/99_openshift-machineconfig_00-{{ machine_role }}-kubelet-providerid.bu \

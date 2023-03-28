@@ -4,6 +4,8 @@ apiVersion: v1
 metadata:
   name: nginx-service
   namespace: {{ oci_samples_namespace | d('oci-samples') }}
+  labels:
+    app: nginx
 spec:
   selector:
     app: nginx

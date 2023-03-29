@@ -2,6 +2,7 @@
   karmab.aicli.ai_cluster:
     name: "{{ cluster_name }}"
     state: present
+    url: "{{ assisted_installer.assisted_service_url | default(omit) }}"
     parameters:
       base_dns_domain: "{{ config_base_domain }}"
       minimal: True # request a minimal iso
@@ -9,3 +10,4 @@
       pull_secret: "{{ config_pull_secret_file }}"
       ssh_public_key: "{{ config_ssh_key }}"
       user_managed_networking: True # =none platform
+

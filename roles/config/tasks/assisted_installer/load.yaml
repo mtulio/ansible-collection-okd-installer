@@ -3,11 +3,13 @@
 - name: Load | Retrieve cluster definition
   karmab.aicli.ai_cluster_info:
     name: "{{ cluster_name }}"
+    url: "{{ assisted_installer.assisted_service_url | default(omit) }}"
   register: _ai_cluster_definition
 
 - name: Load | Retrieve infraenv definition
   karmab.aicli.ai_infraenv_info :
     name: "{{ cluster_name }}"
+    url: "{{ assisted_installer.assisted_service_url | default(omit) }}"
   register: _ai_infraenv_definition
 
 - name: Load | Create initial cluster_state
@@ -25,3 +27,4 @@
       assisted_installer:
         cluster_definition: "{{ _ai_cluster_definition }}"
         infraenv_definition: "{{ _ai_infraenv_definition }}"
+

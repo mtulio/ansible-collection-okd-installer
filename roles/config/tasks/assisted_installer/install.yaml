@@ -4,10 +4,14 @@
 - name: Install | Wait for all hosts to be discovered
   ansible.builtin.command: >-
     aicli wait hosts "{{ cluster_name }}"  -n "{{ config_compute_replicas + config_controlplane_replicas }}"
+  environment:
+    AI_URL: "{{ assisted_installer.assisted_service_url | default(omit) }}"
 
 - name: Install | List all hosts
   ansible.builtin.command: >-
     aicli -o json list hosts
+  environment:
+    AI_URL: "{{ assisted_installer.assisted_service_url | default(omit) }}"
   register: _ai_all_hosts_table
 
 - name: Install | Filter hosts on infraenv
@@ -18,17 +22,19 @@
 
 - name: Install | Update host roles
   karmab.aicli.ai_host:
-      state: updated
-      name: "{{ item.requested_hostname  }}"
-      parameters:
-        infraenv: "{{ cluster_state.assisted_installer.infraenv_definition.name }}"
-        role: "{% if config_controlplane.name in item.requested_hostname %}master{% else %}worker{% endif %}"
+    state: updated
+    name: "{{ item.requested_hostname  }}"
+    url: "{{ assisted_installer.assisted_service_url | default(omit) }}"
+    parameters:
+      infraenv: "{{ cluster_state.assisted_installer.infraenv_definition.name }}"
+      role: "{% if config_controlplane.name in item.requested_hostname %}master{% else %}worker{% endif %}"
   loop: "{{ _ai_infraenv_hosts }}"
 
 - name: Install | Start installation
   karmab.aicli.ai_cluster:
     name: "{{ cluster_name }}"
     state: started
+    url: "{{ assisted_installer.assisted_service_url | default(omit) }}"
 
 - name: Install | Follow installation progress on the console
   ansible.builtin.debug:
@@ -38,3 +44,4 @@
   karmab.aicli.ai_cluster:
     name: "{{ cluster_name }}"
     state: installed
+    url: "{{ assisted_installer.assisted_service_url | default(omit) }}"

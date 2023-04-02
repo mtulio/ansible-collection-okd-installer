@@ -122,3 +122,6 @@ nav:
     - Releasing: development/releasing.md
     - Adding Config Provider: development/adding-config-provider.md
     - Tests: development/tests.md
+  - About:
+    - Why this project?: about-why.md
+    - License: LICENSE

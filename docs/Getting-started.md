@@ -9,10 +9,10 @@
 
 > TODO Content for Getting started
 
-- Simple Install
-- Simple Setup
-- Simple Create Cluster
-- Simple Test
+- Quickly Install
+- Quickly Setup
+- Quickly Create Cluster
+- Quickly Test
 - References more Installing Guides
 
 ## See Next

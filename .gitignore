@@ -2,3 +2,4 @@ build/
 # docs artifacts
 .venv-docs/
 site/
+docs/diagrams/images/

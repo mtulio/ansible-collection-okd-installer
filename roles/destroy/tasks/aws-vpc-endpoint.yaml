@@ -10,9 +10,9 @@
     filters:
       vpc-id:
         - "{{ vpc_id }}"
-      vpc-endpoint-state:
-        - available
-        - pending
+      #vpc-endpoint-state:
+      #  - available
+      #  - pending
   register: res_vpce
 
 - name: AWS | VPC | VPCe | Delete all

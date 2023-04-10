@@ -1,13 +1,13 @@
 # Ansible dependencies
-ansible>=6.4,<6.5
-ansible-core
+#ansible>=7.4,<6.5
+ansible-core>=2.14,<2.15
 
 molecule
 ansible-lint
 jmespath
 
 # provider: AWS
-boto3
+boto3>=1.26,<1.27
 botocore
 
 # kubernetes Collection

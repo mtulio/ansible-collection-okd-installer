@@ -1,5 +1,9 @@
 {
-  "installCommand": "make Makefile docs-ci-install",
-  "buildCommand": "make Makefile docs-build",
-  "outputDirectory": "site/"
+  "installCommand": "make docs-ci-install INSTALL_CMD=apt",
+  "buildCommand": "make docs-build",
+  "outputDirectory": "site/",
+  "github": {
+    "enabled": false,
+    "silent": true
+  }
 }

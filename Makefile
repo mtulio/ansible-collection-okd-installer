@@ -1,6 +1,8 @@
 VENV_DOCS ?= ./.venv-docs
 VENV_REQ ?= docs/requirements.txt
 MKDOCS_ARGS ?= -f ./mkdocs.yaml
+INSTALL_CMD ?= yum
+
 .PHONY: venv
 venv:
 	test -d $(VENV_DOCS) || python3 -m venv $(VENV_DOCS)

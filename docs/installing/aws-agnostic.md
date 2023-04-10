@@ -39,12 +39,63 @@ EOF
 source ./.env-${CLUSTER_NAME}
 ```
 
+Create the env var file (NEW):
+
+```bash
+cat <<EOF > ./vars-aws-ha.yaml
+provider: aws
+cluster_name: aws-ext7
+config_cluster_region: us-east-1
+
+config_base_domain: devcluster.openshift.com
+config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
+config_pull_secret_file: ${HOME}/.openshift/pull-secret-latest.json
+
+cluster_profile: ha
+destroy_bootstrap: no
+
+config_cluster_version: 4.13.0-ec.4-x86_64
+version: 4.13.0-ec.4
+config_installer_environment:
+    OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/openshift-release-dev/ocp-release:4.13.0-ec.4-x86_64"
+
+config_patches:
+- rm-capi-machines
+#- platform-external-kubelet # PROBLEM hangin kubelete (network)
+- platform-external-kcmo
+- deploy-oci-ccm
+- yaml_patch
+- line_regex_patch
+
+cfg_patch_yaml_patch_specs:
+    ## patch infra object to create External provider
+#  - manifest: /manifests/cluster-infrastructure-02-config.yml
+#    patch: '{"spec":{"platformSpec":{"type":"External","external":{"platformName":"aws"}}},"status":{"platform":"External","platformStatus":{"type":"External","external":{}}}}'
+
+    ## OCI : Change the namespace from downloaded assets
+  #- manifest: /manifests/oci-cloud-controller-manager-02.yaml
+  #  patch: '{"metadata":{"namespace":"oci-cloud-controller-manager"}}'
+
+cfg_patch_line_regex_patch_specs:
+  - manifest: /manifests/oci-cloud-controller-manager-01-rbac.yaml
+    #search_string: 'namespace: kube-system'
+    regexp: '^(.*)(namespace\\: kube-system)$'
+    #line: 'namespace: oci-cloud-controller-manager'
+    line: '\\1namespace: oci-cloud-controller-manager'
+
+  - manifest:  /manifests/oci-cloud-controller-manager-02.yaml
+    regexp: '^(.*)(namespace\\: kube-system)$'
+    line: '\\1namespace: oci-cloud-controller-manager'
+
+EOF
+```
+
 Check if all required variables has been set:
 
 ```bash
 ansible-playbook  mtulio.okd_installer.config \
     -e mode=check-vars \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
+    -e @./vars-aws-ha.yaml
 ```
 
 ### Create or customize the `openshift-install` binary
@@ -58,7 +109,7 @@ To generate the install config, you must set variables (defined above) and the c
 ```bash
 ansible-playbook mtulio.okd_installer.config \
     -e mode=create \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
+    -e @./vars-aws-ha.yaml
 ```
 
 ## Create the cluster <a name="create-cluster"></a>
@@ -69,8 +120,7 @@ Call the playbook to create the cluster:
 
 ```bash
 ansible-playbook mtulio.okd_installer.create_all \
-    -e provider=${CONFIG_PROVIDER} \
-    -e cluster_name=${CONFIG_CLUSTER_NAME} \
+    -e @./vars-aws-ha.yaml \
     -e certs_max_retries=20 \
     -e cert_wait_interval_sec=60
 ```
@@ -156,6 +206,5 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
 
 ```bash
 ansible-playbook mtulio.okd_installer.destroy_cluster \
-    -e provider=${CONFIG_PROVIDER} \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
+    -e @./vars-aws-ha.yaml
 ```

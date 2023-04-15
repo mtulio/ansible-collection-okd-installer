@@ -3,12 +3,14 @@
 # Run playbook
 
 export VARS_FILE="./vars-mock.yaml"
-export AWS_MOCK_ENDPOINT_MOTO="http://localhost:3000"
+export AWS_MOCK_ENDPOINT_MOTO="${AWS_MOCK_ENDPOINT_MOTO:-"http://localhost:3000"}"
 
 export PLAY_NAME="${1}"
-export PLAY_EXTRA_VARS="-e cert_approval_done=yes"
+export PLAY_EXTRA_VARS="${PLAY_EXTRA_VARS:-} -e cert_approval_done=yes"
 
-export PULL_SECRET_FILE="${HOME}/.openshift/pull-secret-okd-fake.json"
+if [[ "${PULL_SECRET_FILE:-}" == "" ]]; then
+    export PULL_SECRET_FILE="${HOME}/.openshift/pull-secret-okd-fake.json"
+fi
 declare -x CLUSTER_NAME
 
 if [ -f $VARS_FILE ]; then
@@ -59,7 +61,7 @@ play_run_mock_api_moto() {
 
 play_run() {
     play_run_mock_api_moto ansible-playbook mtulio.okd_installer.$PLAY_NAME \
-        -e @${VARS_FILE} -vvv $PLAY_EXTRA_VARS
+        -e @${VARS_FILE} $PLAY_EXTRA_VARS
 }
 
 play_config() {

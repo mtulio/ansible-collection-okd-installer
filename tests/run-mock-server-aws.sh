@@ -17,6 +17,7 @@ echo "# Running AWS Mock API on port 3000"
 podman run \
     --name $NAME \
     -p "3000:3000" \
+    -v /var/run/docker.sock:/var/run/docker.sock \
     -d $IMG $OPTS
 
 echo "You can populate and check the Dashboard http://localhost:3000/moto-api/"

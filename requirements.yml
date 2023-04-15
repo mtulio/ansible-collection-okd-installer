@@ -5,6 +5,8 @@
 # of the distributed on the ansible minor version(y).
 
 collections:
+- name: community.general
+- name: ansible.posix
 - name: community.kubernetes
   version: '>=2.0.0,<3.0.0'
 

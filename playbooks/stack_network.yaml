@@ -23,7 +23,7 @@
       ansible.builtin.include_vars:
         file: "{{ profile_path }}/network.yaml"
       when: var_file is not defined
-
+    - debug: var=cloud_networks
     - name: okd-installer | Stack | Network | setup
       ansible.builtin.include_role:
         name: cloud_network

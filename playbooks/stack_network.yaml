@@ -14,15 +14,15 @@
     profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
   tasks:
-    - name: okd-installer | Stack | Network | Include Vars - User Provided
-      ansible.builtin.include_vars:
-        file: "{{ var_file }}"
-      when: var_file is defined
+    #- name: okd-installer | Stack | Network | Include Vars - User Provided
+      #ansible.builtin.include_vars:
+      #  file: "{{ var_file }}"
+     # when: var_file is defined
 
     - name: okd-installer | Stack | Network | Include Vars - Profiles
       ansible.builtin.include_vars:
         file: "{{ profile_path }}/network.yaml"
-      when: var_file is not defined
+      #when: var_file is not defined
     - debug: var=cloud_networks
     - debug: var=profile_path
     - name: okd-installer | Stack | Network | setup

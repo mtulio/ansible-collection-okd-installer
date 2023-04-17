@@ -1,5 +1,4 @@
 # Ansible dependencies
-#ansible>=7.4,<6.5
 ansible-core>=2.14,<2.15
 
 molecule

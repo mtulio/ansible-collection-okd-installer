@@ -1,7 +1,4 @@
 ---
-# TODO: approve only N*2 certificates, wehre N is the total of
-# compute/worker nodes. It can decrease the total time waiting
-# for new certs
 - name: okd-installer | Aprove CSR Certificates for Worker nodes
   hosts: localhost
   roles:

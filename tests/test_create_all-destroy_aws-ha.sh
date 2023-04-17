@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-export VARS_FILE="./vars-mock.yaml"
-export test_name=aws-ha
+export test_name=aws-none-ha
 export test_env="okd-4.12.0-0"
+export VARS_FILE="./vars-${test_name}.yaml"
 
 test_dir="$(dirname "$0")"
 

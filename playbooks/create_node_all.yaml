@@ -11,6 +11,9 @@
   connection: local
   vars:
     profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
+    topologies_allowed_multinode:
+      - ha
+      - HighlyAvailable
 
   tasks:
     # Create Compute: Bootstrap node
@@ -64,7 +67,9 @@
       - name: okd-installer | Stack | Compute | Include Topology {{ cluster_profile }}
         ansible.builtin.include_vars:
           file: "{{ profile_path }}/node-compute.yaml"
-        when: var_file_compute is not defined
+        when:
+          - var_file_compute is not defined
+          - cluster_profile in topologies_allowed_multinode
 
       - name: okd-installer | Stack | Compute | Create compute nodes
         ansible.builtin.include_role:

@@ -3,7 +3,7 @@
 # Run playbook
 
 export VARS_FILE="./vars-mock.yaml"
-export AWS_MOCK_ENDPOINT_MOTO="${AWS_MOCK_ENDPOINT_MOTO:-"http://localhost:3000"}"
+export AWS_MOCK_ENDPOINT_MOTO="${AWS_MOCK_ENDPOINT_MOTO:-"http://127.0.0.1:5000"}"
 
 export PLAY_NAME="${1}"
 export PLAY_EXTRA_VARS="${PLAY_EXTRA_VARS:-} -e cert_approval_done=yes"

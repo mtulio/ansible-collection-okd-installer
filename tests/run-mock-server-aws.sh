@@ -11,13 +11,14 @@ IMG="ghcr.io/getmoto/motoserver:latest"
 NAME="mock-aws-api"
 IMG="quay.io/mrbraga/motorserver-patch:latest"
 NAME="mock-aws-api-patched"
-OPTS="-p3000 --debug True"
+PORT="5000"
+OPTS=""
 
 echo "# Running AWS Mock API on port 3000"
-podman run \
+podman run --rm \
     --name $NAME \
-    -p "3000:3000" \
+    -p "${PORT}:5000" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -d $IMG $OPTS
 
-echo "You can populate and check the Dashboard http://localhost:3000/moto-api/"
+echo "You can populate and check the Dashboard http://localhost:$PORT/moto-api/"

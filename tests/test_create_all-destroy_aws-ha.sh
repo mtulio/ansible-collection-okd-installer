@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export VARS_FILE="./vars-mock.yaml"
 export test_name=aws-ha

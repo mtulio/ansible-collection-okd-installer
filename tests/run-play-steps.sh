@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Run playbook
 
-export VARS_FILE="./vars-mock.yaml"
+export VARS_FILE="${VARS_FILE:-./vars-mock.yaml}"
 export AWS_MOCK_ENDPOINT_MOTO="${AWS_MOCK_ENDPOINT_MOTO:-"http://127.0.0.1:5000"}"
 
 export PLAY_NAME="${1}"

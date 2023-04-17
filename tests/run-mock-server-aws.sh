@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Run AWS mock server with Moto project.
 # https://github.com/getmoto/moto

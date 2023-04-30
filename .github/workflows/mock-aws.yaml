@@ -47,12 +47,12 @@ jobs:
           - 5000:5000
 
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v3
       with:
         repository: mtulio/ansible-collection-okd-installer
         path: 'mtulio.okd_installer'
         submodules: recursive
-        ref: tests-mock-aws-api
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:

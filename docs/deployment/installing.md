@@ -1,6 +1,8 @@
 # Installing
 
-> WIP Guide
+!!! warning "TODO / WIP page"
+    This page is not completed!
+
 
 > TODO: Install options
 

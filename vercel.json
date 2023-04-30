@@ -1,0 +1,9 @@
+{
+  "installCommand": "make docs-ci-install INSTALL_CMD='sudo apt update; sudo apt'",
+  "buildCommand": "make docs-build",
+  "outputDirectory": "site/",
+  "github": {
+    "enabled": false,
+    "silent": true
+  }
+}

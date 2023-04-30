@@ -1,3 +1,9 @@
+# Integrating a new provider
+
+!!! warning "TODO / WIP page"
+    This page is not completed!
+
+
 > TODO steps to support new cloud provider
 
 > TODO: Explain:

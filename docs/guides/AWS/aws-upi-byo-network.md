@@ -1,6 +1,8 @@
 # OKD Install on AWS provider with UPI
 
-> NOTE: This documentation is in progress and contains fragments to use external load balancer which is not yet tested. The goal is to validate each one and publish it.
+!!! warning "TODO / WIP page"
+    This page is not completed!
+
 
 Steps to install OKD/OCP clusters in AWS with user-provisioned infrastructure, with Ansible as IaaC to provision the infrastructure.
 
@@ -64,7 +66,8 @@ ansible-playbook mtulio.okd_installer.stack_network \
     -e cidr_block_16=10.100.0.0/16 -e cidr_prefix_16=10.100
 ```
 
-Exanoke Local Zones us-east-1:
+Example Local Zone using pre-built network vars for `us-east-1` (or you can specify your own):
+
 ```bash
 CUSTOM_NET_VARS=${PWD}/vars/networks/aws-use1-localzones.yaml
 ansible-playbook mtulio.okd_installer.stack_network \
@@ -103,52 +106,6 @@ ansible-playbook mtulio.okd_installer.stack_loadbalancer \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
 ```
 
-#### HAProxy and Keepalived (alternative)
-
-- Create EC2 Instances to run HAProxy
-
-> TODO create two EC2 on public subnets
-
-- Register the DNS of those instances
-
-> Create entries on DNS to master-{0-2}.<cluster_domain>
-
-- Install external Load Balancers
-
-> TODO: Install HAProxy and keepalived on new EC2
-
-References:
-
-- https://docs.openshift.com/container-platform/4.11/installing/installing_vsphere/installing-vsphere-installer-provisioned-customizations.html#nw-osp-configuring-external-load-balancer_installing-vsphere-installer-provisioned-customizations
-- https://docs.openshift.com/container-platform/4.11/installing/installing_vsphere/installing-vsphere.html#installation-load-balancing-user-infra_installing-vsphere
-
-#### HAProxy and EC2 Service Discovery (alternative)
-
-> TODO: alternative
-
-References:
-
-- https://medium.com/@sudhindrasajjal/autoscaling-your-ec2-instances-using-haproxy-and-consul-5d2bc9ebafdb
-- https://www.haproxy.com/blog/aws-ec2-service-discovery-with-haproxy/
-- https://github.com/gavsmi/haproxy-ec2-auto-discover
-- https://www.youtube.com/watch?v=ZvKPAug-IgA
-
-#### NGINX (alternative)
-
-> TODO
-
-#### Traefik (alternative)
-
-> TODO
-
-#### Kong (alternative)
-
-> TODO
-
-#### Apache (alternative)
-
-> TODO
-
 ### Compute Stack
 
 - Create the Bootstrap Node
@@ -176,16 +133,6 @@ ansible-playbook mtulio.okd_installer.create_node \
     -e provider=${CONFIG_PROVIDER} \
     -e cluster_name=${CONFIG_CLUSTER_NAME} \
     -e role=compute
-```
-
-### Single Execution (create-all)
-
-```bash
-ansible-playbook mtulio.okd_installer.create_all \
-    -e provider=${CONFIG_PROVIDER} \
-    -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e certs_max_retries=3 \
-    -e cert_wait_interval_sec=60
 ```
 
 #### Approve certificates

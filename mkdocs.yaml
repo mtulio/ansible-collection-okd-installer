@@ -1,0 +1,127 @@
+site_name: "@okd-installer (Ansible Collection)"
+#site_url: https://mtulio.net
+#site_author: 'Marco Braga'
+site_description: >-
+  Ansible Collection okd-installer
+repo_url: https://github.com/mtulio/ansible-collection-okd-installer
+edit_uri: edit/main/docs/
+docs_dir: ./docs
+site_dir: ./site
+dev_addr: 127.0.0.1:8080
+
+theme:
+  # https://github.com/squidfunk/mkdocs-material/blob/master/mkdocs.yml
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: slate
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: default
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+
+  features:
+    #- navigation.tabs
+    #- navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+
+    # integrate menus
+    #- toc.integrate
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.tabs.link
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+plugins:
+  - search:
+      lang:
+      - en
+  - diagrams:
+      file_extension: ".diagram.py"
+      max_workers: 5
+
+markdown_extensions:
+  # - toc:
+  #     permalink: true
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  # enable mermaid
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home:
+    - index.md
+    - How it works: Getting-started.md
+  - Deployment:
+    - deployment/index.md
+    - Installation Guide: deployment/installing.md
+    - Configurations: deployment/configuration.md
+    - Playbooks:
+      - deployment/playbooks/index.md
+      - Installing Clients: deployment/playbooks/install-clients.md
+      - Create Cluster: TODO.md
+      - Destroy Cluster: TODO.md
+      - Config Create: TODO.md
+      - Config Manifest: TODO.md
+      - Config Patch Manifests: TODO.md
+      - Config Ignitions: TODO.md
+      - OS Mirror: TODO.md
+      - Stack IAM: TODO.md
+      - Stack Network: TODO.md
+      - Stack DNS: TODO.md
+      - Stack Load Balancer: TODO.md
+      - Stack Compute: TODO.md
+      - Approve Certificates: TODO.md
+    - Roles:
+      - deployment/roles/index.md
+      - clients: TODO.md
+      - bootstrap: TODO.md
+      - config: TODO.md
+      - csr_approver: TODO.md
+      - destroy: TODO.md
+      - cloud_compute: TODO.md
+      - cloud_dns: TODO.md
+      - cloud_iam: TODO.md
+      - cloud_load_balancer: TODO.md
+      - cloud_network: TODO.md
+    - Integrating Provider: deployment/integrating.md
+  - Guides:
+    - guides/index.md
+    - AWS:
+      - guides/AWS/index.md
+      - Installing HA Topology with UPI: guides/AWS/aws-upi.md
+      - Installing HA Topology with UPI and Platform Agnostic: guides/AWS/aws-agnostic.md
+      - Installing SNO with Ephemeral storage: guides/AWS/aws-sno.md
+      - Installing HA Topology UPI BYO Network: guides/AWS/aws-upi-byo-network.md
+    # - Digital Ocean: TODO.md
+    # - Oracle Cloud:
+    #   - Installing HA Topology with UPI and Platform Agnostic: TODO.md
+    #   - Installing HA Topology with UPI and Platform External: TODO.md
+    #   - Installing HA Topology with UPI and Platform External and CSI Driver: TODO.md
+  #- Examples: TODO.md
+  - Development:
+    - development/index.md
+    - Creating Diagrams: development/diagrams.md
+    - Releasing: development/releasing.md
+    - Adding Config Provider: development/adding-config-provider.md
+    - Tests: development/tests.md
+  - About:
+    - Why this project?: about-why.md
+    - License: LICENSE

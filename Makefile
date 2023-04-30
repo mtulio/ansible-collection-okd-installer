@@ -16,7 +16,7 @@ requirements: venv
 .PHONY: ci-dependencies
 ci-dependencies:
 	cat /etc/os-release
-	yum install -y python3-pip graphviz
+	$(INSTALL_CMD) install -y python3-pip graphviz
 
 .PHONY: ci-install
 docs-ci-install: ci-dependencies requirements

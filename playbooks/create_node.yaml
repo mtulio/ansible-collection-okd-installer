@@ -1,6 +1,4 @@
 ---
-# - ansible.builtin.import_playbook: var_check_required.yaml
-
 - name: okd-installer | Create Stack | Compute | Load Config
   ansible.builtin.import_playbook: config.yaml
   vars:

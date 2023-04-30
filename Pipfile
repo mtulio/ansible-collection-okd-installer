@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+ansible-core = "<2.15,>=2.14"
+molecule = "*"
+ansible-lint = "*"
+jmespath = "*"
+boto3 = ">=1.26,<1.27"
+botocore = "*"
+kubernetes = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

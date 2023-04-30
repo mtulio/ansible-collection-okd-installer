@@ -1,0 +1,142 @@
+---
+name: mock-aws
+'on':
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  schedule:
+    - cron: "0 5 * * 0"
+
+defaults:
+  run:
+    working-directory: 'mtulio.okd_installer'
+
+jobs:
+
+  # Run linter tests: yaml-lint and ansible-lint.
+  create_all:
+    name: create-all
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # ansible.cfg is undert tests directory
+        working-directory: mtulio.okd_installer/tests
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+        - "3.9"
+        - "3.10"
+        test-env:
+        # format: provider-platform-profile
+        - "aws-none-ha"
+        # aws-sno is failing only in CI. Need more investigation to understand the root cause.
+        # to test it locally: bash tests/test_aws-sno_create_all-destroy.sh
+        #- "aws-none-sno"
+        dist-version:
+        - "okd-4.12.0-0"
+
+    # container: ubuntu
+    services:
+      mock_server_moto:
+        image: quay.io/mrbraga/motorserver-patch:latest
+        ports:
+          - 5000:5000
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        repository: mtulio/ansible-collection-okd-installer
+        path: 'mtulio.okd_installer'
+        submodules: recursive
+        ref: tests-mock-aws-api
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set job vars
+      id: vars
+      run: |
+        echo "cluster-name=$(echo '{ "aws-none-ha": "aws-ha-okd", "aws-none-sno": "aws-sno-okd" }' | jq -r 'to_entries[] | select(.key=="${{ matrix.test-env }}") | .value')" >> $GITHUB_OUTPUT
+        echo "cache-key-pip=pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}" >> $GITHUB_OUTPUT
+        echo "cache-dir-pip=$(pip cache dir)" >> $GITHUB_OUTPUT
+        echo "cache-key-collections=ansible-collections-${{ matrix.python-version }}-${{ hashFiles('**/requirements.yml') }}" >> $GITHUB_OUTPUT
+        echo "cache-dir-collections=${HOME}/.ansible/collections" >> $GITHUB_OUTPUT
+        echo "cache-key-bin=backend-binaries_${{ matrix.dist-version }}" >> $GITHUB_OUTPUT
+        echo "cache-dir-bin=${HOME}/.ansible/okd-installer/bin" >> $GITHUB_OUTPUT
+
+    - name: Set pip cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.vars.outputs.cache-dir-pip }}
+        key: ${{ steps.vars.outputs.cache-key-pip }}
+    - name: Set ansible cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.vars.outputs.cache-dir-collections }}
+        key: ${{ steps.vars.outputs.cache-key-collections }}
+    - name: Set okd installer binaries cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.vars.outputs.cache-dir-bin }}
+        key: ${{ steps.vars.outputs.cache-key-bin }}
+
+    - name: Update pip
+      run: |
+        python -m pip install --upgrade pip
+    - name: Install python dependencies
+      run: |
+        pip install -r ./../requirements.txt
+
+    - name: Install Collections
+      run: |
+        ansible-galaxy collection install -r ./../requirements.yml
+        ansible-galaxy collection list
+
+    - name: Create cluster config
+      env:
+        VARS_FILE: "./vars-${{ steps.vars.outputs.cluster-name }}.yaml"
+      run: |
+        set -x
+        source config/${{ matrix.dist-version }}.env
+        envsubst < config/${{ matrix.test-env }}.vars > $VARS_FILE
+        cat $VARS_FILE
+
+    - name: Install client binaries (play install_clients)
+      env:
+        VARS_FILE: "./vars-${{ steps.vars.outputs.cluster-name }}.yaml"
+      run: |
+        ansible-playbook mtulio.okd_installer.install_clients -e @$VARS_FILE
+        tree ~/.ansible/okd-installer/bin || true
+
+    - name: Create cluster (play create_all)
+      env:
+        VARS_FILE: "./vars-${{ steps.vars.outputs.cluster-name }}.yaml"
+      run: |
+        set -x
+        echo "Running create_all, the stdout will be suprised..."
+        ./run-play-steps.sh create_all
+
+        cat ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}/cluster_state.json || true
+        cat ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}install-config-bkp.yaml || true
+
+    - name: Destroy cluster (play destroy_cluster)
+      env:
+        VARS_FILE: "./vars-${{ steps.vars.outputs.cluster-name }}.yaml"
+      run: |
+        echo "Running destroy_cluster, the stdout will be suprised..."
+        ./run-play-steps.sh destroy_cluster
+
+    - name: Saving artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.test-env }}-${{ matrix.dist-version }}-py${{ matrix.python-version }}
+        retention-days: 5
+        path: |
+          ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}/cluster_state.json
+          ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}/install-config-bkp.yaml
+          ./tests/vars-${{ steps.vars.outputs.cluster-name }}.yaml

@@ -31,7 +31,7 @@ jobs:
         - "3.9"
         - "3.10"
         test-env:
-        # provider-platform-profile
+        # format: provider-platform-profile
         - "aws-none-ha"
         # aws-sno is failing only in CI. Need more investigation to understand the root cause.
         # to test it locally: bash tests/test_aws-sno_create_all-destroy.sh
@@ -69,10 +69,6 @@ jobs:
         echo "cache-key-bin=backend-binaries_${{ matrix.dist-version }}" >> $GITHUB_OUTPUT
         echo "cache-dir-bin=${HOME}/.ansible/okd-installer/bin" >> $GITHUB_OUTPUT
 
-    # - name: Get pip cache dir
-    #   id: pip-cache
-    #   run: |
-    #     echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
     - name: Set pip cache
       uses: actions/cache@v3
       with:
@@ -96,18 +92,10 @@ jobs:
       run: |
         pip install -r ./../requirements.txt
 
-    # - name: Get ansible cache dir
-    #   id: ansible-cache
-    #   run: |
-    #     echo "dir=${HOME}/.ansible/collections" >> $GITHUB_OUTPUT
     - name: Install Collections
       run: |
         ansible-galaxy collection install -r ./../requirements.yml
         ansible-galaxy collection list
-    # - name: Set okd-installer cache dir
-    #   id: okdi-cache
-    #   run: |
-    #     echo "dir=${HOME}/.ansible/okd-installer/bin" >> $GITHUB_OUTPUT
 
     - name: Create cluster config
       env:

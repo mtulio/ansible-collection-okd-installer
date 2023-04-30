@@ -35,7 +35,7 @@ jobs:
       - name: Build Pages
         run: |
           make docs-ci-install INSTALL_CMD='sudo apt update; sudo apt'
-          nake docs-build
+          make docs-build
 
       - name: Setup Pages
         uses: actions/configure-pages@v3

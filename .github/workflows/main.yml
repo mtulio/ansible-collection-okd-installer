@@ -1,6 +1,6 @@
 ---
-name: CI
-'on':
+name: main
+on:
   pull_request:
   push:
     branches:
@@ -16,9 +16,9 @@ defaults:
 
 jobs:
 
-  # Run linter tests: yaml-lint and ansible-lint.
+  # Run linters: yaml-lint and ansible-lint.
   lint:
-    name: Linters
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - name: Check out the codebase.
@@ -36,18 +36,16 @@ jobs:
         run: pip3 install yamllint ansible-lint
 
       - name: YAML-lint
-        run: |
-          yamllint .
+        run: yamllint .
 
       - name: Ansible-lint
-        run: |
-          ansible-lint ./
+        run: ansible-lint ./
 
-  # # Run molecule tests.
-  # # TODO: more tests should be added to molecule before running it every build.
-  # # Disabling molecule step (and debian) until more consistent tests is added.
+  # Run molecule tests.
+  # TODO: more tests should be added to molecule before running it every build.
+  # Disabling molecule step (and debian) until more consistent tests is added.
   molecule:
-    name: Molecule
+    name: molecule
     runs-on: ubuntu-latest
     needs: [lint]
     strategy:
@@ -85,7 +83,7 @@ jobs:
 
   # Build a Collection and save to artifacts.
   build:
-    name: Builder(Collection)
+    name: builder(Collection)
     runs-on: ubuntu-latest
     needs: [molecule]
     steps:
@@ -120,7 +118,7 @@ jobs:
 
   # Build a container image in PRs only, without publishing it.
   build-container:
-    name: Releaser Container(dev/PR)
+    name: release container(devel)
     if: ${{ github.event_name == 'pull_request' &&  github.base_ref == 'main' }}
     runs-on: ubuntu-latest
     needs: [build]
@@ -163,7 +161,7 @@ jobs:
 
   # Build a container image on main branch, publishing the 'latest' to repository.
   publish-container-latest:
-    name: Releaser Container(latest/ci)
+    name: release container(latest/ci)
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     needs: [build]
@@ -209,7 +207,7 @@ jobs:
 
   # Build a Collection when the tag is created, publishing it to Galaxy.
   release-to-galaxy:
-    name: Releaser Collection(Galaxy)
+    name: release collection(Galaxy)
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     needs: [build]
@@ -246,7 +244,7 @@ jobs:
 
   # Build a Container image with the Collection release, publishing it to repository.
   publish-container-release:
-    name: Releaser Container(tag)
+    name: release container(tag)
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     needs: [release-to-galaxy]

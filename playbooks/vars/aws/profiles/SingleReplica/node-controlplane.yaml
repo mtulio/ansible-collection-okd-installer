@@ -11,9 +11,8 @@ _tags: "{{ cluster_state.tags }}"
 
 ## User Data template
 _userdata_template: ocp-nodes-user-data.j2
-openshift_userdata:
-  config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/master"
-  ca_source: "{{ cluster_state.certificates.root_ca }}"
+userdata_config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/master"
+userdata_config_ca_source: "{{ cluster_state.certificates.root_ca }}"
 
 ## Common vars used in the Stack vars
 _common:

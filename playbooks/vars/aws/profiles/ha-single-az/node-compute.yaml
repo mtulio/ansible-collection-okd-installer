@@ -9,10 +9,10 @@ _security_groups:
 _tags: "{{ cluster_state.tags }}"
 
 ## User Data template
-_userdata_template: ocp-nodes-user-data.j2
-openshift_userdata:
-  config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/worker"
-  ca_source: "{{ cluster_state.certificates.root_ca }}"
+_userdata_path: "{{ config_install_dir }}/worker.ign"
+# _userdata_template: ocp-nodes-user-data.j2
+# userdata_config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/worker"
+# userdata_config_ca_source: "{{ cluster_state.certificates.root_ca }}"
 
 ## Common vars used in the Stack vars
 _common:
@@ -52,7 +52,7 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no
 
@@ -71,7 +71,7 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no
 
@@ -90,7 +90,7 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no
 

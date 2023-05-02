@@ -13,8 +13,7 @@ openshift_security_groups:
   - "{{ openshift_prefix }}-controlplane-sg"
 openshift_tags: "{{ cluster_state.tags }}"
 
-openshift_userdata:
-  config_source: "s3://{{ openshift_bootstrap_bucket }}/bootstrap.ign"
+userdata_config_source: "s3://{{ openshift_bootstrap_bucket }}/bootstrap.ign"
 
 _def:
   name: "{{ openshift_prefix }}-bootstrap"

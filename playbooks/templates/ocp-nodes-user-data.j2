@@ -3,7 +3,7 @@
     "config": {
       "merge": [
         {
-          "source": "{{ openshift_userdata.config_source }}"
+          "source": "{{ userdata_config_source }}"
         }
       ]
     },
@@ -11,7 +11,7 @@
       "tls": {
         "certificateAuthorities": [
           {
-            "source": "{{ openshift_userdata.ca_source }}"
+            "source": "{{ userdata_config_ca_source }}"
           }
         ]
       }

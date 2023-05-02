@@ -6,7 +6,7 @@ baseDomain: {{ config_base_domain }}
 
 # Compute Pool
 {% if cluster_profile == 'ha' %}
-compute: {{ config_compute }}
+compute: {{ config_compute | from_yaml }}
 
 {% elif cluster_profile == 'sno' %}
 compute:

@@ -14,14 +14,17 @@
 
 - name: Mount the binary names 
   ansible.builtin.set_fact:
-    bin_installer: "openshift-install-{{ client_os }}-{{ version | d(release_version) }}"
     bin_clients: "openshift-client-{{ client_os }}-{{ version | d(release_version) }}"
-    bin_oc: "oc-{{ client_os }}-{{ version | d(release_version) }}"
-    bin_kubectl: "kubectl-{{ client_os }}-{{ version | d(release_version) }}"
+    _bin_installer: "openshift-install-{{ client_os }}-{{ version | d(release_version) }}"
+    _bin_oc: "oc-{{ client_os }}-{{ version | d(release_version) }}"
+    _bin_kubectl: "kubectl-{{ client_os }}-{{ version | d(release_version) }}"
+    _bin_butane: "{{ cli_butane_bin }}-{{ cli_butane_version }}"
+
+# Client: openshift-install
 
 - name: openshift-install | Check is present
   ansible.builtin.stat:
-    path: "{{ collection_bin_dir }}/{{ bin_installer }}"
+    path: "{{ collection_bin_dir }}/{{ _bin_installer }}"
   register: check_bin_inst
 
 - name: openshift-install | Install client
@@ -29,12 +32,12 @@
   block:
   - name: openshift-install | Check tarball
     ansible.builtin.stat:
-      path: "{{ collection_tmp_dir }}/{{ bin_installer }}.tar.gz"
+      path: "{{ collection_tmp_dir }}/{{ _bin_installer }}.tar.gz"
     register: check_tar_inst
 
   - name: openshift-install | Download msg
     ansible.builtin.debug:
-      msg: "Donwloading tools [{{ release_image_version_arch | d(local_version) }}] using secret [{{ config_pull_secret_file }}]"
+      msg: "Downloading tools [{{ release_image_version_arch | d(local_version) }}] using secret [{{ config_pull_secret_file }}]"
     when: not(check_tar_inst.stat.exists)
 
   - name: openshift-install | Check vars
@@ -68,7 +71,7 @@
 
   - name: openshift-install | Extract tarball
     ansible.builtin.unarchive:
-      src: "{{ collection_tmp_dir }}/{{ bin_installer }}.tar.gz"
+      src: "{{ collection_tmp_dir }}/{{ _bin_installer }}.tar.gz"
       dest: "{{ collection_tmp_dir }}"
     when: not(check_bin_inst.stat.exists)
     register: ext_bin_inst
@@ -76,7 +79,7 @@
   - name: openshift-install | Copy to bin dir
     ansible.builtin.copy:
       src: "{{ collection_tmp_dir }}/openshift-install"
-      dest: "{{ collection_bin_dir }}/{{ bin_installer }}"
+      dest: "{{ collection_bin_dir }}/{{ _bin_installer }}"
       mode: 0755
     when: ext_bin_inst.changed
 
@@ -86,9 +89,11 @@
       path: "{{ collection_tmp_dir }}/openshift-install"
     when: ext_bin_inst.changed
 
+# Client: oc
+
 - name: oc | Check openshift client is present
   ansible.builtin.stat:
-    path: "{{ collection_bin_dir }}/{{ bin_oc }}"
+    path: "{{ collection_bin_dir }}/{{ _bin_oc }}"
   register: check_bin_cli
 
 - name: oc | Install clients
@@ -104,7 +109,7 @@
   - name: oc | Copy to bin path
     ansible.builtin.copy:
       src: "{{ collection_tmp_dir }}/oc"
-      dest: "{{ collection_bin_dir }}/{{ bin_oc }}"
+      dest: "{{ collection_bin_dir }}/{{ _bin_oc }}"
       mode: 0755
     when: ext_bin_cli.changed
 
@@ -117,7 +122,7 @@
   - name: kubectl | Copy to bin path
     ansible.builtin.copy:
       src: "{{ collection_tmp_dir }}/kubectl"
-      dest: "{{ collection_bin_dir }}/{{ bin_kubectl }}"
+      dest: "{{ collection_bin_dir }}/{{ _bin_kubectl }}"
       mode: 0755
     when: ext_bin_cli.changed
 
@@ -127,26 +132,64 @@
       path: "{{ collection_tmp_dir }}/kubectl"
     when: ext_bin_cli.changed
 
+# Client: butane
+
+- name: butane | Check butane client is present
+  ansible.builtin.stat:
+    path: "{{ collection_bin_dir }}/{{ _bin_butane }}"
+  register: check_bin_butane
+
+- name: butane | Install clients
+  when: not(check_bin_butane.stat.exists)
+  block:
+  - name: butane | Extract from tarball
+    ansible.builtin.get_url:
+      url: "{{ cli_butane_url }}"
+      dest: "{{ collection_tmp_dir }}/butane"
+      mode: '0440'
+    register: ext_bin_butane
+
+  - name: butane | Copy to bin path
+    ansible.builtin.copy:
+      src: "{{ collection_tmp_dir }}/butane"
+      dest: "{{ collection_bin_dir }}/{{ _bin_butane }}"
+      mode: 0755
+    when: ext_bin_butane.changed
+
+  - name: butane | Remove tmp file
+    ansible.builtin.file:
+      state: absent
+      path: "{{ collection_tmp_dir }}/butane"
+    when: ext_bin_butane.changed
+
+# Creating links to binaries
+
 - name: Ensure file links are present
   ansible.builtin.file:
     state: link
     src: "{{ collection_bin_dir }}/{{ item.src }}"
     dest: "{{ collection_bin_dir }}/{{ item.link }}"
   with_items:
-    - src: "{{ bin_installer }}"
+    - src: "{{ _bin_installer }}"
       link: openshift-install
-    - src: "{{ bin_oc }}"
+    - src: "{{ _bin_oc }}"
       link: oc
-    - src: "{{ bin_kubectl }}"
+    - src: "{{ _bin_kubectl }}"
       link: kubectl
+    - src: "{{ _bin_butane }}"
+      link: butane
 
 - name: Show clients path
   ansible.builtin.debug:
-    msg: "binary=[{{ item.src }}] link=[{{ item.link }}]"
+    msg:
+      - "binary=[{{ collection_bin_dir }}/{{ item.src }}]"
+      - "link=[{{ collection_bin_dir }}/{{ item.link }}]"
   with_items:
-    - src: "{{ bin_installer }}"
+    - src: "{{ _bin_installer }}"
       link: openshift-install
-    - src: "{{ bin_oc }}"
+    - src: "{{ _bin_oc }}"
       link: oc
-    - src: "{{ bin_kubectl }}"
+    - src: "{{ _bin_kubectl }}"
       link: kubectl
+    - src: "{{ _bin_butane }}"
+      link: butane

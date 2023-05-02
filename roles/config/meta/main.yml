@@ -16,8 +16,5 @@ galaxy_info:
     - okd
     - openshift
     - installer
-    - aws
-    - amazon
-    - digitalocean
 
 dependencies: []

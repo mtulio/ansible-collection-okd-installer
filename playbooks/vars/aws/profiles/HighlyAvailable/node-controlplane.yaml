@@ -11,10 +11,10 @@ openshift_security_groups:
 openshift_tags: "{{ cluster_state.tags }}"
 
 # User Data template
-openshift_userdata_template: ocp-nodes-user-data.j2
-openshift_userdata:
-  config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/master"
-  ca_source: "{{ cluster_state.certificates.root_ca }}"
+_userdata_path: "{{ config_install_dir }}/master.ign"
+# userdata_template: ocp-nodes-user-data.j2
+# userdata_config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/master"
+# userdata_config_ca_source: "{{ cluster_state.certificates.root_ca }}"
 
 _def:
   name: 'master'
@@ -54,7 +54,7 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: no
 
@@ -91,7 +91,7 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: no
 
@@ -128,7 +128,7 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: no
 

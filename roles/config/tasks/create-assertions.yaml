@@ -3,6 +3,12 @@
 - name: Create | Assertions | Variables
   ansible.builtin.include_tasks: check-vars.yaml
 
+- name: Create | Assertions | Check required provider
+  ansible.builtin.assert:
+    that:
+      - provider is in config_valid_providers
+    fail_msg: "'provider' is not a valid provider {{ config_valid_providers }}"
+
 - name: Create | Assrt. | Directories
   ansible.builtin.file:
     state: directory
@@ -30,3 +36,23 @@
   ansible.builtin.debug:
     msg: "CONFIG_PULL_SECRET_FILE env var was not found. Please set it with pull-secret file path"
   failed_when: not(ps_out.stat.exists)
+
+- name: Create | Config | Check file manifests/cluster-config.yaml
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/install-config.yaml"
+  register: _installconfig
+
+- name: Create | Assrt. | Check file manifests/cluster-config.yaml
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/manifests/cluster-config.yaml"
+  register: _manifests
+
+- name: Create | Assrt. | Check file metadata.json
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/metadata.json"
+  register: _metadata
+
+- name: Create | Assrt. | Check file coreos-stream.json
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/coreos-stream.json"
+  register: _coreosstream

@@ -1,6 +1,6 @@
 ---
 name: mock-aws
-'on':
+on:
   pull_request:
   push:
     branches:
@@ -15,14 +15,12 @@ defaults:
     working-directory: 'mtulio.okd_installer'
 
 jobs:
-
-  # Run linter tests: yaml-lint and ansible-lint.
   create_all:
     name: create-all
     runs-on: ubuntu-latest
     defaults:
       run:
-        # ansible.cfg is undert tests directory
+        # ansible.cfg is under tests directory
         working-directory: mtulio.okd_installer/tests
     strategy:
       fail-fast: false
@@ -41,6 +39,7 @@ jobs:
 
     # container: ubuntu
     services:
+    # Start Moto service (AWS mock) with custom image
       mock_server_moto:
         image: quay.io/mrbraga/motorserver-patch:latest
         ports:
@@ -85,11 +84,9 @@ jobs:
         path: ${{ steps.vars.outputs.cache-dir-bin }}
         key: ${{ steps.vars.outputs.cache-key-bin }}
 
-    - name: Update pip
+    - name: Update pip and install python dependencies
       run: |
         python -m pip install --upgrade pip
-    - name: Install python dependencies
-      run: |
         pip install -r ./../requirements.txt
 
     - name: Install Collections

@@ -10,9 +10,6 @@ _tags: "{{ cluster_state.tags }}"
 
 ## User Data template
 _userdata_path: "{{ config_install_dir }}/worker.ign"
-# _userdata_template: ocp-nodes-user-data.j2
-# userdata_config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/worker"
-# userdata_config_ca_source: "{{ cluster_state.certificates.root_ca }}"
 
 ## Common vars used in the Stack vars
 _common:

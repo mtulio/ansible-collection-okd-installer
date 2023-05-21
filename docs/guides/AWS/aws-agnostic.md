@@ -37,14 +37,32 @@ export CONFIG_SSH_KEY="$(cat ~/.ssh/id_rsa.pub)"
 EOF
 
 source ./.env-${CLUSTER_NAME}
+
+SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
+VARS_FILE="./vars-okipr3603.yaml"
+cat <<EOF> $VARS_FILE
+release_image: quay.io/openshift/okd
+release_version: 4.12.0-0.okd-2023-04-01-051724
+
+cluster_name: okipr3603
+config_base_domain: devcluster.openshift.com
+
+provider: aws
+config_provider: aws
+config_platform: none
+cluster_profile: ha
+config_cluster_region: us-east-1
+
+config_ssh_key: "${SSH_PUB_KEY}"
+config_pull_secret_file: "{{ playbook_dir }}/../tests/config/pull-secret-okd-fake.json"
+EOF
+
 ```
 
 Check if all required variables has been set:
 
 ```bash
-ansible-playbook  mtulio.okd_installer.config \
-    -e mode=check-vars \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
+ansible-playbook  mtulio.okd_installer.config -e mode=check-vars -e @$VARS_FILE
 ```
 
 ### Create or customize the `openshift-install` binary
@@ -56,9 +74,7 @@ Check the Guide [Install the `openshift-install` binary](./install-openshift-ins
 To generate the install config, you must set variables (defined above) and the cluster_name:
 
 ```bash
-ansible-playbook mtulio.okd_installer.config \
-    -e mode=create \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
+ansible-playbook mtulio.okd_installer.config -e mode=create-config -e @$VARS_FILE
 ```
 
 ## Create the cluster <a name="create-cluster"></a>
@@ -68,11 +84,7 @@ The okd-installer Collection provides one single playbook to create the cluster 
 Call the playbook to create the cluster:
 
 ```bash
-ansible-playbook mtulio.okd_installer.create_all \
-    -e provider=${CONFIG_PROVIDER} \
-    -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e certs_max_retries=20 \
-    -e cert_wait_interval_sec=60
+ansible-playbook mtulio.okd_installer.create_all -e @$VARS_FILE
 ```
 
 ## Cluster Review (optional) <a name="review"></a>

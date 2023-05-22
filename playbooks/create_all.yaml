@@ -68,7 +68,7 @@
 
 - name: OKD Installer | Create all | Bootstrap Destroy
   ansible.builtin.import_playbook: destroy_bootstrap.yaml
-  when: destroy_bootstrap | d('yes') == 'yes'
+  when: destroy_bootstrap | d('no') == 'yes'
 
 - name: OKD Installer | Create ALL | End
   hosts: '{{ target|default("localhost") }}'

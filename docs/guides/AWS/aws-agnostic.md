@@ -21,31 +21,56 @@ Table of Contents:
 
 ### Create and export config variables <a name="setup-vars"></a>
 
-Create and export the environment file:
+Create and export the environments:
 
-- `platform.none: {}`
+- When deploying **OpenShift**:
+
 ```bash
-CLUSTER_NAME="aws-22122701"
-cat <<EOF> ./.env-${CLUSTER_NAME}
-export CONFIG_CLUSTER_NAME=${CLUSTER_NAME}
-export CONFIG_PROVIDER=aws
-export CONFIG_CLUSTER_REGION=us-east-1
-export CONFIG_PLATFORM=none
-export CONFIG_BASE_DOMAIN=devcluster.openshift.com
-export CONFIG_PULL_SECRET_FILE=/home/mtulio/.openshift/pull-secret-latest.json
-export CONFIG_SSH_KEY="$(cat ~/.ssh/id_rsa.pub)"
-EOF
+# Release controller for each distribution:
+# OKD: https://amd64.origin.releases.ci.openshift.org/
+# OCP: https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/
+DISTRIBUTION="ocp"
+RELEASE_REPO="quay.io/openshift-release-dev/ocp-release"
+RELEASE_VERSION="4.13.0-x86_64"
+PULL_SECRET_FILE="${HOME}/.openshift/pull-secret-latest.json"
+```
 
-source ./.env-${CLUSTER_NAME}
+- When deploying **OKD with FCOS**:
 
+```bash
+DISTRIBUTION="okd"
+RELEASE_REPO=quay.io/openshift/okd
+RELEASE_VERSION=4.12.0-0.okd-2023-04-16-041331
+PULL_SECRET_FILE="{{ playbook_dir }}/../tests/config/pull-secret-okd-fake.json"
+```
+
+- When deploying **OKD with SCOS**:
+
+```bash
+DISTRIBUTION="okd"
+RELEASE_REPO=quay.io/okd/scos-release
+RELEASE_VERSION=4.13.0-0.okd-scos-2023-05-04-192252
+PULL_SECRET_FILE="{{ playbook_dir }}/../tests/config/pull-secret-okd-fake.json"
+```
+
+Create the Ansible var files:
+
+
+```bash
+CLUSTER_NAME="aws-none05"
+BASE_DOMAIN="devcluster.openshift.com"
 SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
-VARS_FILE="./vars-okipr3603.yaml"
-cat <<EOF> $VARS_FILE
-release_image: quay.io/openshift/okd
-release_version: 4.12.0-0.okd-2023-04-01-051724
 
-cluster_name: okipr3603
-config_base_domain: devcluster.openshift.com
+VARS_FILE="./vars-${CLUSTER_NAME}.yaml"
+cat <<EOF> $VARS_FILE
+
+cluster_name: ${CLUSTER_NAME}
+config_base_domain: ${BASE_DOMAIN}
+
+distro_default: $DISTRIBUTION
+release_image: $RELEASE_REPO
+release_version: $RELEASE_VERSION
+#release_image_version_arch: "quay.io/openshift-release-dev/ocp-release:4.13.0-x86_64"
 
 provider: aws
 config_provider: aws
@@ -54,9 +79,8 @@ cluster_profile: ha
 config_cluster_region: us-east-1
 
 config_ssh_key: "${SSH_PUB_KEY}"
-config_pull_secret_file: "{{ playbook_dir }}/../tests/config/pull-secret-okd-fake.json"
+config_pull_secret_file: "${PULL_SECRET_FILE}"
 EOF
-
 ```
 
 Check if all required variables has been set:
@@ -68,6 +92,10 @@ ansible-playbook  mtulio.okd_installer.config -e mode=check-vars -e @$VARS_FILE
 ### Create or customize the `openshift-install` binary
 
 Check the Guide [Install the `openshift-install` binary](./install-openshift-install.md) if you aren't set or would like to customize the cluster version.
+
+```bash
+ansible-playbook mtulio.okd_installer.install_clients -e @$VARS_FILE
+```
 
 ### Create the install config <a name="setup-config"></a>
 
@@ -124,45 +152,6 @@ while true; do approve_certs; sleep 30; done
     --dir ~/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/ \
     --log-level debug
 ```
-
-### Review Cluster Operators <a name="review-clusteroperators"></a>
-
-```bash
-export KUBECONFIG=${HOME}/.ansible/okd-installer/clusters/${CONFIG_CLUSTER_NAME}/auth/kubeconfig
-
-oc wait --all --for=condition=Available=True clusteroperators.config.openshift.io --timeout=10m > /dev/null
-oc wait --all --for=condition=Progressing=False clusteroperators.config.openshift.io --timeout=10m > /dev/null
-oc wait --all --for=condition=Degraded=False clusteroperators.config.openshift.io --timeout=10m > /dev/null
-
-oc get clusteroperators
-```
-
-### Day-2 Operation: Enable image-registry <a name="review-day2-enable-registry"></a>
-
-> NOTE: steps used in non-production clusters
-
-> [References](https://docs.openshift.com/container-platform/4.6/registry/configuring_registry_storage/configuring-registry-storage-baremetal.html)
-
-```bash
-oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed","storage":{"emptyDir":{}}}}'
-```
-
-<!-- ```bash
-ansible-playbook mtulio.okd_installer.create_imageregistry \
-    -e cluster_name=${CONFIG_CLUSTER_NAME}
-``` -->
-
-### Create Load Balancer for default router <a name="review-create-ingress-lb"></a>
-
-This steps is optional as the `create_all` playbook already trigger it.
-
-```bash
-ansible-playbook mtulio.okd_installer.stack_loadbalancer \
-    -e provider=${CONFIG_PROVIDER} \
-    -e cluster_name=${CONFIG_CLUSTER_NAME} \
-    -e var_file="./vars/${CONFIG_PROVIDER}/loadbalancer-router-default.yaml"
-```
-
 
 ## Destroy cluster <a name="destroy-cluster"></a>
 

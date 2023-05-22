@@ -36,3 +36,14 @@
     that:
       - config_cluster_region is defined
     fail_msg: "'config_cluster_region' is not defined. Check the env var CONFIG_CLUSTER_REGION"
+
+- name: Check Binary | installer present
+  stat:
+    path: "{{ bin_openshift_install }}"
+  register: _stat_installer
+
+- name: Check Binary | openshift-install
+  ansible.builtin.assert:
+    that:
+      - _stat_installer.stat.exists
+    fail_msg: "Installer binary is not present on path '{{ bin_openshift_install }}'. Run install_clients playbook first"

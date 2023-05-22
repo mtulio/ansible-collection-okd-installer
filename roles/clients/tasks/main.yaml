@@ -8,9 +8,9 @@
     - "{{ collection_tmp_dir }}"
     - "{{ collection_bin_dir }}"
 
-- name: Create default_version var
-  ansible.builtin.set_fact:
-    default_version: "{{ release_image }}:{{ version | d(release_version) }}-{{ release_arch }}"
+# - name: Create default_version var
+#   ansible.builtin.set_fact:
+#     _default_version: "{{ release_image }}:{{ version | d(default_version) }}-{{ release_arch }}"
 
 - name: Mount the binary names 
   ansible.builtin.set_fact:
@@ -164,32 +164,33 @@
 
 # Creating links to binaries
 
+## Create symlinks for cluster to prevent using wrong versions
+- name: Create binary suffix by cluster name
+  ansible.builtin.set_fact:
+    _clients_suffix: "{{ cluster_name | d('') }}"
+
+- name: Map clients version to cluster name
+  ansible.builtin.set_fact:
+    _clients_map:
+      - src: "{{ _bin_installer }}"
+        link: "openshift-install-{{ _clients_suffix }}"
+      - src: "{{ _bin_oc }}"
+        link: "oc-{{ _clients_suffix }}"
+      - src: "{{ _bin_kubectl }}"
+        link: "kubectl-{{ _clients_suffix }}"
+      - src: "{{ _bin_butane }}"
+        link: "butane-{{ _clients_suffix }}"
+
 - name: Ensure file links are present
   ansible.builtin.file:
     state: link
     src: "{{ collection_bin_dir }}/{{ item.src }}"
     dest: "{{ collection_bin_dir }}/{{ item.link }}"
-  with_items:
-    - src: "{{ _bin_installer }}"
-      link: openshift-install
-    - src: "{{ _bin_oc }}"
-      link: oc
-    - src: "{{ _bin_kubectl }}"
-      link: kubectl
-    - src: "{{ _bin_butane }}"
-      link: butane
+  with_items: "{{ _clients_map }}"
 
 - name: Show clients path
   ansible.builtin.debug:
     msg:
       - "binary=[{{ collection_bin_dir }}/{{ item.src }}]"
       - "link=[{{ collection_bin_dir }}/{{ item.link }}]"
-  with_items:
-    - src: "{{ _bin_installer }}"
-      link: openshift-install
-    - src: "{{ _bin_oc }}"
-      link: oc
-    - src: "{{ _bin_kubectl }}"
-      link: kubectl
-    - src: "{{ _bin_butane }}"
-      link: butane
+  with_items: "{{ _clients_map }}"

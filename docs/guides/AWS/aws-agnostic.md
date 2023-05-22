@@ -31,7 +31,8 @@ Create and export the environments:
 # OCP: https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/
 DISTRIBUTION="ocp"
 RELEASE_REPO="quay.io/openshift-release-dev/ocp-release"
-RELEASE_VERSION="4.13.0-x86_64"
+VERSION="4.13.0"
+RELEASE_VERSION="${VERSION}-x86_64"
 PULL_SECRET_FILE="${HOME}/.openshift/pull-secret-latest.json"
 ```
 
@@ -40,7 +41,8 @@ PULL_SECRET_FILE="${HOME}/.openshift/pull-secret-latest.json"
 ```bash
 DISTRIBUTION="okd"
 RELEASE_REPO=quay.io/openshift/okd
-RELEASE_VERSION=4.12.0-0.okd-2023-04-16-041331
+VERSION=4.12.0-0.okd-2023-04-16-041331
+RELEASE_VERSION=$VERSION
 PULL_SECRET_FILE="{{ playbook_dir }}/../tests/config/pull-secret-okd-fake.json"
 ```
 
@@ -49,7 +51,8 @@ PULL_SECRET_FILE="{{ playbook_dir }}/../tests/config/pull-secret-okd-fake.json"
 ```bash
 DISTRIBUTION="okd"
 RELEASE_REPO=quay.io/okd/scos-release
-RELEASE_VERSION=4.13.0-0.okd-scos-2023-05-04-192252
+VERSION=4.13.0-0.okd-scos-2023-05-04-192252
+RELEASE_VERSION=$VERSION
 PULL_SECRET_FILE="{{ playbook_dir }}/../tests/config/pull-secret-okd-fake.json"
 ```
 
@@ -68,6 +71,7 @@ cluster_name: ${CLUSTER_NAME}
 config_base_domain: ${BASE_DOMAIN}
 
 distro_default: $DISTRIBUTION
+version: $VERSION
 release_image: $RELEASE_REPO
 release_version: $RELEASE_VERSION
 #release_image_version_arch: "quay.io/openshift-release-dev/ocp-release:4.13.0-x86_64"

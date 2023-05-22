@@ -50,7 +50,7 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no
 
@@ -87,7 +87,7 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no
 
@@ -124,7 +124,7 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no
 

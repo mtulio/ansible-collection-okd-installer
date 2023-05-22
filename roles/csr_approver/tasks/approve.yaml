@@ -35,7 +35,7 @@
 
 - name: Approver | Approve CSRs
   ansible.builtin.command: |
-    {{ oc_bin }} \
+    {{ bin_oc | d(oc_bin) }} \
       --kubeconfig {{ config_install_dir }}/auth/kubeconfig \
       adm certificate approve {{ csr_name }}
   vars:

@@ -49,7 +49,7 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no
 
@@ -68,7 +68,7 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no
 
@@ -87,25 +87,6 @@ compute_resources:
       security_groups: "{{ _common.security_groups }}"
       state: "{{ _common.state }}"
       termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
-      volumes: "{{ _common.volumes | d([]) }}"
-      wait: no
-
-    - provider: aws
-      type: machine
-      name: "{{ _common.name }}-4"
-      vpc_subnet_name: "{{ _common.prefix }}-net-private-1a"
-      filters:
-        tag:Name: "{{ _common.name }}-4"
-      tags: "{% set x = _common.tags.__setitem__('Name', _common.name + '-4') %}{{ _common.tags }}"
-      detailed_monitoring: "{{ _common.detailed_monitoring }}"
-      ebs_optimized: "{{ _common.ebs_optimized }}"
-      image_id: "{{ _common.image_id }}"
-      instance_role: "{{ _common.instance_role }}"
-      instance_type: "{{ _common.instance_type }}"
-      security_groups: "{{ _common.security_groups }}"
-      state: "{{ _common.state }}"
-      termination_protection: "{{ _common.termination_protection }}"
-      user_data: "{{ lookup('template', _userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _common.volumes | d([]) }}"
       wait: no

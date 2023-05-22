@@ -36,7 +36,7 @@ jobs:
         #- "aws-none-sno"
         dist-version:
         - "okd-4.12.0-0"
-        - "okd-scos-4.13.0-0"
+        - "okd-scos-4.12.0-0"
 
     # container: ubuntu
     services:

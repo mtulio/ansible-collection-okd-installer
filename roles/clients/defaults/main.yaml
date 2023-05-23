@@ -1,11 +1,11 @@
 ---
-distro_default: okd
+distro_default: ocp
 distro_image:
   okd: "quay.io/openshift/okd"
   ocp: "quay.io/openshift-release-dev/ocp-release"
 
 release_arch: x86_64
-default_version: 4.12.0
+default_version: 4.13.0
 # OCP release version has the arch on the sufix
 # https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/
 # OKD does not have the arch on suffix
@@ -20,3 +20,10 @@ release_image_version_arch: "{{ release_image }}:{{ release_version }}"
 
 workdir: "{{ lookup('env', 'HOME') }}/.ansible/okd-installer"
 client_os: linux
+
+## Butane https://github.com/coreos/butane
+cli_butane_version: v0.17.0
+cli_butane_arch: x86_64
+cli_butane_os: unknown-linux-gnu
+cli_butane_bin: "butane-{{ cli_butane_arch }}-{{ cli_butane_os }}"
+cli_butane_url: "https://github.com/coreos/butane/releases/download/{{ cli_butane_version }}/{{ cli_butane_bin }}"

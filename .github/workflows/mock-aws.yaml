@@ -15,7 +15,7 @@ defaults:
     working-directory: 'mtulio.okd_installer'
 
 jobs:
-  create_all:
+  create_destroy_all:
     name: create-all
     runs-on: ubuntu-latest
     defaults:
@@ -36,6 +36,7 @@ jobs:
         #- "aws-none-sno"
         dist-version:
         - "okd-4.12.0-0"
+        - "okd-scos-4.13.0-0"
 
     # container: ubuntu
     services:
@@ -110,16 +111,31 @@ jobs:
         ansible-playbook mtulio.okd_installer.install_clients -e @$VARS_FILE
         tree ~/.ansible/okd-installer/bin || true
 
-    - name: Create cluster (play create_all)
+    # step to run create_all in new environment
+    - name: Create cluster (play create_all/new)
       env:
         VARS_FILE: "./vars-${{ steps.vars.outputs.cluster-name }}.yaml"
       run: |
         set -x
-        echo "Running create_all, the stdout will be suprised..."
+        echo "Running create_all new infrastructure..."
         ./run-play-steps.sh create_all
 
         cat ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}/cluster_state.json || true
         cat ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}install-config-bkp.yaml || true
+
+    # step to run create_all in existing environment (immutable)
+    - name: Create cluster (play create_all/existing)
+      env:
+        VARS_FILE: "./vars-${{ steps.vars.outputs.cluster-name }}.yaml"
+      run: |
+        set -x
+        echo "Running create_all in existing infrastructure..."
+        # TODO: target to idepotent execution, must check change==0
+        ./run-play-steps.sh create_all
+
+        cat ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}/cluster_state.json || true
+        cat ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}install-config-bkp.yaml || true
+
 
     - name: Destroy cluster (play destroy_cluster)
       env:

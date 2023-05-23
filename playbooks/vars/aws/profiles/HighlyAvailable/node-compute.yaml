@@ -11,10 +11,7 @@ openshift_security_groups:
 openshift_tags: "{{ cluster_state.tags }}"
 
 # User Data template
-openshift_userdata_template: ocp-nodes-user-data.j2
-openshift_userdata:
-  config_source: "https://api-int.{{ cluster_state.dns.cluster_domain }}:22623/config/worker"
-  ca_source: "{{ cluster_state.certificates.root_ca }}"
+_userdata_path: "{{ config_install_dir }}/worker.ign"
 
 _def:
   name: 'worker'
@@ -55,7 +52,7 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: no
 
@@ -74,7 +71,7 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: no
 
@@ -93,6 +90,6 @@ compute_resources:
       security_groups: "{{ _def.security_groups }}"
       state: "{{ _def.state }}"
       termination_protection: "{{ _def.termination_protection }}"
-      user_data: "{{ lookup('template', openshift_userdata_template) | to_nice_json | string }}"
+      user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       volumes: "{{ _def.volumes | d([]) }}"
       wait: yes

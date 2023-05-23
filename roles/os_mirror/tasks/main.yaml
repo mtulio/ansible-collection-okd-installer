@@ -1,0 +1,6 @@
+---
+- name: gather from source
+  ansible.builtin.include_tasks: "./{{ os_mirror_from }}.yaml"
+
+- name: upload to provider {{ os_mirror_to_provider }}
+  ansible.builtin.include_tasks: "./{{ os_mirror_to_provider }}.yaml"

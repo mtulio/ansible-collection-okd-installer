@@ -3,13 +3,10 @@
   hosts: '{{ target|default("localhost") }}'
   connection: local
   gather_facts: yes
-
   tasks:
     - name: OKD Installer | Destroy | Timer start
       ansible.builtin.set_fact:
         okdi_del_timer_start: "{{ ansible_date_time.date }} {{ ansible_date_time.time }}"
-
-# - ansible.builtin.import_playbook: var_check_required.yaml
 
 - name: okd-installer | Cluster Destroy | Config load
   ansible.builtin.import_playbook: config.yaml
@@ -20,12 +17,14 @@
   hosts: '{{target|default("localhost")}}'
   connection: local
   gather_facts: yes
+
   vars:
     profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
   vars_files:
     - "{{ profile_path }}/iam.yaml"
     - "{{ profile_path }}/dns.yaml"
+
   pre_tasks:
     # Network
     - name: okd-installer | Destroy | Network | Loading Topology Names
@@ -45,35 +44,30 @@
       ansible.builtin.include_vars:
         file: "{{ profile_path }}/loadbalancer-router-default.yaml"
 
-    - name: okd-installer | Destroy | LB | Merge list
+    - name: okd-installer | Destroy | LB | Merge
       ansible.builtin.set_fact:
-        load_balancers_all: "{{ load_balancers_all + cloud_loadbalancers }}"
+        load_balancers_all: "{{ (load_balancers_all | d([])) + (cloud_loadbalancers | d([])) }}"
 
     - name: okd-installer | Destroy | LB | Load API Names
       ansible.builtin.include_vars:
         file: "{{ profile_path }}/loadbalancer.yaml"
 
-    - name: okd-installer | Destroy | LB | Merge list
+    - name: okd-installer | Destroy | LB | Merge
       ansible.builtin.set_fact:
-        load_balancers_all: "{{ load_balancers_all + cloud_loadbalancers }}"
+        load_balancers_all: "{{ load_balancers_all + (cloud_loadbalancers | d([])) }}"
 
     - name: okd-installer | Destroy | LB | Consolidate
       ansible.builtin.set_fact:
         cloud_loadbalancers: "{{ load_balancers_all }}"
 
-    - name: okd-installer | Destroy | LB | Show number of resources
+    - name: okd-installer | Destroy | LB | Show resource count
       ansible.builtin.debug:
         msg: "Found {{ cloud_loadbalancers | length }} Load Balancers on the Configuration"
 
   roles:
     - role: destroy
 
-
-- name: okd-installer | Destroy | Finish
-  hosts: '{{ target|default("localhost") }}'
-  connection: local
-  gather_facts: true
-  tasks:
+  post_tasks:
     - name: okd-installer | Destroy | Finish | Timer end
       ansible.builtin.set_fact:
         okdi_del_timer_end: "{{ ansible_date_time.date }} {{ ansible_date_time.time }}"

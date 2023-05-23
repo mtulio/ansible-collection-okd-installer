@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  role_name: okd_cluster_destroy
+  role_name: destroy
   author: mtulio
   description: Ansible Role to Destroy OKD Cluster on the Cloud Provider
   license: Apache-2.0
@@ -17,8 +17,5 @@ galaxy_info:
     - openshift
     - cloud
     - installer
-    - aws
-    - amazon
-    - digitalocean
 
 dependencies: []

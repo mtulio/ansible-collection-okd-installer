@@ -11,8 +11,7 @@ _image_id: "{{ custom_image_id | d(cluster_state.compute.image_id) }}"
 _subnet_name: "{{ _cluster_prefix }}-net-public-1a"
 
 ## User Data template
-openshift_userdata:
-  config_source: "s3://{{ bootstrap_bucket }}/bootstrap.ign"
+userdata_config_source: "s3://{{ bootstrap_bucket }}/bootstrap.ign"
 
 ## Common vars used in the Stack vars
 _common:

@@ -16,7 +16,8 @@ galaxy_info:
     - openshift
     - okd
     - installer
-    - aws
-    - amazon
+    - okd-installer
+    - openshift-installer
+    - automation
 
 dependencies: []

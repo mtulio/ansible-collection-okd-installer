@@ -15,15 +15,17 @@
 
 - name: DigitalOcean | Set Bucket URL
   set_fact:
-    openshift_bootstrap_bucket_url: "{{ do_space.data.space.endpoint_url }}"
+    bootstrap_bucket_url: "{{ do_space.data.space.endpoint_url }}"
 
 - name: DigitalOcean | Upload bootstrap.ign
-  amazon.aws.aws_s3:
-    bucket: "{{ openshift_bootstrap_bucket }}"
+  amazon.aws.s3_object:
+    bucket: "{{ bootstrap_bucket }}"
     object: "/bootstrap.ign"
-    src: "{{ install_dir + '/bootstrap.ign' }}"
+    src: "{{ config_install_dir + '/' + bootstrap_src_ign }}"
     mode: put
-    s3_url: "{{ openshift_bootstrap_bucket_url | d(omit) }}"
+    overwrite: different
+    s3_url: "{{ bootstrap_bucket_url | d(omit) }}"
+    expiry: 3600 # expire the presigned URL in 1h
   register: s3_put
 
 - name: DigitalOcean | Show pre-signed URL
@@ -33,4 +35,6 @@
 
 - name: DigitalOcean | Set the Ignition URL
   ansible.builtin.set_fact:
-    setup_bootstrap_ign_spaces_url: "{{ s3_put.url }}"
+    bootstrap_ign_url: "{{ s3_put.url }}"
+
+- debug: var=bootstrap_ign_url

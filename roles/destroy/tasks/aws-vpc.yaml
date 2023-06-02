@@ -56,9 +56,9 @@
       ansible.builtin.include_tasks: aws-vpc-igw.yaml
       tags: vpc
 
-    - name: AWS | VPC | Carrier Gateway(s)
-      ansible.builtin.include_tasks: aws-vpc-cagw.yaml
-      tags: vpc
+   #- name: AWS | VPC | Carrier Gateway(s)
+   #   ansible.builtin.include_tasks: aws-vpc-cagw.yaml
+   #   tags: vpc
 
     - name: AWS | VPC | Delete
       amazon.aws.ec2_vpc_net:

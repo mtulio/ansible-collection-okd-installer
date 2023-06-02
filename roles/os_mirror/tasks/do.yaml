@@ -1,0 +1,59 @@
+---
+# check if private image exists
+
+- name: Get distribution about image with slug coreos-beta
+  community.digitalocean.digital_ocean_image_info:
+    image_type: private
+  register: resp_out
+
+- debug: var=resp_out
+
+- ansible.builtin.set_fact:
+    image_id: "{{ img.id }}"
+  when:
+    - resp_out.data | length > 0
+    - img.name == "{{ cluster_state.compute.image_id }}"
+  loop: "{{ resp_out.data }}"
+  loop_control:
+    loop_var: img
+
+- debug: var=image_id|d('')
+
+#curl -X POST \
+#-H "Content-Type: application/json" \
+#-H "Authorization: Bearer $DIGITALOCEAN_TOKEN" \
+#-d '{"name": "ubuntu-18.04-minimal",
+# "url": "",
+# "distribution": "Ubuntu", "region": "nyc3",
+# "description": "Cloud-optimized image w/ small footprint",
+# "tags":["base-image", "prod"]}' \
+#"https://api.digitalocean.com/v2/images"
+
+# - name: Create RHCOS image
+#   ansible.builtin.uri:
+#     url: "https://api.digitalocean.com/v2/images"
+#     # user: your_username
+#     # password: your_pass
+#     method: POST
+#     # body: "{{ lookup('ansible.builtin.file','issue.json') }}"
+#     #force_basic_auth: true
+#     status_code: 202
+#     body_format: json
+#     headers:
+#       Content-Type: application/json
+#       Authorization: "Bearer {{ ansible_env.DO_API_TOKEN }}"
+#     body:
+#       name: "{{ cluster_state.compute.image_id }}"
+#       url: "{{ cluster_state.compute.image_url }}"
+#       distribution: CoreOS
+#       region: "nyc3"
+#       description: "RHCOS"
+#       tags: ["rhcos"]
+#   register: upload_image
+#   when: image_id | d('') | length == 0
+
+# - debug: var=upload_image
+
+# alternatives
+# https://developer.hashicorp.com/packer/plugins/post-processors/digitalocean
+# https://faun.pub/terraform-and-ansible-aad8fcface7e

@@ -8,6 +8,7 @@ config_default_hyperthreading: Enabled
 
 config_valid_providers:
   - aws
+  - do
 
 # Compute
 config_compute_replicas: 3

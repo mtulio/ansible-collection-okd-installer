@@ -13,6 +13,3 @@
 [submodule "roles/cloud_dns"]
 	path = roles/cloud_dns
 	url = git@github.com:mtulio/ansible-role-cloud-dns.git
-[submodule "docs/okd.io"]
-	path = docs/okd.io
-	url = git@github.com:mtulio/okd.io.git

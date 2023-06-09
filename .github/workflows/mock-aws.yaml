@@ -136,7 +136,6 @@ jobs:
         cat ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}/cluster_state.json || true
         cat ~/.ansible/okd-installer/clusters/${{ steps.vars.outputs.cluster-name }}install-config-bkp.yaml || true
 
-
     - name: Destroy cluster (play destroy_cluster)
       env:
         VARS_FILE: "./vars-${{ steps.vars.outputs.cluster-name }}.yaml"

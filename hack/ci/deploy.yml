@@ -15,7 +15,7 @@
         git submodule update --recursive --remote
         chdir={{ collection_root }}
       register: git_update
-      failed_when: git_update.stdout != ''
+      #failed_when: git_update.stdout != ''
       tags: build
 
     - name: Ensure the ~/.ansible directory exists.

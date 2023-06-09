@@ -34,4 +34,3 @@
     id: "{{ inst.instances[0].id }}"
     preserve_boot_volume: false
     wait: no
-

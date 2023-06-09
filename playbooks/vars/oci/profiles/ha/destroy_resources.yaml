@@ -9,7 +9,6 @@ okd_cluster_destroy_instances:
   - name: "{{ cluster_state.infra_id }}-worker-01"
   - name: "{{ cluster_state.infra_id }}-worker-02"
   - name: "{{ cluster_state.infra_id }}-worker-03"
-  - name: "{{ cluster_state.infra_id }}-opct-01"
     wait: yes
     wait_timeout: 120
 
@@ -23,4 +22,3 @@ okd_cluster_destroy_dns_records:
     domain: "api-int.{{ cluster_state.dns.cluster_domain }}"
   - operation: REMOVE
     domain: "*.apps.{{ cluster_state.dns.cluster_domain }}"
-

@@ -1,6 +1,6 @@
 {
-  "installCommand": "make docs-ci-install INSTALL_CMD='sudo apt update; sudo apt'",
-  "buildCommand": "make docs-build",
+  "installCommand": "./hack/docs.sh install",
+  "buildCommand": "./hack/docs.sh build",
   "outputDirectory": "site/",
   "github": {
     "enabled": false,

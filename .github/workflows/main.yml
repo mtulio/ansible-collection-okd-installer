@@ -208,7 +208,6 @@ jobs:
             - Container: ${{ env.IMAGE }}:${{ env.VERSION }}
             - Docs Preview: ${{ steps.verceldeploy.outputs.url }}
           reactions: rocket
-
       - name: Update comment
         if: steps.fbc.outputs.comment-id != ''
         uses: peter-evans/create-or-update-comment@v3

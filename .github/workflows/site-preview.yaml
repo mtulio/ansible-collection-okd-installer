@@ -1,0 +1,74 @@
+
+name: github-pages-preview
+env:
+  VERCEL_VERSION: 28.20.0
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  Deploy-Preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set job vars
+        id: vars
+        run: |
+          echo "cache-key-npm=npm-vercel-${VERCEL_VERSION}" >> $GITHUB_OUTPUT
+          echo "cache-dir-npm=${HOME}/.npm" >> $GITHUB_OUTPUT
+
+      - name: Set npm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.vars.outputs.cache-dir-npm }}
+          key: ${{ steps.vars.outputs.cache-key-npm }}
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@${VERCEL_VERSION}
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} | tee out.log
+          export PREVIEW_URL=$(grep ^Preview out.log | awk '{print$2}')
+          echo "Discovered Preview URL: ${PREVIEW_URL}"
+          echo "url-dev=$PREVIEW_URL" >> $GITHUB_OUTPUT
+
+      - name: Find comment
+        uses: peter-evans/find-comment@v2
+        id: fbc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: Docs published!
+
+      - name: Create comment
+        if: steps.fbc.outputs.comment-id == ''
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Docs published!
+            - Preview URL: ${{ steps.deploy.outputs.url-dev }}
+          reactions: rocket
+
+      - name: Update comment
+        if: steps.fbc.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.fbc.outputs.comment-id }}
+          body: |
+            Docs published!
+            - Preview URL: ${{ steps.deploy.outputs.url-dev }}
+          reactions: hooray

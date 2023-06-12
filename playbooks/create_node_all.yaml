@@ -53,27 +53,27 @@
         loop:
           - "cloud_compute"
 
-    # Create Compute: Compute nodes
-    - name: okd-installer | Stack | Compute | Worker
-      when: create_worker | d('yes') == 'yes'
-      block:
-      - name: okd-installer | Stack | Compute | Set User provided (CMP)
-        ansible.builtin.include_vars:
-          file: "{{ var_file_compute }}"
-        when: var_file_compute is defined
+    # # Create Compute: Compute nodes
+    # - name: okd-installer | Stack | Compute | Worker
+    #   when: create_worker | d('yes') == 'yes'
+    #   block:
+    #   - name: okd-installer | Stack | Compute | Set User provided (CMP)
+    #     ansible.builtin.include_vars:
+    #       file: "{{ var_file_compute }}"
+    #     when: var_file_compute is defined
 
-      - name: okd-installer | Stack | Compute | Include Topology {{ cluster_profile }}
-        ansible.builtin.include_vars:
-          file: "{{ profile_path }}/node-compute.yaml"
-        when:
-          - var_file_compute is not defined
-          - cluster_profile in topologies_allowed_multinode
+    #   - name: okd-installer | Stack | Compute | Include Topology {{ cluster_profile }}
+    #     ansible.builtin.include_vars:
+    #       file: "{{ profile_path }}/node-compute.yaml"
+    #     when:
+    #       - var_file_compute is not defined
+    #       - cluster_profile in topologies_allowed_multinode
 
-      - name: okd-installer | Stack | Compute | Create compute nodes
-        ansible.builtin.include_role:
-          name: "{{ item }}"
-        loop:
-          - "cloud_compute"
+    #   - name: okd-installer | Stack | Compute | Create compute nodes
+    #     ansible.builtin.include_role:
+    #       name: "{{ item }}"
+    #     loop:
+    #       - "cloud_compute"
 
 - name: okd-installer | Stack | Compute ALL | Save state
   import_playbook: config.yaml

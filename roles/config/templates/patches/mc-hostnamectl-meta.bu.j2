@@ -1,0 +1,32 @@
+variant: openshift
+version: 4.12.0
+metadata:
+  name: 00-{{ machine_role }}-hostnamectl-meta
+  labels:
+    machineconfiguration.openshift.io/role: {{ machine_role }}
+systemd:                        
+  units:                        
+  - name: setnodename.service       
+    enabled: true               
+    contents: |                 
+      [Unit]
+      Description=Set hostname from metadata
+      Wants=afterburn.service
+      #Before=node-valid-hostname.service
+      Before=crio.service kubelet.service
+      #After=afterburn.service
+      After=NetworkManager-wait-online.service
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/run-hostnamectl
+      RemainAfterExit=yes
+      [Install]
+      WantedBy=network-online.target
+storage:
+  files:
+    - path: /usr/local/bin/run-hostnamectl
+      mode: 0755
+      contents:
+        inline: |
+          #!/usr/bin/bash
+          hostnamectl set-hostname $(curl -s http://169.254.169.254/metadata/v1/hostname)

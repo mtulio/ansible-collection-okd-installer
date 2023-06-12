@@ -1,17 +1,9 @@
 ---
-
-#AWS: https://docs.ansible.com/ansible/latest/collections/community/aws/route53_module.html
+# https://docs.ansible.com/ansible/latest/collections/community/digitalocean/digital_ocean_domain_module.html
 cloud_dns_zones:
-
-  # private
-  - name: "{{ cluster_state.dns.cluster_domain }}"
-    type: cluster
-    provider: do
-    #vpc_name: "{{ cluster_state.infra_id }}-vpc"
+  - provider: do
     vpc_region: "{{ cluster_state.region }}"
-    #private_zone: yes
-    project: "{{ cluster_state.infra_id }}"
-#    records:
-#      - name: "api.{{ cluster_state.zones.cluster }}"
-#        value: "lb.{{ cluster_state.zones.cluster }}"
-#        type: CNAME
+    spec:
+      name: "{{ cluster_state.dns.cluster_domain }}"
+      project_name: "{{ cluster_state.infra_id }}"
+      state: present

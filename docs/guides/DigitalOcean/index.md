@@ -50,22 +50,33 @@ ansible-galaxy collection install -r collections/ansible_collections/mtulio/okd_
 export DO_API_TOKEN=value
 ```
 
+- Create Spaces credentials and export it
+
+```bash
+export AWS_ACCESS_KEY_ID="DO00..."
+export AWS_SECRET_ACCESS_KEY="..."
+```
+
 ## Setup the configuration
 
 ```bash
-CLUSTER_NAME=do-lab02
+CLUSTER_NAME=do-lab10
 VARS_FILE=./vars-do-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}
 provider: do
-cluster_name: ${CLUSTER_NAME}
 config_cluster_region: nyc3
+
+cluster_name: ${CLUSTER_NAME}
+# Already default:
+# config_platform: none
+# config_platform_spec: '{}'
 
 cluster_profile: ha
 destroy_bootstrap: no
 
 config_base_domain: splat-do.devcluster.openshift.com
-config_ssh_key: "$(cat ~/.ssh/openshift-dev.pub)"
+config_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbXCby9r69mn+lGn7/mjZRkr+ShGWmVcXT4pbwA8IJBkjJg/EtXFuL1VjP5QbbWvjakQ1ZpMEYkL4V1Gm1etzkoDuMV+VhvvL8uW59XezLH1My9RQ5vtXY7GpB3t4qbTX2AQ5abAlTAoRgOxr5mKT62m3uUpU6HBWkcqwhNGRNPQOhUBybbpxMyakJ/TyS5F7GOajsCWdhx3ErldXrtUgbArPwR16Nh0lA3jO81QJnKzbkcaVlCNd8A3to0Dx1g5cel2HDK37Ri6xYZssh1qGN+fecc7Gf4lqvp1gGMtKMyZw8t54/cJrSeVhzi+mq8aeTIaOAwpoa8C4H80HE35wog1tsS0WALlPdNZ8IyPZRfhH3iG12X0WttB5x2hHngQaYzSWzs1TvEGwrci1Y8EFE1xXG6ArAPG5Iy79tmXlOZM/R/D1K6oVRrVB6T4fWKtHFHJExlRI6HWT+Qxye96RPWxEdKEhWzOLRrBiWPSXYCtT4SCbBirP4C/htnDNcMGlT/HIETVf0R+ixjnsqeYYQn15cXvWSSDQ4LTnW9vBrDLsWVFV8hJ4outZ67Ztf/tBuGKfUFzLkTCFhWJER1bbH7Zhxn5xCplI4REr2+PKnhRaPCrz6W2TRO94pACkJG3M4eP3OyCbVfC1N1c0+MPwwJ0R7TAllli94t5jQthu8xw=="
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
 config_cluster_version: 4.13.0
@@ -84,8 +95,14 @@ os_mirror_to_do:
   bucket: rhcos-images
   image_type: QCOW2
 
+# Manifest Patches
 config_patches:
 - rm-capi-machines
+- mc-kubelet-provider-nodename
+
+# Ignition Patches
+config_patches_ignitions:
+- ign-hostnamectl-metadata
 
 EOF
 ```
@@ -153,9 +170,13 @@ ansible-playbook mtulio.okd_installer.config -e mode=patch-manifests -e @$VARS_F
 ansible-playbook mtulio.okd_installer.config -e mode=create-ignitions -e @$VARS_FILE
 ```
 
+```bash
+ansible-playbook mtulio.okd_installer.config -e mode=patch-ignitions -e @$VARS_FILE
+```
+
 #### Mirror OS boot image
 
-> TODO for DigitalOcean
+> TODO fixes for DigitalOcean
 
 ```bash
 ansible-playbook mtulio.okd_installer.os_mirror -e @$VARS_FILE
@@ -165,7 +186,7 @@ ansible-playbook mtulio.okd_installer.os_mirror -e @$VARS_FILE
 
 ##### Bootstrap node
 
-- Upload the bootstrap ignition to blob and Create the Bootstrap Instance
+- Upload the bootstrap ignition to blob and Create the Bootstrap Droplet
 
 ```bash
 ansible-playbook mtulio.okd_installer.create_node -e node_role=bootstrap -e @$VARS_FILE

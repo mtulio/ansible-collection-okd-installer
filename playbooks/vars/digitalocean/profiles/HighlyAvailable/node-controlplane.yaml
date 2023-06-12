@@ -12,7 +12,7 @@ openshift_tags: "{{ cluster_state.tags }}"
 _userdata_path: "{{ config_install_dir }}/master.ign"
 
 _def:
-  name: "master"
+  name: "{{ cluster_state.infra_id }}-master"
   region: "{{ cluster_state.region }}"
   project: "{{ cluster_state.infra_id }}"
   image_id: "{{ openshift_image_id }}"
@@ -63,80 +63,208 @@ compute_resources:
     #       resource_type: ip
     #       #resource_id: private_ip
 
+    # - provider: do
+    #   type: machine
+    #   name: "{{ openshift_prefix }}-{{ _def.name }}-2"
+    #   state: "{{ _def.state }}"
+    #   #filters:
+    #   #  tag:Name: "{{ _def.name }}"
+    #   #  instance-state-name: running
+    #   #tags: "{% set x=cluster_state.tags.__setitem__('Name', _def.name ) %}{{ cluster_state.tags }}"
+    #   #security_groups: "{{ _def.security_groups }}"
+    #   #volumes: "{{ _def.volumes | d([]) }}"
+    #   #user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
+    #   user_data: "{{ lookup('file', _userdata_path) | from_json }}"
+    #   vpc_name: "{{ _def.vpc_name }}"
+    #   wait: "{{ _def.wait }}"
+    #   wait_timeout: "{{ _def.wait_timeout }}"
+
+    #   #firewall: "{{ _def.firewall }}"
+    #   image_name: "{{ _def.image_id }}"
+    #   #ipv6: no
+    #   #monitoring: no
+    #   private_networking: yes
+    #   project_name: "{{ _def.project }}"
+    #   region: "{{ _def.region }}"
+    #   size: "{{ _def.instance_type }}"
+    #   #sleep_interval: 
+    #   ssh_key:
+    #     name: "{{ _def.project }}"
+    #     pub_key: "{{ lookup('ansible.builtin.env', 'CONFIG_SSH_KEY') }}"
+    #   #tags: 
+    #   #user_data: 
+    #   #volumes:
+
+    #   register_resources:
+    #     - service: loadbalancer
+    #       service_type: lb
+    #       resource_name: "{{ openshift_prefix}}-ext"
+    #       resource_type: ip
+    #       #resource_id: private_ip
+
+    # - provider: do
+    #   type: machine
+    #   name: "{{ openshift_prefix }}-{{ _def.name }}-3"
+    #   state: "{{ _def.state }}"
+    #   #filters:
+    #   #  tag:Name: "{{ _def.name }}"
+    #   #  instance-state-name: running
+    #   #tags: "{% set x=cluster_state.tags.__setitem__('Name', _def.name ) %}{{ cluster_state.tags }}"
+    #   #security_groups: "{{ _def.security_groups }}"
+    #   #volumes: "{{ _def.volumes | d([]) }}"
+    #   #user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
+    #   user_data: "{{ lookup('file', _userdata_path) | from_json }}"
+    #   vpc_name: "{{ _def.vpc_name }}"
+    #   wait: "{{ _def.wait }}"
+    #   wait_timeout: "{{ _def.wait_timeout }}"
+
+    #   #firewall: "{{ _def.firewall }}"
+    #   image_name: "{{ _def.image_id }}"
+    #   #ipv6: no
+    #   #monitoring: no
+    #   private_networking: yes
+    #   project_name: "{{ _def.project }}"
+    #   region: "{{ _def.region }}"
+    #   size: "{{ _def.instance_type }}"
+    #   #sleep_interval: 
+    #   ssh_key:
+    #     name: "{{ _def.project }}"
+    #     pub_key: "{{ lookup('ansible.builtin.env', 'CONFIG_SSH_KEY') }}"
+    #   #tags: 
+    #   #user_data: 
+    #   #volumes:
+
+    #   register_resources:
+    #     - service: loadbalancer
+    #       service_type: lb
+    #       resource_name: "{{ openshift_prefix}}-ext"
+    #       resource_type: ip
+    #       #resource_id: private_ip
+
+# https://docs.ansible.com/ansible/latest/collections/community/digitalocean/digital_ocean_droplet_module.html
     - provider: do
-      type: machine
-      name: "{{ openshift_prefix }}-{{ _def.name }}-2"
-      state: "{{ _def.state }}"
-      #filters:
-      #  tag:Name: "{{ _def.name }}"
-      #  instance-state-name: running
-      #tags: "{% set x=cluster_state.tags.__setitem__('Name', _def.name ) %}{{ cluster_state.tags }}"
-      #security_groups: "{{ _def.security_groups }}"
-      #volumes: "{{ _def.volumes | d([]) }}"
-      #user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
+      #user_data: "{{ lookup('template', 'ocp-bootstrap-user-data.j2') }}"
       user_data: "{{ lookup('file', _userdata_path) | from_json }}"
       vpc_name: "{{ _def.vpc_name }}"
       wait: "{{ _def.wait }}"
       wait_timeout: "{{ _def.wait_timeout }}"
-
-      #firewall: "{{ _def.firewall }}"
       image_name: "{{ _def.image_id }}"
-      #ipv6: no
-      #monitoring: no
-      private_networking: yes
-      project_name: "{{ _def.project }}"
-      region: "{{ _def.region }}"
-      size: "{{ _def.instance_type }}"
-      #sleep_interval: 
       ssh_key:
         name: "{{ _def.project }}"
-        pub_key: "{{ lookup('ansible.builtin.env', 'CONFIG_SSH_KEY') }}"
-      #tags: 
-      #user_data: 
-      #volumes:
+        pub_key: "{{ config_ssh_key }}"
 
-      register_resources:
-        - service: loadbalancer
-          service_type: lb
-          resource_name: "{{ openshift_prefix}}-ext"
-          resource_type: ip
-          #resource_id: private_ip
+      spec:
+        state: present
+        name: "{{ _def.name }}-01"
+        unique_name: true
+        size: "{{ _def.instance_type }}"
+        region: "{{ _def.region }}"
+        project_name: "{{ _def.project }}"
+        private_networking: true
+        wait_timeout: 500
+        #wait: no
+        ipv6: false
+        monitoring: false
+        #firewall: "{{ _def.firewall }}"
+        tags:
+        - "{{ _def.project }}-control-planes"
+        - "cluster-name-{{ _def.project }}"
 
+      callbacks:
+        - service: dns
+          domain: "{{ cluster_state.dns.cluster_domain }}"
+          rr_type: A
+          rr_name: "{{ _def.name }}-01"
+          droplet_network: v4
+          droplet_network_type: private
+        - service: dns
+          domain: "{{ cluster_state.dns.cluster_domain }}"
+          rr_type: A
+          rr_name: "etcd-0"
+          droplet_network: v4
+          droplet_network_type: private
+
+# master-2
     - provider: do
-      type: machine
-      name: "{{ openshift_prefix }}-{{ _def.name }}-3"
-      state: "{{ _def.state }}"
-      #filters:
-      #  tag:Name: "{{ _def.name }}"
-      #  instance-state-name: running
-      #tags: "{% set x=cluster_state.tags.__setitem__('Name', _def.name ) %}{{ cluster_state.tags }}"
-      #security_groups: "{{ _def.security_groups }}"
-      #volumes: "{{ _def.volumes | d([]) }}"
-      #user_data: "{{ lookup('file', _userdata_path) | from_json | to_nice_json | string }}"
       user_data: "{{ lookup('file', _userdata_path) | from_json }}"
       vpc_name: "{{ _def.vpc_name }}"
       wait: "{{ _def.wait }}"
       wait_timeout: "{{ _def.wait_timeout }}"
-
-      #firewall: "{{ _def.firewall }}"
       image_name: "{{ _def.image_id }}"
-      #ipv6: no
-      #monitoring: no
-      private_networking: yes
-      project_name: "{{ _def.project }}"
-      region: "{{ _def.region }}"
-      size: "{{ _def.instance_type }}"
-      #sleep_interval: 
       ssh_key:
         name: "{{ _def.project }}"
-        pub_key: "{{ lookup('ansible.builtin.env', 'CONFIG_SSH_KEY') }}"
-      #tags: 
-      #user_data: 
-      #volumes:
+        pub_key: "{{ config_ssh_key }}"
 
-      register_resources:
-        - service: loadbalancer
-          service_type: lb
-          resource_name: "{{ openshift_prefix}}-ext"
-          resource_type: ip
-          #resource_id: private_ip
+      spec:
+        state: present
+        name: "{{ _def.name }}-02"
+        unique_name: true
+        size: "{{ _def.instance_type }}"
+        region: "{{ _def.region }}"
+        project_name: "{{ _def.project }}"
+        private_networking: true
+        wait_timeout: 500
+        #wait: yes
+        ipv6: false
+        monitoring: false
+        #firewall: "{{ _def.firewall }}"
+        tags:
+        - "{{ _def.project }}-control-planes"
+        - "cluster-name-{{ _def.project }}"
+
+      callbacks:
+        - service: dns
+          domain: "{{ cluster_state.dns.cluster_domain }}"
+          rr_type: A
+          rr_name: "{{ _def.name }}-02"
+          droplet_network: v4
+          droplet_network_type: private
+        - service: dns
+          domain: "{{ cluster_state.dns.cluster_domain }}"
+          rr_type: A
+          rr_name: "etcd-1"
+          droplet_network: v4
+          droplet_network_type: private
+
+# master-03
+
+    - provider: do
+      user_data: "{{ lookup('file', _userdata_path) | from_json }}"
+      vpc_name: "{{ _def.vpc_name }}"
+      wait: "{{ _def.wait }}"
+      wait_timeout: "{{ _def.wait_timeout }}"
+      image_name: "{{ _def.image_id }}"
+      ssh_key:
+        name: "{{ _def.project }}"
+        pub_key: "{{ config_ssh_key }}"
+
+      spec:
+        state: present
+        name: "{{ _def.name }}-03"
+        unique_name: true
+        size: "{{ _def.instance_type }}"
+        region: "{{ _def.region }}"
+        project_name: "{{ _def.project }}"
+        private_networking: true
+        wait_timeout: 500
+        #wait: no
+        ipv6: false
+        monitoring: false
+        #firewall: "{{ _def.firewall }}"
+        tags:
+        - "{{ _def.project }}-control-planes"
+        - "cluster-name-{{ _def.project }}"
+
+      callbacks:
+        - service: dns
+          domain: "{{ cluster_state.dns.cluster_domain }}"
+          rr_type: A
+          rr_name: "{{ _def.name }}-03"
+          droplet_network: v4
+          droplet_network_type: private
+        - service: dns
+          domain: "{{ cluster_state.dns.cluster_domain }}"
+          rr_type: A
+          rr_name: "etcd-2"
+          droplet_network: v4
+          droplet_network_type: private

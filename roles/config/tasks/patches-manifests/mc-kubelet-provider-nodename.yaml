@@ -1,0 +1,55 @@
+---
+# NOTE: there is not guarantee that it would work.
+# The Platform=External should have precedence before testing this approach.
+
+- name: Patch | mc-hostnamectl-meta | Set tmp dir
+  ansible.builtin.set_fact:
+    cluster_tmp_dir: "{{ config_install_dir }}/.tmp"
+
+- name: Patch | mc-hostnamectl-meta | ensure tmp dir
+  ansible.builtin.file:
+    dest: "{{ cluster_tmp_dir }}"
+    state: directory
+
+# https://github.com/coreos/fedora-coreos-tracker/issues/538
+- name: Patch | mc-hostnamectl-meta | Render template
+  ansible.builtin.template:
+    src: patches/mc-hostnamectl-meta.bu.j2
+    dest: "{{ cluster_tmp_dir }}/99_openshift-machineconfig_00-hostnamectl-meta-{{ machine_role }}.bu"
+  loop_control:
+    loop_var: machine_role
+  loop:
+  - master
+  - worker
+
+- name: Patch | mc-hostnamectl-meta | Process butane config
+  ansible.builtin.shell: |
+    {{ bin_butane }} \
+      {{ cluster_tmp_dir }}/99_openshift-machineconfig_00-hostnamectl-meta-{{ machine_role }}.bu \
+      -o {{ config_install_dir }}/openshift/99_openshift-machineconfig_00-hostnamectl-meta-{{ machine_role }}.yaml
+  loop_control:
+    loop_var: machine_role
+  loop:
+  - master
+  - worker
+
+- name: Patch | mc-kubelet-nodename | Render template
+  ansible.builtin.template:
+    src: patches/mc-kubelet-provider-nodename.bu.j2
+    dest: "{{ cluster_tmp_dir }}/99_openshift-machineconfig_00-kubelet-nodename-{{ machine_role }}.bu"
+  loop_control:
+    loop_var: machine_role
+  loop:
+  - master
+  - worker
+
+- name: Patch | mc-kubelet-meta | Process butane config
+  ansible.builtin.shell: |
+    {{ bin_butane }} \
+      {{ cluster_tmp_dir }}/99_openshift-machineconfig_00-kubelet-nodename-{{ machine_role }}.bu \
+      -o {{ config_install_dir }}/openshift/99_openshift-machineconfig_00-kubelet-nodename-{{ machine_role }}.yaml
+  loop_control:
+    loop_var: machine_role
+  loop:
+  - master
+  - worker

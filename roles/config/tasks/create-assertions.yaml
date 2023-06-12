@@ -37,6 +37,8 @@
     msg: "CONFIG_PULL_SECRET_FILE env var was not found. Please set it with pull-secret file path"
   failed_when: not(ps_out.stat.exists)
 
+# Creaete state files to validate each configuration state.
+
 - name: Create | Config | Check file manifests/cluster-config.yaml
   ansible.builtin.stat:
     path: "{{ config_install_dir }}/install-config.yaml"
@@ -56,3 +58,13 @@
   ansible.builtin.stat:
     path: "{{ config_install_dir }}/coreos-stream.json"
   register: _coreosstream
+
+- name: Create | Assrt. | Check file bootstrap.ign
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/bootstrap.ign"
+  register: _ign_bootstrap
+
+- name: Create | Assrt. | Check file .bootstrap.ign.stat
+  ansible.builtin.stat:
+    path: "{{ config_install_dir }}/.bootstrap.ign.stat"
+  register: _ign_bootstrap_stat

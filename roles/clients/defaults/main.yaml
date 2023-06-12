@@ -27,3 +27,8 @@ cli_butane_arch: x86_64
 cli_butane_os: unknown-linux-gnu
 cli_butane_bin: "butane-{{ cli_butane_arch }}-{{ cli_butane_os }}"
 cli_butane_url: "https://github.com/coreos/butane/releases/download/{{ cli_butane_version }}/{{ cli_butane_bin }}"
+
+## filetranspile
+cli_filetranspile_version: "1.1.3"
+cli_filetranspile_bin: "filetranspile-{{ cli_filetranspile_version }}"
+cli_filetranspile_url: "https://raw.githubusercontent.com/ashcrow/filetranspiler/{{ cli_filetranspile_version }}/filetranspile"

@@ -1,0 +1,125 @@
+---
+# DigitalOcean vars for Worker/Compute nodes
+
+_userdata_path: "{{ config_install_dir }}/worker.ign"
+
+_def:
+  name: "{{ cluster_state.infra_id }}-worker"
+  region: "{{ cluster_state.region }}"
+  project: "{{ cluster_state.infra_id }}"
+  image_id: "{{ cluster_state.compute.image_id }}"
+  instance_type: s-4vcpu-8gb
+  state: present
+  vpc_name: "{{ cluster_state.infra_id }}-vpc"
+  wait: yes
+  wait_timeout: 500
+  firewall: ["{{ cluster_state.infra_id }}-default-fw"]
+  tags:
+    - "{{ cluster_state.infra_id }}-compute-nodes"
+    - "cluster-name-{{ cluster_state.infra_id }}"
+
+compute_resources:
+
+# https://docs.ansible.com/ansible/latest/collections/community/digitalocean/digital_ocean_droplet_module.html
+    - provider: do
+      user_data: "{{ lookup('file', _userdata_path) | from_json }}"
+      vpc_name: "{{ _def.vpc_name }}"
+      wait: "{{ _def.wait }}"
+      wait_timeout: "{{ _def.wait_timeout }}"
+      image_name: "{{ _def.image_id }}"
+      ssh_key:
+        name: "{{ _def.project }}"
+        pub_key: "{{ config_ssh_key }}"
+
+      spec:
+        state: present
+        name: "{{ _def.name }}-01"
+        unique_name: true
+        size: "{{ _def.instance_type }}"
+        region: "{{ _def.region }}"
+        project_name: "{{ _def.project }}"
+        private_networking: true
+        wait_timeout: 500
+        #wait: no
+        ipv6: false
+        monitoring: false
+        tags: "{{ _def.tags }}"
+        firewall: "{{ _def.firewall }}"
+
+      callbacks:
+        - service: dns
+          domain: "{{ cluster_state.dns.cluster_domain }}"
+          rr_type: A
+          rr_name: "{{ _def.name }}-01"
+          droplet_network: v4
+          droplet_network_type: private
+
+    # worker-02
+    - provider: do
+      user_data: "{{ lookup('file', _userdata_path) | from_json }}"
+      vpc_name: "{{ _def.vpc_name }}"
+      wait: "{{ _def.wait }}"
+      wait_timeout: "{{ _def.wait_timeout }}"
+      image_name: "{{ _def.image_id }}"
+      ssh_key:
+        name: "{{ _def.project }}"
+        pub_key: "{{ config_ssh_key }}"
+
+      spec:
+        state: present
+        name: "{{ _def.name }}-02"
+        unique_name: true
+        size: "{{ _def.instance_type }}"
+        region: "{{ _def.region }}"
+        project_name: "{{ _def.project }}"
+        private_networking: true
+        wait_timeout: 500
+        ipv6: false
+        monitoring: false
+        tags: "{{ _def.tags }}"
+        firewall: "{{ _def.firewall }}"
+
+      callbacks:
+        - service: dns
+          domain: "{{ cluster_state.dns.cluster_domain }}"
+          rr_type: A
+          rr_name: "{{ _def.name }}-02"
+          droplet_network: v4
+          droplet_network_type: private
+
+# master-03
+
+    # - provider: do
+    #   user_data: "{{ lookup('file', _userdata_path) | from_json }}"
+    #   vpc_name: "{{ _def.vpc_name }}"
+    #   wait: "{{ _def.wait }}"
+    #   wait_timeout: "{{ _def.wait_timeout }}"
+    #   image_name: "{{ _def.image_id }}"
+    #   ssh_key:
+    #     name: "{{ _def.project }}"
+    #     pub_key: "{{ config_ssh_key }}"
+
+    #   spec:
+    #     state: present
+    #     name: "{{ _def.name }}-03"
+    #     unique_name: true
+    #     size: "{{ _def.instance_type }}"
+    #     region: "{{ _def.region }}"
+    #     project_name: "{{ _def.project }}"
+    #     private_networking: true
+    #     wait_timeout: 500
+    #     #wait: no
+    #     ipv6: false
+    #     monitoring: false
+    #     #firewall: "{{ _def.firewall }}"
+    #     tags:
+    #     - "{{ _def.project }}-compute-nodes"
+    #     - "cluster-name-{{ _def.project }}"
+
+    #   callbacks:
+    #     - service: dns
+    #       domain: "{{ cluster_state.dns.cluster_domain }}"
+    #       rr_type: A
+    #       rr_name: "{{ _def.name }}-03"
+    #       droplet_network: v4
+    #       droplet_network_type: private

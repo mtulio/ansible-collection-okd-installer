@@ -1,0 +1,55 @@
+---
+
+- name: Patch | mc-hostnamectl-meta | Set tmp dir
+  ansible.builtin.set_fact:
+    cluster_tmp_dir: "{{ config_install_dir }}/.tmp/bootstrap-fakeroot"
+
+- name: Patch | mc-hostnamectl-meta | ensure tmp dir
+  ansible.builtin.file:
+    dest: "{{ item }}"
+    state: directory
+    recurse: yes
+  loop:
+    - "{{ cluster_tmp_dir }}/usr/local/bin"
+    - "{{ cluster_tmp_dir }}/etc/systemd/system"
+
+- name: create unit
+  copy:
+    dest: "{{ cluster_tmp_dir }}/etc/systemd/system/sethostname.service"
+    content: |
+      [Unit]
+      Description=Set hostname from metadata
+      Wants=afterburn.service
+      Before=crio.service
+      After=NetworkManager-wait-online.service
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/run-hostnamectl
+      RemainAfterExit=yes
+      [Install]
+      WantedBy=network-online.target
+
+- name: create unit script
+  copy:
+    dest: "{{ cluster_tmp_dir }}/usr/local/bin/run-hostnamectl"
+    mode: 0755
+    content: |
+      #!/usr/bin/bash
+      hostnamectl set-hostname $(curl -s http://169.254.169.254/metadata/v1/hostname)
+
+- name: run filetranspile
+  ansible.builtin.shell: |
+    {{ bin_filetranspile }} \
+      -i {{ config_install_dir }}/bootstrap.ign \
+      -f {{ cluster_tmp_dir }} \
+      -o {{ config_install_dir }}/bootstrap-patched.ign
+
+- name: update ignition file
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: "{{ config_install_dir }}/bootstrap.ign"
+      dest: "{{ config_install_dir }}/bootstrap-bkp.ign"
+    - src: "{{ config_install_dir }}/bootstrap-patched.ign"
+      dest: "{{ config_install_dir }}/bootstrap.ign"

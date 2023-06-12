@@ -1,0 +1,32 @@
+---
+
+- name: DO | VPC | Firewall
+  community.digitalocean.digital_ocean_firewall:
+    name: "{{ fw.name }}"
+    state: absent
+  with_items: "{{ item_vpc.security_groups }}"
+  loop_control:
+    loop_var: fw
+
+- name: DO | VPC | Discovery by Name
+  community.digitalocean.digital_ocean_vpc_info:
+    members: true
+    name: "{{ item_vpc.name }}"
+  register: do_vpc
+  ignore_errors: true
+
+- name: DO | VPC | Show
+  ansible.builtin.debug:
+    var: do_vpc
+
+- name: DO | VPC
+  community.digitalocean.digital_ocean_vpc:
+    state: absent
+    name: "{{ item_vpc.name }}"
+    region: "{{ item_vpc.region }}"
+  when: not(do_vpc.failed)
+
+- name: DO | Project
+  community.digitalocean.digital_ocean_project:
+    name: "{{ item_vpc.project }}"
+    state: absent

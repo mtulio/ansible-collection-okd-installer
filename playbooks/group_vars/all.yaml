@@ -10,6 +10,7 @@ config_install_dir: "{{ collection_cluster_dir }}/{{ cluster_name }}"
 bin_openshift_install: "{{ collection_bin_dir }}/openshift-install-{{ cluster_name }}"
 bin_oc: "{{ collection_bin_dir }}/oc-{{ cluster_name }}"
 bin_butane: "{{ collection_bin_dir }}/butane-{{ cluster_name }}"
+bin_filetranspile: "{{ collection_bin_dir }}/filetranspile-{{ cluster_name }}"
 
 ## export CONFIG_PULL_SECRET_FILE=${HOME}/.openshift/pull-secret-latest.jso
 config_pull_secret_file: "{{ lookup('ansible.builtin.env', 'CONFIG_PULL_SECRET_FILE') }}"

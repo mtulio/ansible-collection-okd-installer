@@ -1,0 +1,74 @@
+---
+- ansible.builtin.set_fact:
+    profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
+
+- name: DO | LB | Load vars | Load Balancers
+  ansible.builtin.include_vars:
+    file: "{{ profile_path }}/loadbalancer.yaml"
+
+- name: DO | Load Balancers
+  community.digitalocean.digital_ocean_load_balancer:
+  args: "{{ item.spec | combine({'state':'absent'}) }}"
+  register: lb_out
+  loop: "{{ cloud_loadbalancers }}"
+  ignore_errors: true
+
+- name: DO | LB | Load vars | DNS
+  ansible.builtin.include_vars:
+    file: "{{ profile_path }}/dns.yaml"
+
+- name: DO | DNS
+  community.digitalocean.digital_ocean_domain:
+  args: "{{ item.spec | combine({'state':'absent'}) }}"
+  register: z_out
+  loop: "{{ cloud_dns_zones }}"
+
+- name: DO | LB | Load vars | Node Bootstrap
+  ansible.builtin.include_vars:
+    file: "{{ profile_path }}/node-bootstrap.yaml"
+
+- name: DO | Bootstrap
+  community.digitalocean.digital_ocean_droplet:
+  args: "{{ item.spec | combine({'state':'absent'}) }}"
+  vars:
+    bootstrap_ign_url: ''
+  register: z_out
+  loop: "{{ compute_resources }}"
+
+- name: DO | LB | Load vars | Node worker
+  ansible.builtin.include_vars:
+    file: "{{ profile_path }}/node-compute.yaml"
+
+- name: DO | compute
+  community.digitalocean.digital_ocean_droplet:
+  args: "{{ item.spec | combine({'state':'absent'}) }}"
+  register: z_out
+  loop: "{{ compute_resources }}"
+
+- name: DO | LB | Load vars | Node control plane
+  ansible.builtin.include_vars:
+    file: "{{ profile_path }}/node-controlplane.yaml"
+
+- name: DO | control plane
+  community.digitalocean.digital_ocean_droplet:
+  args: "{{ item.spec | combine({'state':'absent'}) }}"
+  register: z_out
+  loop: "{{ compute_resources }}"
+
+#- name: DO | IAM
+#  ansible.builtin.include_tasks: "{{ provider }}-iam.yaml"
+#  tags: iam
+
+- name: DO | VPC
+  ansible.builtin.include_tasks: "{{ provider }}-vpc.yaml"
+  tags: vpc
+  with_items: "{{ cloud_networks }}"
+  loop_control:
+    loop_var: item_vpc
+
+- name: DigitalOcean | Spaces
+  amazon.aws.s3_bucket:
+    state: absent
+    name: "{{ cluster_state.infra_id }}-infra"
+    endpoint_url: "https://{{ cluster_state.region }}.digitaloceanspaces.com"
+    force: true

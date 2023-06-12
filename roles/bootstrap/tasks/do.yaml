@@ -1,0 +1,33 @@
+--- # Setup Ignition files for Bootstrap in AWS
+
+- name: DigitalOcean | Create Spaces
+  community.digitalocean.digital_ocean_spaces:
+    state: present
+    name: "{{ bootstrap_bucket }}"
+    region: "{{ cluster_state.region }}"
+  register: do_space
+
+- name: DigitalOcean | Show Config
+  ansible.builtin.debug:
+    var: do_space
+  when: debug|d(false)
+
+- name: DigitalOcean | Upload bootstrap.ign
+  amazon.aws.s3_object:
+    bucket: "{{ bootstrap_bucket }}"
+    object: "/bootstrap.ign"
+    src: "{{ config_install_dir + '/' + bootstrap_src_ign }}"
+    mode: put
+    overwrite: different
+    s3_url: "{{ do_space.data.space.endpoint_url }}"
+    expiry: 3600 # expire the presigned URL in 1h
+  register: s3_put
+
+- name: DigitalOcean | Show pre-signed URL
+  ansible.builtin.debug:
+    var: s3_put
+  when: debug|d(false)
+
+- name: DigitalOcean | Set the Ignition URL
+  ansible.builtin.set_fact:
+    bootstrap_ign_url: "{{ s3_put.url }}"

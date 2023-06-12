@@ -19,6 +19,7 @@
     _bin_oc: "oc-{{ client_os }}-{{ version | d(release_version) }}"
     _bin_kubectl: "kubectl-{{ client_os }}-{{ version | d(release_version) }}"
     _bin_butane: "{{ cli_butane_bin }}-{{ cli_butane_version }}"
+    _bin_filetranspile: "{{ cli_filetranspile_bin }}"
 
 # Client: openshift-install
 
@@ -162,6 +163,36 @@
       path: "{{ collection_tmp_dir }}/butane"
     when: ext_bin_butane.changed
 
+# Client: FileTranspile
+
+- name: filetranspile | Check filetranspile client is present
+  ansible.builtin.stat:
+    path: "{{ collection_bin_dir }}/{{ _bin_filetranspile }}"
+  register: check_bin_filetranspile
+
+- name: filetranspile | Install clients
+  when: not(check_bin_filetranspile.stat.exists)
+  block:
+  - name: filetranspile | Download
+    ansible.builtin.get_url:
+      url: "{{ cli_filetranspile_url }}"
+      dest: "{{ collection_tmp_dir }}/filetranspile"
+      mode: '0440'
+    register: ext_bin_filetranspile
+
+  - name: filetranspile | Copy to bin path
+    ansible.builtin.copy:
+      src: "{{ collection_tmp_dir }}/filetranspile"
+      dest: "{{ collection_bin_dir }}/{{ _bin_filetranspile }}"
+      mode: 0755
+    when: ext_bin_filetranspile.changed
+
+  - name: filetranspile | Remove tmp file
+    ansible.builtin.file:
+      state: absent
+      path: "{{ collection_tmp_dir }}/filetranspile"
+    when: ext_bin_filetranspile.changed
+
 # Creating links to binaries
 
 ## Create symlinks for cluster to prevent using wrong versions
@@ -180,6 +211,8 @@
         link: "kubectl-{{ _clients_suffix }}"
       - src: "{{ _bin_butane }}"
         link: "butane-{{ _clients_suffix }}"
+      - src: "{{ _bin_filetranspile }}"
+        link: "filetranspile-{{ _clients_suffix }}"
 
 - name: Ensure file links are present
   ansible.builtin.file:

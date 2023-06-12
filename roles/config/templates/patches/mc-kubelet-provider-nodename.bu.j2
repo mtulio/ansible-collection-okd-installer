@@ -1,0 +1,61 @@
+variant: openshift
+version: 4.12.0
+metadata:
+  name: 00-{{ machine_role }}-kubelet-nodename
+  labels:
+    machineconfiguration.openshift.io/role: {{ machine_role }}
+storage:
+  files:
+  - mode: 0755
+    path: "/usr/local/bin/kubelet-provider-nodename"
+    contents:
+      inline: |
+        #!/bin/bash
+        set -e -o pipefail
+
+        NODECONF=/etc/systemd/system/kubelet.service.d/20-provider-node-name.conf
+
+        if [ -e "${NODECONF}" ]; then
+            echo "Not replacing existing ${NODECONF}"
+            exit 0
+        fi
+        
+        # afterburn service is expected to be used for metadata retrival, see respective systemd unit.
+        # However, on older OCP boot images does not contain afterburn service, check if afterburn variables are there
+        # otherwise try to communicate IMDS here.
+        # metadata related afterburn doc: https://coreos.github.io/afterburn/usage/attributes/
+        
+        HOSTNAME=${AFTERBURN_AWS_HOSTNAME:-}
+        if [[ -z "${HOSTNAME}" ]]; then
+            HOSTNAME=$(curl -fSs http://169.254.169.254/metadata/v1/hostname)
+            if [[ -z "${HOSTNAME}" ]]; then
+                echo "Can not obtain hostname from the metadata service."
+                exit 1
+            fi 
+        fi
+
+        # Set node name to be instance name instead of the default FQDN hostname
+        cat > "${NODECONF}" <<EOF
+        [Service]
+        Environment="KUBELET_NODE_NAME=${HOSTNAME}"
+        EOF
+systemd:
+  units:
+  - name: kubelet-provider-nodename.service
+    enabled: true
+    contents: |
+      [Unit]
+      Description=Fetch kubelet provider node name from Metadata
+      Wants=afterburn.service
+      After=afterburn.service
+      # Wait for NetworkManager to report it's online
+      After=NetworkManager-wait-online.service
+      # Run before kubelet
+      Before=kubelet.service
+      [Service]
+      # Mark afterburn environment file optional, due to it is possible that afterburn service was not executed
+      EnvironmentFile=-/run/metadata/afterburn
+      ExecStart=/usr/local/bin/kubelet-provider-nodename
+      Type=oneshot
+      [Install]
+      WantedBy=network-online.target

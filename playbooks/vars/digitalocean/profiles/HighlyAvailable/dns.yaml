@@ -1,0 +1,9 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/community/digitalocean/digital_ocean_domain_module.html
+cloud_dns_zones:
+  - provider: do
+    vpc_region: "{{ cluster_state.region }}"
+    spec:
+      name: "{{ cluster_state.dns.cluster_domain }}"
+      project_name: "{{ cluster_state.infra_id }}"
+      state: present

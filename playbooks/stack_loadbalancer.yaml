@@ -13,7 +13,7 @@
     cloud_loadbalancers_state: []
     profile_path: "{{ playbook_dir }}/vars/{{ config_provider }}/profiles/{{ cluster_profile|d('default') }}"
 
-  pre_tasks:
+  tasks:
     - name: okd-installer | Stack | LB | Include vars - User Provided
       ansible.builtin.include_vars:
         file: "{{ var_file }}"

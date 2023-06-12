@@ -1,13 +1,5 @@
 ---
-openshift_prefix: "{{ cluster_state.infra_id }}"
-openshift_bootstrap_bucket: "{{ openshift_prefix }}"
-
-openshift_instance_type: s-4vcpu-8gb
-openshift_image_id: "{{ cluster_state.compute.image_id }}"
-openshift_vpc_name: "{{ openshift_prefix }}-vpc"
-openshift_security_groups:
-  - "{{ openshift_prefix }}-compute-sg"
-openshift_tags: "{{ cluster_state.tags }}"
+# DigitalOcean vars for Worker/Compute nodes
 
 _userdata_path: "{{ config_install_dir }}/worker.ign"
 
@@ -15,12 +7,16 @@ _def:
   name: "{{ cluster_state.infra_id }}-worker"
   region: "{{ cluster_state.region }}"
   project: "{{ cluster_state.infra_id }}"
-  image_id: "{{ openshift_image_id }}"
-  instance_type: "{{ openshift_instance_type }}"
+  image_id: "{{ cluster_state.compute.image_id }}"
+  instance_type: s-4vcpu-8gb
   state: present
-  vpc_name: "{{ openshift_vpc_name }}"
+  vpc_name: "{{ cluster_state.infra_id }}-vpc"
   wait: yes
   wait_timeout: 500
+  firewall: ["{{ cluster_state.infra_id }}-default-fw"]
+  tags:
+    - "{{ cluster_state.infra_id }}-compute-nodes"
+    - "cluster-name-{{ cluster_state.infra_id }}"
 
 compute_resources:
 
@@ -47,10 +43,8 @@ compute_resources:
         #wait: no
         ipv6: false
         monitoring: false
-        #firewall: "{{ _def.firewall }}"
-        tags:
-        - "{{ _def.project }}-compute-nodes"
-        - "cluster-name-{{ _def.project }}"
+        tags: "{{ _def.tags }}"
+        firewall: "{{ _def.firewall }}"
 
       callbacks:
         - service: dns
@@ -60,7 +54,7 @@ compute_resources:
           droplet_network: v4
           droplet_network_type: private
 
-# master-2
+    # worker-02
     - provider: do
       user_data: "{{ lookup('file', _userdata_path) | from_json }}"
       vpc_name: "{{ _def.vpc_name }}"
@@ -82,10 +76,8 @@ compute_resources:
         wait_timeout: 500
         ipv6: false
         monitoring: false
-        #firewall: "{{ _def.firewall }}"
-        tags:
-        - "{{ _def.project }}-compute-nodes"
-        - "cluster-name-{{ _def.project }}"
+        tags: "{{ _def.tags }}"
+        firewall: "{{ _def.firewall }}"
 
       callbacks:
         - service: dns

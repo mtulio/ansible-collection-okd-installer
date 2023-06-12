@@ -20,8 +20,7 @@
     mode: put
     overwrite: different
     s3_url: "{{ do_space.data.space.endpoint_url }}"
-    #expiry: 3600 # expire the presigned URL in 1h
-    permission: public-read
+    expiry: 3600 # expire the presigned URL in 1h
   register: s3_put
 
 - name: DigitalOcean | Show pre-signed URL
@@ -31,7 +30,4 @@
 
 - name: DigitalOcean | Set the Ignition URL
   ansible.builtin.set_fact:
-    #bootstrap_ign_url: "{{ s3_put.url }}"
-    bootstrap_ign_url: "https://{{ config_cluster_region }}.digitaloceanspaces.com/{{ bootstrap_bucket }}/bootstrap.ign"
-
-- debug: var=bootstrap_ign_url
+    bootstrap_ign_url: "{{ s3_put.url }}"

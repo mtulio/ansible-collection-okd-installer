@@ -60,7 +60,7 @@ export AWS_SECRET_ACCESS_KEY="..."
 ## Setup the configuration
 
 ```bash
-CLUSTER_NAME=do-lab10
+CLUSTER_NAME=do-lab11
 VARS_FILE=./vars-do-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}

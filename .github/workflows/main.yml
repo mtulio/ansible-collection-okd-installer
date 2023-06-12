@@ -190,37 +190,37 @@ jobs:
           echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
       # Commenting in PR
-      - name: Find comment
-        uses: peter-evans/find-comment@v2
-        id: fbc
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: '<!-- id-build-comment -->'
+      # - name: Find comment
+      #   uses: peter-evans/find-comment@v2
+      #   id: fbc
+      #   with:
+      #     issue-number: ${{ github.event.pull_request.number }}
+      #     comment-author: 'github-actions[bot]'
+      #     body-includes: '<!-- id-build-comment -->'
       - name: Create comment
-        if: steps.fbc.outputs.comment-id == ''
+        #if: steps.fbc.outputs.comment-id == ''
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             <!-- id-build-comment -->
-            Artifacts built by CI:
+            Artifacts has been built successfully by CI: :robot :rocket
             - Container: ${{ env.IMAGE }}:${{ env.VERSION }}
             - Docs Preview: ${{ steps.verceldeploy.outputs.url }}
-          reactions: rocket
-
-      - name: Update comment
-        if: steps.fbc.outputs.comment-id != ''
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          comment-id: ${{ steps.fbc.outputs.comment-id }}
-          body: |
-            <!-- id-build-comment -->
-            Artifacts built by CI:
-            - Container: ${{ env.IMAGE }}:${{ env.VERSION }}
-            - Docs Preview: ${{ steps.verceldeploy.outputs.url }}
+          #reactions: rocket
           reactions: hooray
-          edit-mode: replace
+      # - name: Update comment
+      #   if: steps.fbc.outputs.comment-id != ''
+      #   uses: peter-evans/create-or-update-comment@v3
+      #   with:
+      #     comment-id: ${{ steps.fbc.outputs.comment-id }}
+      #     body: |
+      #       <!-- id-build-comment -->
+      #       Artifacts built by CI:
+      #       - Container: ${{ env.IMAGE }}:${{ env.VERSION }}
+      #       - Docs Preview: ${{ steps.verceldeploy.outputs.url }}
+      #     reactions: hooray
+      #     edit-mode: replace
 
   # Build a container image on main branch, publishing the 'latest' to repository.
   publish-container-latest:

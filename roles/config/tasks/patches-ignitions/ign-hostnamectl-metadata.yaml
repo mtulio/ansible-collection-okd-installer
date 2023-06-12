@@ -18,13 +18,16 @@
     dest: "{{ cluster_tmp_dir }}/etc/systemd/system/sethostname.service"
     content: |
       [Unit]
+      Description=Set hostname from metadata
+      Wants=afterburn.service
+      Before=crio.service
       After=NetworkManager-wait-online.service
       [Service]
       Type=oneshot
       ExecStart=/usr/local/bin/run-hostnamectl
       RemainAfterExit=yes
       [Install]
-      WantedBy=multi-user.target
+      WantedBy=network-online.target
 
 - name: create unit script
   copy:

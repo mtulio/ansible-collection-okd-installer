@@ -2,16 +2,18 @@
 - name: Patch | OCI | CCM | Set namespace oci_ccm_namespace
   ansible.builtin.set_fact:
     # default provided by repo is kube-system
-    oci_ccm_namespace: oci-cloud-controller-manager
+    #oci_ccm_namespace: oci-cloud-controller-manager
+    oci_ccm_namespace: "{{ cfg_patch_oci_ccm_namespace }}"
   when: oci_ccm_namespace is not defined
 
 - name: Patch | OCI | CCM | Create Namespace
+  when: oci_ccm_namespace != "kube-system"
   ansible.builtin.template:
     src: patches/oci/oci-ccm-00-namespace.yaml.j2
     dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-00-namespace.yaml"
     mode: 0644
 
-- name: Patch | OCI | CCM | Set subnet ID
+- name: Patch | OCI | CCM | Gather subnet ID
   ansible.builtin.set_fact:
     _lb_subnet1: "{{ sb.state.id }}"
   loop: "{{ (cluster_state.networks | first).subnets }}"
@@ -31,26 +33,43 @@
   vars:
     oci_compartment_id: oci_compartment_id
 
-- name: Patch | OCI | CCM | Create RBAC SA
-  ansible.builtin.template:
-    src: patches/oci/oci-ccm-02-rbac-sa.yaml.j2
-    dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-02-rbac-sa.yaml"
-    mode: 0644
+- name: Patch | OCI | CCM | Custom manifests
+  when: oci_ccm_namespace == "kube-system"
+  block:
+  - name: Get CCM manifests
+    ansible.builtin.get_url:
+      url: "{{ item.url }}"
+      dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-{{ item.suffix }}.yaml"
+      mode: '0440'
+    loop:
+      - url: "https://github.com/oracle/oci-cloud-controller-manager/releases/download/{{ oci_ccm_version }}/oci-cloud-controller-manager-rbac.yaml"
+        suffix: "02-rbac"
+      - url: "https://github.com/oracle/oci-cloud-controller-manager/releases/download/{{ oci_ccm_version }}/oci-cloud-controller-manager.yaml"
+        suffix: "03"
 
-- name: Patch | OCI | CCM | Create RBAC CR
-  ansible.builtin.template:
-    src: patches/oci/oci-ccm-03-rbac-cr.yaml.j2
-    dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-03-rbac-cr.yaml"
-    mode: 0644
+- name: Patch | OCI | CCM | Custom manifests
+  when: oci_ccm_namespace != "kube-system"
+  block:
+  - name: Patch | OCI | CCM | Create RBAC SA
+    ansible.builtin.template:
+      src: patches/oci/oci-ccm-02-rbac-sa.yaml.j2
+      dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-02-rbac-sa.yaml"
+      mode: 0644
 
-- name: Patch | OCI | CCM | Create RBAC CRB
-  ansible.builtin.template:
-    src: patches/oci/oci-ccm-04-rbac-crb.yaml.j2
-    dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-04-rbac-crb.yaml"
-    mode: 0644
+  - name: Patch | OCI | CCM | Create RBAC CR
+    ansible.builtin.template:
+      src: patches/oci/oci-ccm-03-rbac-cr.yaml.j2
+      dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-03-rbac-cr.yaml"
+      mode: 0644
 
-- name: Patch | OCI | CCM | Create DaemonSet
-  ansible.builtin.template:
-    src: patches/oci/oci-ccm-05-daemonset.yaml.j2
-    dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-05-daemonset.yaml"
-    mode: 0644
+  - name: Patch | OCI | CCM | Create RBAC CRB
+    ansible.builtin.template:
+      src: patches/oci/oci-ccm-04-rbac-crb.yaml.j2
+      dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-04-rbac-crb.yaml"
+      mode: 0644
+
+  - name: Patch | OCI | CCM | Create DaemonSet
+    ansible.builtin.template:
+      src: patches/oci/oci-ccm-05-daemonset.yaml.j2
+      dest: "{{ config_install_dir }}/manifests/oci-cloud-controller-manager-05-daemonset.yaml"
+      mode: 0644

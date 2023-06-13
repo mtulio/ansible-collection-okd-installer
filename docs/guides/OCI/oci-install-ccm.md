@@ -26,7 +26,7 @@ EOF
 source ~/.oci/env
 
 
-CLUSTER_NAME=oci-fd1-vpu90
+CLUSTER_NAME=oci-ext01
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}

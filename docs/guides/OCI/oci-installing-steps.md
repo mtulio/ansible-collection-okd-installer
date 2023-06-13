@@ -114,6 +114,10 @@ cfg_patch_yaml_patch_specs:
 cfg_patch_kubelet_providerid_script: |
     PROVIDERID=\$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/instance/ | jq -r .id);
 
+# using kube-system and downloading manifests from github
+oci_ccm_namespace: kube-system
+oci_ccm_version: v1.25.0
+
 # Customize instance type
 #compute_shape: "BM.Standard.E2.64"
 #compute_shape_config: {}

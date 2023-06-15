@@ -2,13 +2,13 @@
 
 The steps described on this document can be changed from the final version.
 
-The goal is to quickly setup the PoC environment installing all the dependencies and Oracle Cloud Infrastructure identities to use the CLI/SDK with Ansible.
+The goal is to quickly setup the PoC environment installing all the dependencies to deploy a cluster in Oracle Cloud Infrastructure - official Collection `oracle.oci`, setup identities to use the CLI/SDK, etc.
 
 ### Setup Ansible project
 
-> This steps should be made only when OCI provider is under development - not merged to `main` branch. Then the normal install flow should be used.
+> This steps should be made only when OCI provider is under development in the branch `feat-added-provider-oci`.
 
-- Setup your ansible workdir (optional, you can use the defaults)
+- Setup the ansible workdir (optional, you can use the defaults except the `collections_path`)
 
 ```bash
 cat <<EOF > ansible.cfg
@@ -27,33 +27,16 @@ sort_order=none
 EOF
 ```
 
-- Create a virtual ennv
+- Create a virtual env
+
+> Tested in Python 3.9 and 3.10
 
 ```bash
 python3.9 -m venv ./.oci
 source ./.oci/bin/activate
 ```
 
-- Donwload requirements files
-
-```
-wget https://raw.githubusercontent.com/mtulio/ansible-collection-okd-installer/main/requirements.yml
-wget https://raw.githubusercontent.com/mtulio/ansible-collection-okd-installer/main/requirements.txt
-```
-
-- Install ansible and dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-- Install the Collections
-
-```bash
-ansible-galaxy collection install -r requirements.yml
-```
-
-- Get the latest (under development) okd-installer for OCI
+- Get the latest (under development) okd-installer collection with OCI modules:
 
 > https://github.com/mtulio/ansible-collection-okd-installer/pull/26
 
@@ -61,6 +44,13 @@ ansible-galaxy collection install -r requirements.yml
 git clone -b feat-added-provider-oci --recursive \
     git@github.com:mtulio/ansible-collection-okd-installer.git \
     collections/ansible_collections/mtulio/okd_installer
+```
+
+- Install the dependencies:
+
+```bash
+pip install -r collections/ansible_collections/mtulio/okd_installer/requirements.txt
+ansible-galaxy collection install -r collections/ansible_collections/mtulio/okd_installer/requirements.yml
 ```
 
 - Check if the collection is present
@@ -81,6 +71,8 @@ oracle.oci           4.23.0
 Make sure your credentials have been set correctly on the file `~/.oci/config` and you can use the OCI ansible collection:
 
 - Get the User ID from the documentation
+
+> you may need to adapt if there are more than one profile
 
 ```bash
 export oci_user_id=$(grep ^user ~/.oci/config | awk -F '=' '{print$2}')

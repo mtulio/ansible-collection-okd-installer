@@ -10,9 +10,9 @@ on:
   schedule:
     - cron: "0 5 * * 0"
 
-defaults:
-  run:
-    working-directory: 'mtulio.okd_installer'
+# defaults:
+  # run:
+    # working-directory: 'mtulio.okd_installer'
 
 jobs:
 
@@ -24,7 +24,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
+          # path: 'mtulio.okd_installer'
           submodules: recursive
 
       - name: Set up Python 3.
@@ -60,7 +60,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
+          # path: 'mtulio.okd_installer'
           submodules: recursive
 
       - name: Set up Python 3.
@@ -90,8 +90,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Build Collection
@@ -132,8 +132,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Download artifacts
@@ -231,8 +231,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Download artifacts
@@ -277,8 +277,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Get version
@@ -314,8 +314,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Get version

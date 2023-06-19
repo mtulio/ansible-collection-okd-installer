@@ -11,7 +11,7 @@
     loop_var: subnet
   register: _del_subnet
   until: "_del_subnet is not failed"
-  retries: 5
+  retries: 10
   delay: 5
 
 - name: OCI | Network | Route Table Public | Delete

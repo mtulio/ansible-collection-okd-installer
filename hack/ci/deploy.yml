@@ -12,7 +12,7 @@
   pre_tasks:
     - name: Verify none of the git submodules need updates.
       command: >
-        git submodule update --recursive --remote
+        git submodule update --recursive
         chdir={{ collection_root }}
       register: git_update
       #failed_when: git_update.stdout != ''

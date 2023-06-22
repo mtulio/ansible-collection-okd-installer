@@ -20,7 +20,7 @@
   loop_control:
     loop_var: sb
   when: sb.public
-  no_log: not(debug | d(false))
+  no_log: true
 
 - name: Patch | OCI | CCM | Load OCI Secret data
   ansible.builtin.set_fact:

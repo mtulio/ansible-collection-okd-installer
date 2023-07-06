@@ -4,6 +4,10 @@ apiVersion: v1
 baseDomain: {{ config_base_domain }}
 {% endif %}
 
+{% if config_featureset is defined %}
+featureSet: {{ config_featureset }}
+{% endif %}
+
 # Compute Pool
 {% if cluster_profile == 'ha' %}
 compute: {{ config_compute | from_yaml }}

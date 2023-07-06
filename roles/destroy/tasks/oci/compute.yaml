@@ -17,6 +17,7 @@
   when:
     - _instances.results | length > 0
     - results.instances is defined and results.instances | length > 0  
+    - debug | d(false)
   debug:
     msg: "Deleting Instance: {{ results.instances[0].display_name }}({{ results.instances[0].id }})"
 
@@ -28,6 +29,7 @@
   when:
     - _instances.results | length > 0
     - inst.instances is defined and inst.instances | length > 0  
+  no_log: true
   oracle.oci.oci_compute_instance:
     state: absent
     compartment_id: "{{ okd_cluster_destroy_instances_compartment_id }}"

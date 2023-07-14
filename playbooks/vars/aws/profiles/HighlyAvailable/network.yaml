@@ -189,14 +189,14 @@ cloud_networks:
       #   route_table: "{{ cluster_state.infra_id }}-rt-public-edge"
       #   map_public: false
 
-    endpoint_services:
-      - name: s3
-        service: com.amazonaws.us-east-1.s3
-        route_tables:
-          - "{{ cluster_state.infra_id }}-rt-public"
-          - "{{ cluster_state.infra_id }}-rt-private-1a"
-          - "{{ cluster_state.infra_id }}-rt-private-1b"
-          - "{{ cluster_state.infra_id }}-rt-private-1c"
+    # endpoint_services:
+    #   - name: s3
+    #     service: com.amazonaws.us-east-1.s3
+    #     route_tables:
+    #       - "{{ cluster_state.infra_id }}-rt-public"
+    #       - "{{ cluster_state.infra_id }}-rt-private-1a"
+    #       - "{{ cluster_state.infra_id }}-rt-private-1b"
+    #       - "{{ cluster_state.infra_id }}-rt-private-1c"
           # - "{{ cluster_state.infra_id }}-rt-public-edge"
 
       # - name: ec2

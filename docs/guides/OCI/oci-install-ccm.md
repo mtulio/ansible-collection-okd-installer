@@ -25,7 +25,7 @@ EOF
 source ~/.oci/env
 
 # MCO patch without revendor (w/o disabling FG)
-CLUSTER_NAME=oci-ext106
+CLUSTER_NAME=oci-ext414ec4-2
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}
@@ -44,19 +44,10 @@ config_base_domain: splat-oci.devcluster.openshift.com
 config_ssh_key: "$(cat ~/.ssh/openshift-dev.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
-config_featureset: TechPreviewNoUpgrade
+#config_featureset: TechPreviewNoUpgrade
 
-#release_image: registry.ci.openshift.org/ocp/release
-#release_version: 4.14.0-0.nightly-2023-06-27-233015
-
-# custom installer w/ support to external
-# 4.14.0-0.nightly-2023-06-29-external
-release_image: quay.io/mrbraga/ocp-release
-release_version: 4.14.0-0.nightly-2023-06-27-233015
-
-#config_cluster_version: 4.14.0-0.nightly-2023-06-27-233015
-#version: 4.14.0-0.nightly-2023-06-27-233015
-#version: 4.13.4
+config_cluster_version: 4.14.0-ec.4
+version: 4.14.0-ec.4
 
 # Define the OS Image mirror
 os_mirror: yes
@@ -81,41 +72,18 @@ cat <<EOF >> ${VARS_FILE}
 config_platform: external
 config_platform_spec: '{"platformName":"oci"}'
 
-# Platform External specifics (preview release with minimal changes)
-#config_installer_environment:
-#  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/mrbraga/ocp-release:4.13.0-rc.0-x86_64_platexternal-kcmo-mco-3cmo"
-
-config_installer_environment:
-  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/mrbraga/ocp-release:4.14.0-0.nightly-2023-06-27-233015-mco_manual_crd-installer"
-
-
 # Available manifest paches (runs after 'create manifest' stage)
 config_patches:
 - rm-capi-machines
 - mc-kubelet-providerid
 - deploy-oci-ccm
 - deploy-oci-csi
-# - yaml_patch
-
-# YAML Patches
-# cfg_patch_yaml_patch_specs:
-#   ## patch infra object to create External provider
-#   - manifest: /manifests/cluster-infrastructure-02-config.yml
-#     patch: '{"spec":{"platformSpec":{"type":"External","external":{"platformName":"oci"}}},"status":{"platform":"External","platformStatus":{"type":"External","external":{"cloudControllerManager":{"state":"External"}}}}}'
-#  - manifest: /manifests/cluster-infrastructure-02-config.yml
-#    patch: '{"spec":{"platformSpec":{"type":"External","external":{"platformName":"oci"}}},"status":{"platform":"External","platformStatus":{"type":"External","external":{}}}}'
 
 # MachineConfig to set the Kubelet environment. Will use this script to discover the ProviderID
 cfg_patch_kubelet_providerid_script: |
     PROVIDERID=\$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/instance/ | jq -r .id);
 
-# Choose CCM deployment parameters
-## Use patched manifests for OCP
 oci_ccm_namespace: oci-cloud-controller-manager
-## Use default manifests from github https://github.com/oracle/oci-cloud-controller-manager#deployment
-## Note: that method is failing when copying the manifests 'as-is' in OCP. Reason: the RBAC manifest file (and any bundle / single file with many objects) must be splitted to prevent rendering errors in the bootstrap stage
-# oci_ccm_namespace: kube-system
-# oci_ccm_version: v1.25.0
 
 EOF
 ```
@@ -129,12 +97,32 @@ ansible-playbook mtulio.okd_installer.create_all \
     -e @$VARS_FILE
 ```
 
-## Destroy the cluster
+### Destroy the cluster
 
 ```bash
 ansible-playbook mtulio.okd_installer.destroy_cluster -e @$VARS_FILE
 ```
 
+### Steps
+
+```bash
+ansible-playbook mtulio.okd_installer.install_clients -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.config -e mode=create-config -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.config -e mode=create-manifests -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.stack_network -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.stack_dns -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.stack_loadbalancer -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.config -e mode=patch-manifests -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.config -e mode=create-ignitions -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.os_mirror -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.create_node -e node_role=bootstrap -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.create_node -e node_role=controlplane -e @$VARS_FILE
+ansible-playbook mtulio.okd_installer.create_node -e node_role=compute -e @$VARS_FILE
+export KUBECONFIG=
+oc adm certificate approve $(oc get csr  -o json |jq -r '.items[] | select(.status.certificate == null).metadata.name')
+
+ansible-playbook mtulio.okd_installer.destroy_cluster -e @$VARS_FILE
+```
 
 ## Examples
 
@@ -142,7 +130,7 @@ ansible-playbook mtulio.okd_installer.destroy_cluster -e @$VARS_FILE
 
 - OCP 4.14-nightly-patched_CMO + Platform External + OCI + CSI
 ```bash
-CLUSTER_NAME=oci-ext107
+CLUSTER_NAME=oci-ext108
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}

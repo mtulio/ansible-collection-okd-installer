@@ -55,9 +55,9 @@ EOF
 source ~/.openshift/env
 
 CLUSTER_NAME=oci-bm2
-VAR_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
+VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
-cat <<EOF > ${VAR_FILE}
+cat <<EOF > ${VARS_FILE}
 provider: oci
 cluster_name: ${CLUSTER_NAME}
 config_cluster_region: us-sanjose-1
@@ -138,7 +138,7 @@ ansible-playbook mtulio.okd_installer.install_clients -e @$VARS_FILE
 ansible-playbook mtulio.okd_installer.create_all \
     -e certs_max_retries=20 \
     -e cert_wait_interval_sec=60 \
-    -e @$VAR_FILE
+    -e @$VARS_FILE
 ```
 
 ### Installing option 2: step-by-step

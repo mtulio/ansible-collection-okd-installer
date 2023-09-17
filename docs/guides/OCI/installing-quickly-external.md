@@ -25,7 +25,7 @@ EOF
 source ~/.oci/env
 
 # MCO patch without revendor (w/o disabling FG)
-CLUSTER_NAME=oci-ext414ec4-2
+CLUSTER_NAME=oci-e414rc0
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}
@@ -44,10 +44,8 @@ config_base_domain: splat-oci.devcluster.openshift.com
 config_ssh_key: "$(cat ~/.ssh/openshift-dev.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
-#config_featureset: TechPreviewNoUpgrade
-
-config_cluster_version: 4.14.0-ec.4
-version: 4.14.0-ec.4
+config_cluster_version: 4.14.0-rc.0
+version: 4.14.0-rc.0
 
 # Define the OS Image mirror
 os_mirror: yes
@@ -103,7 +101,7 @@ ansible-playbook mtulio.okd_installer.create_all \
 ansible-playbook mtulio.okd_installer.destroy_cluster -e @$VARS_FILE
 ```
 
-### Steps
+### Steps by playbook
 
 ```bash
 ansible-playbook mtulio.okd_installer.install_clients -e @$VARS_FILE

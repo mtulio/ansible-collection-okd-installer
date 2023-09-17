@@ -1,17 +1,19 @@
-# Guides for Oracle Cloud Infrastructure
+# OKD/OCP guides for Oracle Cloud Infrastructure (OCI)
 
-> WIP
+!!! warning "Developer Preview"
+    This document is available only for development preview.
 
-> TODO:
+    The [PR #26](https://github.com/mtulio/ansible-collection-okd-installer/pull/26)is under development and is subject to change the whole document described under OCI guides.
 
-Create guides/docs for OCP/OKD on OCI:
+Guides for OKD/OCP in Oracle Cloud Infrastructure (OCI):
 
-- Installing a cluster with agnostic installation quickly (Platform=None)
-- Installing a cluster with Cloud Controller Manager using External provider (Platform=External)
-- Installing a cluster with External Cloud provider integration: CCM and `Platform External`
-- Installing a cluster with agnostic installation with Assisted Installer as a installation provider
-
-Generic guides:
-
-- Integrate new provider to the Ansible Collection (UPI stacks)
-- Adding CCM to existing integrated external provider
+- [Requirements](./init.md)
+- [Installing a cluster quickly on OCI with platform agnostic (None)](./installing-quickly-agnostic.md)
+- [Installing a cluster quickly on OCI with platform external (External)](./installing-quickly-external.md)
+- [Installing a cluster on OCI with infrastructure customizations](./installing-customization-infra.md)
+- [Installing a cluster on OCI using platform external (External) with CCM customizations](./installing-customization-external.md)
+- [Installing a cluster on OCI with Assisted Installer](./installing-assisted-installer.md)
+- [Setting up the registry storage with OCI Bucket](./setting-registry-storage-bucket.md)
+- [Lab / Examples distributed/reused vars](./lab-examples-custom-vars.md)
+- [Testing the installation with Kubernetes/OpenShift conformance test suites](./testing-opct-conformance.md)
+- [hack/platform external development/building custom components in OKD](./hack/dev-platform-external-custom-release.md)

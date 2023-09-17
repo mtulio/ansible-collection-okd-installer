@@ -1,6 +1,6 @@
 # Platform External - creating a custom release to support it on 4.13
 
-This guide describes how to create a custom OCP release image with minimal changes to enable Platform `External` to be considered 'external' on the `library-go` - `IsCloudProviderExternal()`, signalizing the Kubelet (MCO) and Kube Controller Manager (KCMO) flag `--cloud-provider` be external, waiting for an external CCM be deployed on install time (in this case [OCI CCM](https://github.com/oracle/oci-cloud-controller-manager))
+This guide describe how to create a custom OCP release image with minimal changes to enable Platform `External` to be considered 'external' on the `library-go` - `IsCloudProviderExternal()`, signalizing the Kubelet (MCO) and Kube Controller Manager (KCMO) flag `--cloud-provider` be external, waiting for an external CCM be deployed on install time (in this case [OCI CCM](https://github.com/oracle/oci-cloud-controller-manager))
 
 This is part of a PoC to enable Platform External to install CCM on install time. All the work has been mapped on the [Enhancement Proposal 1353](https://github.com/openshift/enhancements/pull/1353).
 

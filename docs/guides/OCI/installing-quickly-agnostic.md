@@ -54,7 +54,7 @@ OCP_RELEASE_413="quay.io/mrbraga/ocp-release:4.13.0-rc.0-x86_64_platexternal-kcm
 EOF
 source ~/.openshift/env
 
-CLUSTER_NAME=oci-bm2
+CLUSTER_NAME=oci-e414rc0
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}
@@ -75,10 +75,10 @@ config_base_domain: splat-oci.devcluster.openshift.com
 config_ssh_key: "$(cat ~/.ssh/id_rsa.pub;cat ~/.ssh/openshift-dev.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
-config_cluster_version: 4.13.0-rc.0
-version: 4.13.0-rc.0
-config_installer_environment:
-  OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/mrbraga/ocp-release:4.13.0-rc.0-x86_64_platexternal-kcmo-mco-3cmo"
+config_cluster_version: 4.14.0-rc.0
+version: 4.14.0-rc.0
+# config_installer_environment:
+#   OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/mrbraga/ocp-release:4.14.0-rc.0-x86_64_platexternal-kcmo-mco-3cmo"
 
 # Define the OS Image mirror
 # custom_image_id: rhcos-412.86.202212081411-0-openstack.x86_64

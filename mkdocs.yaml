@@ -110,13 +110,19 @@ nav:
       - Installing HA Topology with UPI and Platform Agnostic: guides/AWS/aws-agnostic.md
       - Installing SNO with Ephemeral storage: guides/AWS/aws-sno.md
       - Installing HA Topology UPI BYO Network: guides/AWS/aws-upi-byo-network.md
-    # - Digital Ocean: TODO.md
-    - Oracle Cloud:
-      # - Installing HA Topology with UPI and Platform Agnostic: TODO.md
-      - guides/OCI/oci-prerequisites.md
-      - guides/OCI/oci-installing-steps.md
-      - Installing HA Topology with UPI and Platform External: guides/OCI/oci-install-ccm.md
-      # - Installing HA Topology with UPI and Platform External and CSI Driver: TODO.md
+    - Oracle Cloud Infrastructure:
+      - guides/OCI/index.md
+      - "Requirements": guides/OCI/init.md
+      - Installing a cluster quickly on OCI with platform agnostic (None): guides/OCI/installing-quickly-agnostic.md
+      - Installing a cluster quickly on OCI with platform external (External): guides/OCI/installing-quickly-external.md
+      - Installing a cluster on OCI with infrastructure customizations: guides/OCI/installing-customization-infra.md
+      - Installing a cluster on OCI using platform external (External) with CCM customizations: guides/OCI/installing-customization-external.md
+      - Installing a cluster on OCI with Assisted Installer: guides/OCI/installing-assisted-installer.md
+      - Setting up the registry storage with OCI Bucket: guides/OCI/setting-registry-storage-bucket.md
+      - Lab / Examples distributed/reused vars: guides/OCI/lab-examples-custom-vars.md
+      - Testing the installation with Kubernetes/OpenShift conformance test suites: guides/OCI/testing-opct-conformance.md
+      - hack/platform external development/building custom components in OKD: guides/OCI/hack/dev-platform-external-custom-release.md
+    - Dev Call - Cloud Provider Opportunities for OKD: guides/opportunities.md
   #- Examples: TODO.md
   - Development:
     - development/index.md

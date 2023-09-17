@@ -86,4 +86,4 @@ ansible localhost \
     -a user_id=${oci_user_id}
 ```
 
-You must be able to collect the user information.
+Ansible should return the user attributes, otherwise check your credentials.

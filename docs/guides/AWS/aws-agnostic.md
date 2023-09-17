@@ -31,7 +31,7 @@ Create and export the environments:
 # OCP: https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/
 DISTRIBUTION="ocp"
 RELEASE_REPO="quay.io/openshift-release-dev/ocp-release"
-VERSION="4.13.0"
+VERSION="4.14.0-rc.0"
 RELEASE_VERSION="${VERSION}-x86_64"
 PULL_SECRET_FILE="${HOME}/.openshift/pull-secret-latest.json"
 ```
@@ -60,7 +60,7 @@ Create the Ansible var files:
 
 
 ```bash
-CLUSTER_NAME="aws-none05"
+CLUSTER_NAME="aws-n414rc0"
 BASE_DOMAIN="devcluster.openshift.com"
 SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
 

@@ -64,44 +64,14 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  # enable modules (include md files)
+  - pymdownx.snippets:
+      check_paths: true
 
 nav:
   - Home:
     - index.md
     - How it works: Getting-started.md
-  - Deployment:
-    - deployment/index.md
-    - Installation Guide: deployment/installing.md
-    - Configurations: deployment/configuration.md
-    - Playbooks:
-      - deployment/playbooks/index.md
-      - Installing Clients: deployment/playbooks/install-clients.md
-      - Create Cluster: TODO.md
-      - Destroy Cluster: TODO.md
-      - Config Create: TODO.md
-      - Config Manifest: TODO.md
-      - Config Patch Manifests: TODO.md
-      - Config Ignitions: TODO.md
-      - OS Mirror: TODO.md
-      - Stack IAM: TODO.md
-      - Stack Network: TODO.md
-      - Stack DNS: TODO.md
-      - Stack Load Balancer: TODO.md
-      - Stack Compute: TODO.md
-      - Approve Certificates: TODO.md
-    - Roles:
-      - deployment/roles/index.md
-      - clients: TODO.md
-      - bootstrap: TODO.md
-      - config: TODO.md
-      - csr_approver: TODO.md
-      - destroy: TODO.md
-      - cloud_compute: TODO.md
-      - cloud_dns: TODO.md
-      - cloud_iam: TODO.md
-      - cloud_load_balancer: TODO.md
-      - cloud_network: TODO.md
-    - Integrating Provider: deployment/integrating.md
   - Guides:
     - guides/index.md
     - AWS:
@@ -110,6 +80,7 @@ nav:
       - Installing HA Topology with UPI and Platform Agnostic: guides/AWS/aws-agnostic.md
       - Installing SNO with Ephemeral storage: guides/AWS/aws-sno.md
       - Installing HA Topology UPI BYO Network: guides/AWS/aws-upi-byo-network.md
+
     - Oracle Cloud Infrastructure:
       - guides/OCI/index.md
       - "Requirements": guides/OCI/init.md
@@ -123,6 +94,49 @@ nav:
       - Testing the installation with Kubernetes/OpenShift conformance test suites: guides/OCI/testing-opct-conformance.md
       - hack/platform external development/building custom components in OKD: guides/OCI/hack/dev-platform-external-custom-release.md
     - Dev Call - Cloud Provider Opportunities for OKD: guides/opportunities.md
+  - Deployment:
+    - deployment/index.md
+    - Installation Guide: deployment/installing.md
+    - Configurations: deployment/configuration.md
+    - Playbooks:
+      - deployment/playbooks/index.md
+      - approve_certs: TODO.md
+      - config_load: TODO.md
+      - create_all: TODO.md
+      - create_node: TODO.md
+      - create_node_all: TODO.md
+      - config_dump: TODO.md
+      - config:
+        - TODO.md
+        - Config Manifest: TODO.md
+        - Config Patch Manifests: TODO.md
+        - Config Ignitions: TODO.md
+      - create_imageregistry: TODO.md
+      - destroy_cluster: TODO.md
+      - destroy_bootstrap: TODO.md
+      - install_clients: TODO.md
+      - os_mirror: TODO.md
+      - stack_dns: TODO.md
+      - stack_loadbalancer: TODO.md
+      - stack_iam: TODO.md
+      - stack_network: TODO.md
+      - ping: TODO.md
+      - var_check_required: TODO.md
+      - Global Vars:
+        - TODO.md
+    - Roles:
+      - deployment/roles/index.md
+      - clients: TODO.md
+      - bootstrap: TODO.md
+      - config: TODO.md
+      - csr_approver: TODO.md
+      - destroy: TODO.md
+      - cloud_compute: TODO.md
+      - cloud_dns: TODO.md
+      - cloud_iam: TODO.md
+      - cloud_load_balancer: TODO.md
+      - cloud_network: TODO.md
+    - Integrating Provider: deployment/integrating.md
   #- Examples: TODO.md
   - Development:
     - development/index.md

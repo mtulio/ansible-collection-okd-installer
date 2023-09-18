@@ -38,6 +38,9 @@ theme:
     - search.suggest
     - content.tabs.link
 
+    # copy clipboard
+    - content.code.copy
+
   font:
     text: Roboto
     code: Roboto Mono
@@ -68,6 +71,14 @@ markdown_extensions:
   - pymdownx.snippets:
       check_paths: true
 
+  # copy clipboard feature (content.code.copy)
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+
 nav:
   - Home:
     - index.md
@@ -76,11 +87,14 @@ nav:
     - guides/index.md
     - AWS:
       - guides/AWS/index.md
-      - Installing HA Topology with UPI: guides/AWS/aws-upi.md
-      - Installing HA Topology with UPI and Platform Agnostic: guides/AWS/aws-agnostic.md
+      - guides/AWS/installing-quickly-agnostic.md
       - Installing SNO with Ephemeral storage: guides/AWS/aws-sno.md
+      - Scripts:
+        - guides/AWS/script/installing-quickly-agnostic.md
+      - "-> Review In Progress:": TODO.md
+      - Installing HA Topology with UPI and Platform Agnostic: guides/AWS/aws-agnostic.md
+      - Installing HA Topology with UPI: guides/AWS/aws-upi.md
       - Installing HA Topology UPI BYO Network: guides/AWS/aws-upi-byo-network.md
-
     - Oracle Cloud Infrastructure:
       - guides/OCI/index.md
       - "Requirements": guides/OCI/init.md

@@ -1,0 +1,5 @@
+DISTRIBUTION="ocp"
+RELEASE_REPO="quay.io/openshift-release-dev/ocp-release"
+VERSION="4.14.0-rc.0"
+RELEASE_VERSION="${VERSION}-x86_64"
+PULL_SECRET_FILE="${HOME}/.openshift/pull-secret-latest.json"

@@ -41,7 +41,7 @@ config_networking_clusternetwork:
 config_networking_machinenetwork:
   - cidr: 10.0.0.0/16
 
-config_networking_networktype: OpenShiftSDN
+config_networking_networktype: OVNKubernetes
 
 config_networking_servicenetwork:
   - 172.30.0.0/16

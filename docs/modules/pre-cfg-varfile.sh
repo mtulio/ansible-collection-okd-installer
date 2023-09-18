@@ -1,19 +1,16 @@
-### Create the vars file
-
-```bash
+# okd-installer config
 cat <<EOF > ${VARS_FILE}
 provider: ${PROVIDER}
 cluster_name: ${CLUSTER_NAME}
 config_cluster_region: ${CLUSTER_REGION}
 
-config_cluster_version: 4.14.0-rc.0
-version: 4.14.0-rc.0
+config_cluster_version: ${VERSION}
+version: ${VERSION}
 
 cluster_profile: ha
 destroy_bootstrap: no
 
 config_base_domain: ${CLUSTER_DOMAIN}
 config_ssh_key: "$(cat ~/.ssh/openshift-dev.pub)"
-config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
+config_pull_secret_file: "${PULL_SECRET_FILE}"
 EOF
-```

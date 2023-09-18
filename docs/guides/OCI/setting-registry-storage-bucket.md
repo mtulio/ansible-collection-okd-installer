@@ -2,6 +2,8 @@
 
 > WIP
 
+https://docs.okd.io/latest/registry/configuring_registry_storage/configuring-registry-storage-aws-user-infrastructure.html
+
 Steps to use the OCI S3 Compatibility API to set the persistent storage for the OpenShift Image Registry with OCI Bucket service.
 
 Steps:

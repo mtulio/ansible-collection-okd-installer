@@ -5,7 +5,7 @@
 
     The [PR #26](https://github.com/mtulio/ansible-collection-okd-installer/pull/26)is under development and is subject to change the whole document described under OCI guides.
 
-Guides for OKD/OCP in Oracle Cloud Infrastructure (OCI):
+Guides for OKD/OCP on Oracle Cloud Infrastructure (OCI):
 
 - [Requirements](./init.md)
 - [Installing a cluster quickly on OCI with platform agnostic (None)](./installing-quickly-agnostic.md)

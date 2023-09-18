@@ -1,4 +1,4 @@
-# OCI PoC - Prerequisites
+# Prerequisites OCI (PoC)
 
 The steps described on this document can be changed from the final version.
 
@@ -87,3 +87,20 @@ ansible localhost \
 ```
 
 Ansible should return the user attributes, otherwise check your credentials.
+
+
+## Export the Compartment used to deploy the cluster
+
+```bash
+cat <<EOF > ~/.oci/env
+# Compartment that the cluster will be installed
+OCI_COMPARTMENT_ID="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
+
+# Compartment that the DNS Zone is created (based domain)
+OCI_COMPARTMENT_ID_DNS="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
+
+# Compartment that the OS Image will be created
+OCI_COMPARTMENT_ID_IMAGE="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
+EOF
+source ~/.oci/env
+```

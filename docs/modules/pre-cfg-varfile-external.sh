@@ -1,8 +1,5 @@
-
-
-```bash
 # Platform External setup only
-cat <<EOF >> ${VARS_FILE}
+cat << EOF >> ${VARS_FILE}
 
 # Define the OS Image mirror
 os_mirror: yes
@@ -18,7 +15,6 @@ os_mirror_to_oci:
   bucket: rhcos-images
   image_type: QCOW2
 
-
 # Available manifest paches (runs after 'create manifest' stage)
 config_patches:
 - rm-capi-machines
@@ -31,6 +27,3 @@ cfg_patch_kubelet_providerid_script: |
     PROVIDERID=\$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/instance/ | jq -r .id);
 
 oci_ccm_namespace: oci-cloud-controller-manager
-
-EOF
-```

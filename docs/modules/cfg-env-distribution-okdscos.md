@@ -6,6 +6,7 @@ To obtain the openshift installer and client, visit releases for stable versions
 Export the variables related to deployment environment:
 
 ```bash
+## Distribution information
 DISTRIBUTION="okd"
 RELEASE_REPO=quay.io/okd/scos-release
 VERSION=4.14.0-0.okd-scos-2023-08-17-022029

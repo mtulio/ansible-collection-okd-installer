@@ -1,6 +1,7 @@
 # okd-installer config
 cat <<EOF > ${VARS_FILE}
-provider: ${PROVIDER}
+provider: ${CONFIG_PROVIDER}
+config_platform: ${CONFIG_PLATFORM}
 cluster_name: ${CLUSTER_NAME}
 config_cluster_region: ${CLUSTER_REGION}
 

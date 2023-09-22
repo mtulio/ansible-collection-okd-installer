@@ -9,9 +9,9 @@ Install an OCP cluster in OCI with Platform External as an option and OCI Cloud 
 - DNS Zone place the DNS zone and exported to variable `${}`
 - Compartment used to store the RHCOS image exported to variable `${}`
 
-## OCP Cluster Setup on OCI
+## Setup with Platform External type and CCM
 
-### Create the vars file
+Create the vars file for okd-installer collection:
 
 ```bash
 cat <<EOF > ~/.oci/env
@@ -88,7 +88,7 @@ oci_ccm_namespace: oci-cloud-controller-manager
 EOF
 ```
 
-### Install the cluster
+## Install the cluster
 
 ```bash
 ansible-playbook mtulio.okd_installer.create_all \
@@ -97,7 +97,33 @@ ansible-playbook mtulio.okd_installer.create_all \
     -e @$VARS_FILE
 ```
 
-### Destroy the cluster
+### Approve certificates
+
+```bash
+oc get csr \
+  -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' \
+  | xargs oc adm certificate approve
+```
+
+## Testing
+
+Setup the test environment (internal registry, labeling and taint worker node, etc):
+
+```bash
+ansible-playbook opct-runner/opct-run-tool-preflight.yaml -e @$VARS_FILE
+```
+
+Run the tests:
+
+> TMP note: remove the `-serial`
+
+```bash
+~/opct/bin/opct-devel run -w --plugins-image openshift-tests-provider-cert:devel-serial &&\
+  ~/opct/bin/opct-devel retrieve &&\
+  ~/opct/bin/opct-devel report *.tar.gz --save-to /tmp/results --server-skip
+```
+
+## Destroy the cluster
 
 ```bash
 ansible-playbook mtulio.okd_installer.destroy_cluster -e @$VARS_FILE

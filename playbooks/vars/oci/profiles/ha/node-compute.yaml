@@ -10,10 +10,10 @@ _shape_config_default:
 
 # Uncomment if you want to run the nodes in the same FD
 #node_compute_single_fault_domain: FAULT-DOMAIN-1
-_compute_fault_domains: # it will be used by index: worker-1 uses index 0...
-  - FAULT-DOMAIN-1
-  - FAULT-DOMAIN-2
-  - FAULT-DOMAIN-3
+default_availability_domain: "gzqB:US-ASHBURN-AD-1"
+default_fault_domain: FAULT-DOMAIN-1
+_compute_availability_domain: "{{ oci_availability_domains }}"
+_compute_fault_domains: "{{ oci_fault_domains }}"
 
 _shape: "{{ compute_shape | d('VM.Standard.E4.Flex') }}"
 _shape_config: "{{ compute_shape_config | d(_shape_config_default) }}"
@@ -54,8 +54,8 @@ compute_resources:
       region: "{{ config_cluster_region }}"
       #freeform_tags: {'Department': 'Finance'}
       #defined_tags: {'Operations': {'CostCenter': 'US'}}
-      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
-      fault_domain: "{{ _compute_fault_domains[0] | d('FAULT-DOMAIN-1') }}"
+      availability_domain: "{{ _compute_availability_domain[0] | d(default_availability_domain) }}"
+      fault_domain: "{{ _compute_fault_domains[0] | d(default_fault_domain) }}"
 
       # platform_config:
       #   type: AMD_VM
@@ -105,8 +105,8 @@ compute_resources:
       region: "{{ config_cluster_region }}"
       #freeform_tags: {'Department': 'Finance'}
       #defined_tags: {'Operations': {'CostCenter': 'US'}}
-      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
-      fault_domain: "{{ _compute_fault_domains[1] | d('FAULT-DOMAIN-2') }}"
+      availability_domain: "{{ _compute_availability_domain[1] | d(default_availability_domain) }}"
+      fault_domain: "{{ _compute_fault_domains[1] | d(default_fault_domain) }}"
 
       # platform_config:
       #   type: AMD_VM
@@ -156,8 +156,8 @@ compute_resources:
       region: "{{ config_cluster_region }}"
       #freeform_tags: {'Department': 'Finance'}
       #defined_tags: {'Operations': {'CostCenter': 'US'}}
-      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
-      fault_domain: "{{ _compute_fault_domains[2] | d('FAULT-DOMAIN-3') }}"
+      availability_domain: "{{ _compute_availability_domain[2] | d(default_availability_domain) }}"
+      fault_domain: "{{ _compute_fault_domains[2] | d(default_fault_domain) }}"
 
       # platform_config:
       #   type: AMD_VM

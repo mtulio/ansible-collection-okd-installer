@@ -5,7 +5,7 @@ _cluster_prefix: "{{ cluster_state.infra_id }}"
 bootstrap_bucket: "{{ _cluster_prefix }}-infra"
 
 # Vars used on Machine/Compute Stack
-_instance_type: "{{ bootstrap_instance | d('m6i.xlarge') }}"
+_instance_type: "{{ bootstrap_instance | d('VM.Standard.E4.Flex') }}"
 _instance_profile: "{{ cluster_state.compute.iam_profile_bootstrap }}"
 # _image_id: "{{ custom_image_id | d(cluster_state.compute.image_id) }}"
 _image_id: "{{ custom_image_id }}"
@@ -15,6 +15,8 @@ _machine_suffix: ''
 
 ## User Data template
 userdata_config_source: "{{ bootstrap_bucket_signed_url }}"
+
+default_availability_domain: "gzqB:US-ASHBURN-AD-1"
 
 ## Common vars used in the Stack vars
 # _common:
@@ -72,10 +74,10 @@ compute_resources:
       region: "{{ config_cluster_region }}"
       #freeform_tags: {'Department': 'Finance'}
       #defined_tags: {'Operations': {'CostCenter': 'US'}}
-      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
+      availability_domain: "{{ default_availability_domain }}"
       # platform_config:
       #   type: AMD_VM
-      shape: "VM.Standard.E4.Flex"
+      shape: "{{ _instance_type }}"
       shape_config:
         ocpus: 4
         memory_in_gbs: 16

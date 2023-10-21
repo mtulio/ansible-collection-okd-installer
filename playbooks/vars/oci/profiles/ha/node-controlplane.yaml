@@ -17,8 +17,8 @@ _shape_config:
 #node_controlplane_single_fault_domain: "FAULT-DOMAIN-1"
 default_availability_domain: "gzqB:US-ASHBURN-AD-1"
 default_fault_domain: FAULT-DOMAIN-1
-_controlplane_availability_domain: "{{ oci_availability_domains }}"
-_controlplane_fault_domains: "{{ oci_fault_domains }}"
+_controlplane_availability_domain: "{{ oci_availability_domains | d([default_availability_domain]) }}"
+_controlplane_fault_domains: "{{ oci_fault_domains | d([default_fault_domain]) }}"
 
 _agent_config:
   are_all_plugins_disabled: true

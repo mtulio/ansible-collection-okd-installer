@@ -54,13 +54,15 @@ OCP_RELEASE_413="quay.io/mrbraga/ocp-release:4.13.0-rc.0-x86_64_platexternal-kcm
 EOF
 source ~/.openshift/env
 
-CLUSTER_NAME=oci-e414rc0
+CLUSTER_NAME=oci-e414rc6ad3
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}
 provider: oci
 cluster_name: ${CLUSTER_NAME}
-config_cluster_region: us-sanjose-1
+
+config_cluster_region: us-ashburn-1
+config_base_domain: us-ashburn-1.splat-oci.devcluster.openshift.com
 
 #TODO: create compartment validations
 #TODO: allow create compartment from a parent
@@ -71,12 +73,11 @@ oci_compartment_id_image: ${OCI_COMPARTMENT_ID_IMAGE}
 cluster_profile: ha
 destroy_bootstrap: no
 
-config_base_domain: splat-oci.devcluster.openshift.com
 config_ssh_key: "$(cat ~/.ssh/id_rsa.pub;cat ~/.ssh/openshift-dev.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
-config_cluster_version: 4.14.0-rc.0
-version: 4.14.0-rc.0
+config_cluster_version: 4.14.0-rc.6
+version: 4.14.0-rc.6
 # config_installer_environment:
 #   OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/mrbraga/ocp-release:4.14.0-rc.0-x86_64_platexternal-kcmo-mco-3cmo"
 
@@ -121,6 +122,17 @@ oci_ccm_version: v1.25.0
 # Customize instance type
 #compute_shape: "BM.Standard.E2.64"
 #compute_shape_config: {}
+
+# spread nodes between "AZs"
+oci_availability_domains:
+- gzqB:US-ASHBURN-AD-1
+- gzqB:US-ASHBURN-AD-2
+- gzqB:US-ASHBURN-AD-3
+
+oci_fault_domains:
+- FAULT-DOMAIN-1
+- FAULT-DOMAIN-2
+- FAULT-DOMAIN-3
 
 EOF
 

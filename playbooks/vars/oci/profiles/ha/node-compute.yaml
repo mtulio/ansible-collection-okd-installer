@@ -12,8 +12,8 @@ _shape_config_default:
 #node_compute_single_fault_domain: FAULT-DOMAIN-1
 default_availability_domain: "gzqB:US-ASHBURN-AD-1"
 default_fault_domain: FAULT-DOMAIN-1
-_compute_availability_domain: "{{ oci_availability_domains }}"
-_compute_fault_domains: "{{ oci_fault_domains }}"
+_compute_availability_domain: "{{ oci_availability_domains | d([default_availability_domain]) }}"
+_compute_fault_domains: "{{ oci_fault_domains | d([default_fault_domain]) }}"
 
 _shape: "{{ compute_shape | d('VM.Standard.E4.Flex') }}"
 _shape_config: "{{ compute_shape_config | d(_shape_config_default) }}"

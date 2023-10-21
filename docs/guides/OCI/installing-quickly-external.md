@@ -31,13 +31,15 @@ Create the vars file for okd-installer collection:
 
 ```bash
 # MCO patch without revendor (w/o disabling FG)
-CLUSTER_NAME=oci-e414rc2
+CLUSTER_NAME=oci-e414rc2ad3v1
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
 cat <<EOF > ${VARS_FILE}
 provider: oci
 cluster_name: ${CLUSTER_NAME}
-config_cluster_region: us-sanjose-1
+
+config_cluster_region: us-ashburn-1
+config_base_domain: us-ashburn-1.splat-oci.devcluster.openshift.com
 
 oci_compartment_id: ${OCI_COMPARTMENT_ID}
 oci_compartment_id_dns: ${OCI_COMPARTMENT_ID_DNS}
@@ -45,8 +47,6 @@ oci_compartment_id_image: ${OCI_COMPARTMENT_ID_IMAGE}
 
 cluster_profile: ha
 destroy_bootstrap: no
-
-config_base_domain: splat-oci.devcluster.openshift.com
 
 config_ssh_key: "$(cat ~/.ssh/openshift-dev.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
@@ -95,6 +95,17 @@ os_mirror_to_oci:
 # Mount control plane as a second volume
 # cfg_patch_mc_varlibetcd:
 #   device_path: /dev/sdb
+
+# spread nodes between "AZs"
+oci_availability_domains:
+- gzqB:US-ASHBURN-AD-1
+- gzqB:US-ASHBURN-AD-2
+- gzqB:US-ASHBURN-AD-3
+
+oci_fault_domains:
+- FAULT-DOMAIN-1
+- FAULT-DOMAIN-2
+- FAULT-DOMAIN-3
 EOF
 ```
 

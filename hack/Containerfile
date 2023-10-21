@@ -2,7 +2,8 @@ FROM quay.io/centos/centos:stream9
 
 ENV ANSIBLE_UNSAFE_WRITES=1
 
-WORKDIR /okd-installer
+WORKDIR /opt/okd-installer
+ENV ANSIBLE_HOME=/opt/okd-installer
 
 RUN dnf install python3-pip -y \
     && dnf clean all

@@ -216,7 +216,7 @@ jobs:
           comment-id: ${{ steps.fbc.outputs.comment-id }}
           body: |
             <!-- id-build-comment -->
-            Artifacts built by CI:
+            Artifacts have been built successfully by CI:
             - Container: ${{ env.IMAGE }}:${{ env.VERSION }}
             - Docs Preview: ${{ steps.verceldeploy.outputs.url }}
           reactions: hooray

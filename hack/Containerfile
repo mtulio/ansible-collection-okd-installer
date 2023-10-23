@@ -2,12 +2,12 @@ FROM quay.io/centos/centos:stream9
 
 ARG QUAY_EXPIRATION=1w
 ARG TARGETARCH=amd64
-ARG TARGETPLATFORM=linux-amd64
+ARG TARGETPLATFORM="linux-amd64"
 ARG TARGETOS=linux
-LABEL quay.expires-after=${QUAY_EXPIRATION} \
-      architecture=$TARGETARCH \
-      platform=$TARGETPLATFORM \
-      os=$TARGETOS
+LABEL quay.expires-after="${QUAY_EXPIRATION}" \
+      architecture="$TARGETARCH" \
+      platform="$TARGETPLATFORM" \
+      os="$TARGETOS"
 
 ENV ANSIBLE_UNSAFE_WRITES=1
 WORKDIR /opt/okd-installer

@@ -7,7 +7,7 @@
 
 Guides for OKD/OCP on Oracle Cloud Infrastructure (OCI):
 
-- [Requirements](./init.md)
+- [Prerequisites](./prerequisites.md)
 - [Installing a cluster quickly on OCI with platform agnostic (None)](./installing-quickly-agnostic.md)
 - [Installing a cluster quickly on OCI with platform external (External)](./installing-quickly-external.md)
 - [Installing a cluster on OCI with infrastructure customizations](./installing-customization-infra.md)

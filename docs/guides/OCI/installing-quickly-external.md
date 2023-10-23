@@ -4,7 +4,7 @@ Install an OCP cluster in OCI with Platform External as an option and OCI Cloud 
 
 ## Prerequisites
 
-- okd-installer Collection with [OCI dependencies installed](./oci-prerequisites.md):
+- okd-installer Collection with [OCI dependencies installed](./prerequisites.md):
 - Compartments used to launch the cluster created and exported to variable `${OCI_COMPARTMENT_ID}`
 - DNS Zone place the DNS zone and exported to variable `${OCI_COMPARTMENT_ID_DNS}`
 - Compartment used to store the RHCOS image exported to variable `${OCI_COMPARTMENT_ID_IMAGE}`

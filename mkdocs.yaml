@@ -97,7 +97,7 @@ nav:
       - Installing HA Topology UPI BYO Network: guides/AWS/aws-upi-byo-network.md
     - Oracle Cloud Infrastructure:
       - guides/OCI/index.md
-      - "Requirements": guides/OCI/init.md
+      - Prerequisites: guides/OCI/prerequisites.md
       - Installing a cluster quickly on OCI with platform agnostic (None): guides/OCI/installing-quickly-agnostic.md
       - Installing a cluster quickly on OCI with platform external (External): guides/OCI/installing-quickly-external.md
       - Installing a cluster on OCI with infrastructure customizations: guides/OCI/installing-customization-infra.md

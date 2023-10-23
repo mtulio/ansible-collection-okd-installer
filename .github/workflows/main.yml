@@ -347,7 +347,7 @@ jobs:
           podman login -u="${QUAY_USER}" -p="${QUAY_PASS}" quay.io
 
           echo "> Build container image:"
-          podman build -t ${IMAGE}:${VERSION} -f hack/Containerfile .
+          podman build --build-arg=QUAY_EXPIRATION=never -t ${IMAGE}:${VERSION} -f hack/Containerfile .
           podman tag ${IMAGE}:${VERSION} ${IMAGE}:${VERSION_BUILD}
 
           echo "> Publish container image:"

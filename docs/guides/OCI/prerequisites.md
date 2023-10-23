@@ -57,7 +57,7 @@ ansible-galaxy collection install -r collections/ansible_collections/mtulio/okd_
 
 
 ```bash
-$ ansible-galaxy collection list |egrep "(okd_installer|^oracle)"
+$ ansible-galaxy collection list |grep -E "(okd_installer|^oracle)"
 mtulio.okd_installer 0.0.0-latest
 oracle.oci           4.23.0
 ```
@@ -66,7 +66,6 @@ oracle.oci           4.23.0
 
 - See [API Key Authentication](https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.11.0/guides/authentication.html#api-key-authentication):
 - See https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#two
-
 
 Make sure your credentials have been set correctly on the file `~/.oci/config` and you can use the OCI ansible collection:
 
@@ -86,8 +85,13 @@ ansible localhost \
     -a user_id=${oci_user_id}
 ```
 
-Ansible should return the user attributes, otherwise check your credentials.
+!!! warning "Python Virtual Environment"
+    If you are getting errors like `oci python sdk required for this module`, even it is already installed from previews steps,
+    and you are using Python Virtual Environment, you must point the `ansible_python_interpreter` to the python interpretar path.
 
+    For example: `ansible localhost -m oracle.oci.oci_identity_user_facts -a user_id=${oci_user_id} -e ansible_python_interpreter=$VIRTUAL_ENV/bin/python3`
+
+Ansible should return the user attributes, otherwise check your credentials.
 
 ## Export the Compartment used to deploy the cluster
 

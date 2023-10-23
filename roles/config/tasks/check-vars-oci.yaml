@@ -1,0 +1,19 @@
+---
+
+- name: Check Vars | oci_compartment_id
+  ansible.builtin.assert:
+    that:
+      - oci_compartment_id is defined
+    fail_msg: "'oci_compartment_id' is not defined"
+
+- name: Check Vars | oci_compartment_id_dns
+  ansible.builtin.assert:
+    that:
+      - oci_compartment_id_dns is defined
+    fail_msg: "'oci_compartment_id_dns' is not defined"
+
+- name: Check Vars | oci_compartment_id_image
+  ansible.builtin.assert:
+    that:
+      - oci_compartment_id_image is defined
+    fail_msg: "'oci_compartment_id_image' is not defined"

@@ -19,4 +19,4 @@ collections:
 # Oracle Cloud Infrastructure Ansible Collections
 # https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.11.0/installation/index.html
 - name: oracle.oci
-  version: '>=4.23.0,<4.24.0'
+  version: '>=4.33.0,<4.34.0'

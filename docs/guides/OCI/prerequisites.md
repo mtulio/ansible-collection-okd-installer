@@ -49,17 +49,24 @@ git clone -b feat-added-provider-oci --recursive \
 - Install the dependencies:
 
 ```bash
-pip install -r collections/ansible_collections/mtulio/okd_installer/requirements.txt
-ansible-galaxy collection install -r collections/ansible_collections/mtulio/okd_installer/requirements.yml
+pip install -Ur collections/ansible_collections/mtulio/okd_installer/requirements.txt
+ansible-galaxy collection install --upgrade -r collections/ansible_collections/mtulio/okd_installer/requirements.yml
 ```
 
-- Check if the collection is present
+- Check if the SDK is installed:
+
+```bash
+$ pip freeze | grep oci
+oci==2.112.4
+```
+
+- Check if the collection is present:
 
 
 ```bash
 $ ansible-galaxy collection list |grep -E "(okd_installer|^oracle)"
 mtulio.okd_installer 0.0.0-latest
-oracle.oci           4.23.0
+oracle.oci           4.33.0
 ```
 
 ### Setup OCI credentials

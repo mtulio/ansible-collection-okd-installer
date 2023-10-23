@@ -57,6 +57,9 @@ source ~/.openshift/env
 CLUSTER_NAME=oci-e414rc6ad3
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
+# if you are using python virtual env, like me ;D, set the interpreter path:
+ANSIBLE_PYTHON_INTERPRETER=${VENV_PATH}/$VIRTUAL_ENV/bin/python3
+
 cat <<EOF > ${VARS_FILE}
 provider: oci
 cluster_name: ${CLUSTER_NAME}
@@ -73,7 +76,7 @@ oci_compartment_id_image: ${OCI_COMPARTMENT_ID_IMAGE}
 cluster_profile: ha
 destroy_bootstrap: no
 
-config_ssh_key: "$(cat ~/.ssh/id_rsa.pub;cat ~/.ssh/openshift-dev.pub)"
+config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
 config_cluster_version: 4.14.0-rc.6

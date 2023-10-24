@@ -1,0 +1,1 @@
+ansible-playbook mtulio.okd_installer.destroy_cluster -e @$VARS_FILE

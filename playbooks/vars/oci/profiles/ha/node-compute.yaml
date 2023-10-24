@@ -1,0 +1,183 @@
+---
+# Vars used on Machine/Compute Stack
+_userdata_path: "{{ config_install_dir }}/worker.ign"
+
+_shape_config_default:
+  ocpus: 4
+  memory_in_gbs: 16
+  #baseline_ocpu_utilization: BASELINE_1_8
+  #nvmes: 1
+
+# Uncomment if you want to run the nodes in the same FD
+#node_compute_single_fault_domain: FAULT-DOMAIN-1
+default_availability_domain: "gzqB:US-ASHBURN-AD-1"
+default_fault_domain: FAULT-DOMAIN-1
+_compute_availability_domain: "{{ oci_availability_domains | d([default_availability_domain]) }}"
+_compute_fault_domains: "{{ oci_fault_domains | d([default_fault_domain]) }}"
+
+_shape: "{{ compute_shape | d('VM.Standard.E4.Flex') }}"
+_shape_config: "{{ compute_shape_config | d(_shape_config_default) }}"
+
+_callbacks:
+  - name: nlb
+    nlb_name: "{{ cluster_state.infra_id }}-nlb"
+    backend_sets:
+    - name: "{{ cluster_state.infra_id }}-ingress-http"
+      port: 80
+    - name: "{{ cluster_state.infra_id }}-ingress-https"
+      port: 443
+
+# Stack Compute (Ansible Role cloud_compute) options:
+compute_resources:
+  #
+  # Node role: compute
+  # Node: worker-01
+  #
+  - provider: oci
+    type: machine
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-compute"
+
+    # OCI spec
+    spec:
+      state: present
+      wait: yes
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-worker-01"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "{{ _compute_availability_domain[0] | d(default_availability_domain) }}"
+      fault_domain: "{{ _compute_fault_domains[0] | d(default_fault_domain) }}"
+
+      # platform_config:
+      #   type: AMD_VM
+      shape: "{{ _shape }}"
+      shape_config: "{{ _shape_config }}"
+
+      agent_config:
+        are_all_plugins_disabled: true
+    
+      source_details:
+        source_type: image
+        boot_volume_size_in_gbs: 120
+        boot_volume_vpus_per_gb: 20
+
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-worker-01-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "worker-01"
+      metadata:
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
+
+    callbacks: "{{ _callbacks }}"
+
+  #
+  # Node role: compute
+  # Node: worker-02
+  #
+  - provider: oci
+    type: machine
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-compute"
+
+    # OCI spec
+    spec:
+      state: present
+      wait: yes
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-worker-02"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "{{ _compute_availability_domain[1] | d(default_availability_domain) }}"
+      fault_domain: "{{ _compute_fault_domains[1] | d(default_fault_domain) }}"
+
+      # platform_config:
+      #   type: AMD_VM
+      shape: "{{ _shape }}"
+      shape_config: "{{ _shape_config }}"
+
+      agent_config:
+        are_all_plugins_disabled: true
+    
+      source_details:
+        source_type: image
+        boot_volume_size_in_gbs: 120
+        boot_volume_vpus_per_gb: 20
+
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-worker-02-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "worker-02"
+      metadata:
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
+
+    callbacks: "{{ _callbacks }}"
+
+  #
+  # Node role: compute
+  # Node: worker-03
+  #
+  - provider: oci
+    type: machine
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-private"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-compute"
+
+    # OCI spec
+    spec:
+      state: present
+      wait: no
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-worker-03"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "{{ _compute_availability_domain[2] | d(default_availability_domain) }}"
+      fault_domain: "{{ _compute_fault_domains[2] | d(default_fault_domain) }}"
+
+      # platform_config:
+      #   type: AMD_VM
+      shape: "{{ _shape }}"
+      shape_config: "{{ _shape_config }}"
+
+      agent_config:
+        are_all_plugins_disabled: true
+    
+      source_details:
+        source_type: image
+        boot_volume_size_in_gbs: 120
+        boot_volume_vpus_per_gb: 20
+
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-worker-03-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "worker-03"
+      metadata:
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"
+
+    callbacks: "{{ _callbacks }}"

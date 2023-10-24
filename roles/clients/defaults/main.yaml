@@ -5,17 +5,15 @@ distro_image:
   ocp: "quay.io/openshift-release-dev/ocp-release"
 
 release_arch: x86_64
-default_version: 4.13.0
+default_version: 4.14.0-rc.0
 # OCP release version has the arch on the sufix
 # https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/
 # OKD does not have the arch on suffix
 # https://amd64.origin.releases.ci.openshift.org/
-# Example: release_version: 4.11.0-0.okd-2022-08-20-022919
+# Example: release_version: 4.14.0-0.okd-scos-2023-08-17-022029
 release_version: "{{ version | d(default_version) }}-{{ release_arch }}"
 
-# https://amd64.origin.releases.ci.openshift.org/
 release_image: "quay.io/openshift-release-dev/ocp-release"
-
 release_image_version_arch: "{{ release_image }}:{{ release_version }}"
 
 workdir: "{{ lookup('env', 'HOME') }}/.ansible/okd-installer"

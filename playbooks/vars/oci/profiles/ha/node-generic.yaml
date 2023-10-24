@@ -1,0 +1,57 @@
+---
+# Vars used on Machine/Compute Stack
+_userdata_path: "{{ config_install_dir }}/worker.ign"
+
+# Stack Compute (Ansible Role cloud_compute) options:
+compute_resources:
+  #
+  # Node role: compute
+  # Node: opct-01
+  #
+  - provider: oci
+    type: machine
+
+    # RHCOS Custom Image
+    image_name: "{{ cluster_state.compute.image_id }}"
+    image_compartment_id: "{{ oci_compartment_id_image | d(oci_compartment_id) }}"
+
+    # Network details
+    vnic_subnet_name: "{{ cluster_state.infra_id }}-net-{{ subnet | d('net-private') }}"
+    network_security_group_names:
+    - "{{ cluster_state.infra_id }}-nsg-{{ nsg | d('nsg-compute') }}"
+
+    # OCI spec
+    spec:
+      state: present
+      wait: yes
+      compartment_id: "{{ oci_compartment_id }}"
+      display_name: "{{ cluster_state.infra_id }}-{{ sufix | d ('generic-01') }}"
+      region: "{{ config_cluster_region }}"
+      #freeform_tags: {'Department': 'Finance'}
+      #defined_tags: {'Operations': {'CostCenter': 'US'}}
+      availability_domain: "gzqB:US-SANJOSE-1-AD-1"
+      fault_domain: FAULT-DOMAIN-1
+
+      # platform_config:
+      #   type: AMD_VM
+      shape: "VM.Standard.E4.Flex"
+      shape_config:
+        ocpus: "{{ cpu  | d(2) }}"
+        memory_in_gbs: "{{ mem  | d(8) }}"
+        #baseline_ocpu_utilization: BASELINE_1_8
+        #nvmes: 1
+      agent_config:
+        are_all_plugins_disabled: true
+    
+      source_details:
+        source_type: image
+        boot_volume_size_in_gbs: 120
+        boot_volume_vpus_per_gb: 20
+
+      create_vnic_details:
+        display_name: "{{ cluster_state.infra_id }}-{{ sufix | d ('generic-01') }}-vnic0"
+        assign_public_ip: false
+        assign_private_dns_record: true
+        hostname_label: "{{ sufix | d ('generic-01') }}"
+      metadata:
+        user_data: "{{ lookup('file', _userdata_path) | b64encode }}"

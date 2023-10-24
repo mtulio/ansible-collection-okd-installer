@@ -1,0 +1,14 @@
+---
+- name: OCI | Bucket | Get the namespace
+  oracle.oci.oci_object_storage_namespace_facts:
+    compartment_id: "{{ oci_compartment_id }}"
+  register: _objns
+
+- name: OCI | Bucket | Delete bootstrap
+  oracle.oci.oci_object_storage_bucket:
+    state: absent
+    compartment_id: "{{ oci_compartment_id }}"
+    name: "{{ cluster_state.infra_id }}-infra"
+    namespace_name: "{{ _objns.namespace }}"
+    force: yes
+    

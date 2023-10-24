@@ -15,3 +15,8 @@ collections:
   version: '>=5.5.0,<5.6'
 - name: amazon.aws
   version: '>=5.5.0,<5.6'
+
+# Oracle Cloud Infrastructure Ansible Collections
+# https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.11.0/installation/index.html
+- name: oracle.oci
+  version: '>=4.33.0,<4.34.0'

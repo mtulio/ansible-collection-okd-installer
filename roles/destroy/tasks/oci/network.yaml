@@ -1,0 +1,81 @@
+---
+- name: OCI | Network | Subnet | Delete
+  oracle.oci.oci_network_subnet:
+    state: absent
+    compartment_id: "{{ vcn.compartment_id }}"
+    display_name: "{{ subnet.spec.display_name }}"
+  environment:
+    OCI_USE_NAME_AS_IDENTIFIER: true
+  loop: "{{ vcn.subnets }}"
+  loop_control:
+    loop_var: subnet
+  register: _del_subnet
+  until: "_del_subnet is not failed"
+  retries: 10
+  delay: 5
+
+- name: OCI | Network | Route Table Public | Delete
+  oracle.oci.oci_network_route_table:
+    state: absent
+    compartment_id: "{{ vcn.compartment_id }}"
+    display_name: "{{ vcn.route_table_public.spec.display_name }}"
+  environment:
+    OCI_USE_NAME_AS_IDENTIFIER: true
+
+- name: OCI | Network | Route Table Private | Delete
+  oracle.oci.oci_network_route_table:
+    state: absent
+    compartment_id: "{{ vcn.compartment_id }}"
+    display_name: "{{ vcn.route_table_private.spec.display_name }}"
+  environment:
+    OCI_USE_NAME_AS_IDENTIFIER: true
+
+- name: OCI | Network | NatGW
+  oracle.oci.oci_network_nat_gateway:
+    state: absent
+    compartment_id: "{{ vcn.compartment_id }}"
+    display_name: "{{ vcn.nat_gateway.spec.display_name }}"
+  environment:
+    OCI_USE_NAME_AS_IDENTIFIER: true
+
+- name: OCI | VCN | IGW | Delete
+  oracle.oci.oci_network_internet_gateway:
+    state: absent
+    compartment_id: "{{ vcn.compartment_id }}"
+    display_name: "{{ vcn.internet_gateway.spec.display_name }}"
+  environment:
+    OCI_USE_NAME_AS_IDENTIFIER: true
+
+- name: OCI | Network | NSG | Delete
+  oracle.oci.oci_network_security_group:
+    state: absent
+    compartment_id: "{{ vcn.compartment_id }}"
+    display_name: "{{ nsg.spec.display_name }}"
+  environment:
+    OCI_USE_NAME_AS_IDENTIFIER: true
+  loop: "{{ vcn.network_security_groups }}"
+  loop_control:
+    loop_var: nsg
+
+- name: OCI | Network | SecList | Delete
+  oracle.oci.oci_network_security_list:
+    state: absent
+    compartment_id: "{{ vcn.compartment_id }}"
+    display_name: "{{ seclist.spec.display_name }}"
+  environment:
+    OCI_USE_NAME_AS_IDENTIFIER: true
+  loop: "{{ vcn.security_lists }}"
+  loop_control:
+    loop_var: seclist
+
+- name: OCI | Network | VCN | Delete
+  oracle.oci.oci_network_vcn:
+    state: absent
+    compartment_id: "{{ vcn.compartment_id }}"
+    display_name: "{{ vcn.name }}"
+  environment:
+    OCI_USE_NAME_AS_IDENTIFIER: true
+  register: oci_destroy_vcn
+  until: "oci_destroy_vcn is not failed"
+  retries: 5
+  delay: 5

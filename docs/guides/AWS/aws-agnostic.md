@@ -31,7 +31,7 @@ Create and export the environments:
 # OCP: https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/
 DISTRIBUTION="ocp"
 RELEASE_REPO="quay.io/openshift-release-dev/ocp-release"
-VERSION="4.13.0"
+VERSION="4.14.0-rc.0"
 RELEASE_VERSION="${VERSION}-x86_64"
 PULL_SECRET_FILE="${HOME}/.openshift/pull-secret-latest.json"
 ```
@@ -60,7 +60,7 @@ Create the Ansible var files:
 
 
 ```bash
-CLUSTER_NAME="aws-none05"
+CLUSTER_NAME="aws-n414rc0"
 BASE_DOMAIN="devcluster.openshift.com"
 SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
 
@@ -163,4 +163,37 @@ while true; do approve_certs; sleep 30; done
 ansible-playbook mtulio.okd_installer.destroy_cluster \
     -e provider=${CONFIG_PROVIDER} \
     -e cluster_name=${CONFIG_CLUSTER_NAME}
+```
+
+
+## Quick install 4.14
+
+```bash
+CLUSTER_NAME=aws-none127
+VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
+
+cat <<EOF > ${VARS_FILE}
+provider: aws
+cluster_name: ${CLUSTER_NAME}
+config_cluster_region: us-east-1
+
+cluster_profile: ha
+# destroy_bootstrap: no
+
+config_base_domain: devcluster.openshift.com
+config_ssh_key: "$(cat ~/.ssh/openshift-dev.pub)"
+config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
+
+config_featureset: TechPreviewNoUpgrade
+
+config_cluster_version: 4.14.0-ec.3
+version: 4.14.0-ec.3
+EOF
+```
+
+```bash
+ansible-playbook mtulio.okd_installer.create_all \
+    -e cert_max_retries=30 \
+    -e cert_wait_interval_sec=60 \
+    -e @$VARS_FILE
 ```

@@ -38,6 +38,9 @@ theme:
     - search.suggest
     - content.tabs.link
 
+    # copy clipboard
+    - content.code.copy
+
   font:
     text: Roboto
     code: Roboto Mono
@@ -64,31 +67,77 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  # enable modules (include md files)
+  - pymdownx.snippets:
+      check_paths: true
+
+  # copy clipboard feature (content.code.copy)
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
 
 nav:
   - Home:
     - index.md
     - How it works: Getting-started.md
+  - Guides:
+    - guides/index.md
+    - AWS:
+      - guides/AWS/index.md
+      - guides/AWS/installing-quickly-agnostic.md
+      - Installing SNO with Ephemeral storage: guides/AWS/aws-sno.md
+      - Scripts:
+        - guides/AWS/script/installing-quickly-agnostic.md
+      - "-> Review In Progress:": TODO.md
+      - Installing HA Topology with UPI and Platform Agnostic: guides/AWS/aws-agnostic.md
+      - Installing HA Topology with UPI: guides/AWS/aws-upi.md
+      - Installing HA Topology UPI BYO Network: guides/AWS/aws-upi-byo-network.md
+    - Oracle Cloud Infrastructure:
+      - guides/OCI/index.md
+      - Prerequisites: guides/OCI/prerequisites.md
+      - Installing a cluster quickly on OCI with platform agnostic (None): guides/OCI/installing-quickly-agnostic.md
+      - Installing a cluster quickly on OCI with platform external (External): guides/OCI/installing-quickly-external.md
+      - Installing a cluster on OCI with infrastructure customizations: guides/OCI/installing-customization-infra.md
+      - Installing a cluster on OCI using platform external (External) with CCM customizations: guides/OCI/installing-customization-external.md
+      - Installing a cluster on OCI with Assisted Installer: guides/OCI/installing-assisted-installer.md
+      - Setting up the registry storage with OCI Bucket: guides/OCI/setting-registry-storage-bucket.md
+      - Lab / Examples distributed/reused vars: guides/OCI/lab-examples-custom-vars.md
+      - Testing the installation with Kubernetes/OpenShift conformance test suites: guides/OCI/testing-opct-conformance.md
+      - hack/platform external development/building custom components in OKD: guides/OCI/hack/dev-platform-external-custom-release.md
+    - Dev Call - Cloud Provider Opportunities for OKD: guides/opportunities.md
   - Deployment:
     - deployment/index.md
     - Installation Guide: deployment/installing.md
     - Configurations: deployment/configuration.md
     - Playbooks:
       - deployment/playbooks/index.md
-      - Installing Clients: deployment/playbooks/install-clients.md
-      - Create Cluster: TODO.md
-      - Destroy Cluster: TODO.md
-      - Config Create: TODO.md
-      - Config Manifest: TODO.md
-      - Config Patch Manifests: TODO.md
-      - Config Ignitions: TODO.md
-      - OS Mirror: TODO.md
-      - Stack IAM: TODO.md
-      - Stack Network: TODO.md
-      - Stack DNS: TODO.md
-      - Stack Load Balancer: TODO.md
-      - Stack Compute: TODO.md
-      - Approve Certificates: TODO.md
+      - approve_certs: TODO.md
+      - config_load: TODO.md
+      - create_all: TODO.md
+      - create_node: TODO.md
+      - create_node_all: TODO.md
+      - config_dump: TODO.md
+      - config:
+        - TODO.md
+        - Config Manifest: TODO.md
+        - Config Patch Manifests: TODO.md
+        - Config Ignitions: TODO.md
+      - create_imageregistry: TODO.md
+      - destroy_cluster: TODO.md
+      - destroy_bootstrap: TODO.md
+      - install_clients: TODO.md
+      - os_mirror: TODO.md
+      - stack_dns: TODO.md
+      - stack_loadbalancer: TODO.md
+      - stack_iam: TODO.md
+      - stack_network: TODO.md
+      - ping: TODO.md
+      - var_check_required: TODO.md
+      - Global Vars:
+        - TODO.md
     - Roles:
       - deployment/roles/index.md
       - clients: TODO.md
@@ -102,19 +151,6 @@ nav:
       - cloud_load_balancer: TODO.md
       - cloud_network: TODO.md
     - Integrating Provider: deployment/integrating.md
-  - Guides:
-    - guides/index.md
-    - AWS:
-      - guides/AWS/index.md
-      - Installing HA Topology with UPI: guides/AWS/aws-upi.md
-      - Installing HA Topology with UPI and Platform Agnostic: guides/AWS/aws-agnostic.md
-      - Installing SNO with Ephemeral storage: guides/AWS/aws-sno.md
-      - Installing HA Topology UPI BYO Network: guides/AWS/aws-upi-byo-network.md
-    # - Digital Ocean: TODO.md
-    # - Oracle Cloud:
-    #   - Installing HA Topology with UPI and Platform Agnostic: TODO.md
-    #   - Installing HA Topology with UPI and Platform External: TODO.md
-    #   - Installing HA Topology with UPI and Platform External and CSI Driver: TODO.md
   #- Examples: TODO.md
   - Development:
     - development/index.md

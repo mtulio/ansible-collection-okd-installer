@@ -5,7 +5,8 @@
 [![](https://img.shields.io/ansible/collection/1867)](https://galaxy.ansible.com/mtulio/okd_installer)
 
 
-Ansible Collection to install OKD/OpenShift clusters with customization.
+Ansible Collection okd-installer allow you to keep infrastructure required to deploy
+OKD/OCP as a code in non-integrated providrs or UPI installation method.
 
 - [Summary](#summary)
 - [Content](#content)

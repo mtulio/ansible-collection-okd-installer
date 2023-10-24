@@ -11,3 +11,6 @@ botocore
 
 # kubernetes Collection
 kubernetes
+
+# provider: Oracle Cloud/OCI
+oci>=2.112.4,<2.113

@@ -1,0 +1,39 @@
+---
+# NOTE: there is not guarantee that it would work.
+# The Platform=External should have precedence before testing this approach.
+
+- name: Patch | mc-kubelet-providerid | Check requirements
+  ansible.builtin.assert:
+    that:
+    - cfg_patch_kubelet_providerid_script is defined
+    fail_msg: "'cfg_patch_kubelet_providerid_script' is required to use patch 'mc-kubelet-providerid'"
+
+- name: Patch | mc-kubelet-providerid | Set tmp dir
+  ansible.builtin.set_fact:
+    cluster_tmp_dir: "{{ config_install_dir }}/.tmp"
+
+- name: Patch | mc-kubelet-providerid | ensure tmp dir
+  ansible.builtin.file:
+    dest: "{{ cluster_tmp_dir }}"
+    state: directory
+
+- name: Patch | mc-kubelet-providerid | Create kubelet providerID
+  ansible.builtin.template:
+    src: patches/mc-kubelet-providerid.bu.j2
+    dest: "{{ cluster_tmp_dir }}/99_openshift-machineconfig_00-{{ machine_role }}-kubelet-providerid.bu"
+  loop_control:
+    loop_var: machine_role
+  loop:
+  - master
+  - worker
+
+- name: Patch | mc-kubelet-providerid | Render butane config
+  ansible.builtin.shell: |
+    {{ bin_butane }} \
+      {{ cluster_tmp_dir }}/99_openshift-machineconfig_00-{{ machine_role }}-kubelet-providerid.bu \
+      -o {{ config_install_dir }}/openshift/99_openshift-machineconfig_00-{{ machine_role }}-kubelet-providerid.yaml
+  loop_control:
+    loop_var: machine_role
+  loop:
+  - master
+  - worker

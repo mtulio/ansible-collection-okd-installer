@@ -1,0 +1,24 @@
+---
+# placeholder
+okd_cluster_destroy_instances_compartment_id: "{{ oci_compartment_id }}"
+okd_cluster_destroy_instances:
+  - name: "{{ cluster_state.infra_id }}-bootstrap"
+  - name: "{{ cluster_state.infra_id }}-master-01"
+  - name: "{{ cluster_state.infra_id }}-master-02"
+  - name: "{{ cluster_state.infra_id }}-master-03"
+  - name: "{{ cluster_state.infra_id }}-worker-01"
+  - name: "{{ cluster_state.infra_id }}-worker-02"
+  - name: "{{ cluster_state.infra_id }}-worker-03"
+    wait: yes
+    wait_timeout: 120
+
+okd_cluster_destroy_dns_compartment_id: "{{ oci_compartment_id_dns | d(oci_compartment_id) }}"
+okd_cluster_destroy_dns_records:
+  zone_name_or_id: "{{ cluster_state.dns.base_domain }}"
+  patch_items_spec:
+  - operation: REMOVE
+    domain: "api.{{ cluster_state.dns.cluster_domain }}"
+  - operation: REMOVE
+    domain: "api-int.{{ cluster_state.dns.cluster_domain }}"
+  - operation: REMOVE
+    domain: "*.apps.{{ cluster_state.dns.cluster_domain }}"

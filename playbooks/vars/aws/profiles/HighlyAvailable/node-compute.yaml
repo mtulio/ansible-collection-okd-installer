@@ -5,7 +5,7 @@ openshift_instance_type: "{{ compute_instance | d('m6i.xlarge') }}"
 openshift_instance_profile: "{{ cluster_state.compute.iam_profile_compute }}"
 # TODO: fix image lookup for agnostic installations
 #openshift_image_id: "{{ cluster_state.compute.image_id }}"
-openshift_image_id: "ami-0722eb0819717090f"
+openshift_image_id: "{{ custom_image_id | d('ami-0a4a3456fc86deabc') }}"
 openshift_security_groups:
   - "{{ openshift_prefix }}-compute-sg"
 openshift_tags: "{{ cluster_state.tags }}"

@@ -1,0 +1,16 @@
+---
+# NOTE: there is not guarantee that it would work.
+# The Platform=External should have precedence before testing this approach.
+
+# Requires to cfg_patch_kubelet_env_workaround_content
+## Each line should have the script generating the data to append to the
+## kubelet workaround file.
+- name: Crete kubelet config
+  ansible.builtin.template:
+    src: patches/mc-kubelet-env.yaml.j2
+    dest: "{{ config_install_dir }}/openshift/99_openshift-machineconfig_00-{{ machine_role }}-kubelet-env-wa.yaml"
+  loop_control:
+    loop_var: machine_role
+  loop:
+  - master
+  - worker

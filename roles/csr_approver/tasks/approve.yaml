@@ -11,6 +11,10 @@
     kind: CertificateSigningRequest
     kubeconfig: "{{ config_install_dir }}/auth/kubeconfig"
   register: all_csr
+  until: "all_csr | length > 0"
+  retries: 12
+  delay: 5
+  no_log: true
 
 - name: Approver | Set pending list
   ansible.builtin.set_fact:

@@ -84,7 +84,7 @@ cloud_networks:
   - name: "{{ cluster_state.infra_id }}-vpc"
     block: "{{ okd_net_default_cidr }}"
     provider: aws
-    region: "{{ provider_region }}"
+    region: "{{ cluster_state.region }}"
     security_groups: "{{ security_groups | d([]) }}"
     tags: "{{ cluster_state.tags | d({}) }}"
 
@@ -109,20 +109,20 @@ cloud_networks:
 
     subnets:
       - name: "{{ cluster_state.infra_id }}-net-public-1a"
-        az: "{{ provider_region }}a"
+        az: "{{ cluster_state.region }}a"
         cidr: 10.0.16.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-public"
         map_public: yes
 
       - name: "{{ cluster_state.infra_id }}-net-private-1a"
-        az: "{{ provider_region }}a"
+        az: "{{ cluster_state.region }}a"
         cidr: 10.0.48.0/22
         route_table: "{{ cluster_state.infra_id }}-rt-private"
         map_public: no
 
     endpoint_services:
       - name: s3
-        service: "com.amazonaws.{{ provider_region }}.s3"
+        service: "com.amazonaws.{{ cluster_state.region }}.s3"
         route_tables:
           - "{{ cluster_state.infra_id }}-rt-public"
           - "{{ cluster_state.infra_id }}-rt-private"

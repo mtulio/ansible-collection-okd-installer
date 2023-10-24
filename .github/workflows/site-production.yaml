@@ -1,6 +1,5 @@
 # Workflow for deploying static content to GitHub Pages
 name: github-pages
-
 on:
   push:
     branches: ["main"]

@@ -10,9 +10,9 @@ on:
   schedule:
     - cron: "0 5 * * 0"
 
-defaults:
-  run:
-    working-directory: 'mtulio.okd_installer'
+# defaults:
+  # run:
+    # working-directory: 'mtulio.okd_installer'
 
 jobs:
 
@@ -24,7 +24,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
+          # path: 'mtulio.okd_installer'
           submodules: recursive
 
       - name: Set up Python 3.
@@ -60,7 +60,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
+          # path: 'mtulio.okd_installer'
           submodules: recursive
 
       - name: Set up Python 3.
@@ -90,8 +90,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Build Collection
@@ -132,8 +132,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Download artifacts
@@ -189,16 +189,16 @@ jobs:
           echo "Discovered Preview URL: ${PREVIEW_URL}"
           echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
-      # Commenting in PR
-      - name: Find comment
-        uses: peter-evans/find-comment@v2
-        id: fbc
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: '<!-- id-build-comment -->'
+      # Commenting in PR the build information (force to always create a comment)
+      # - name: Find comment
+      #   uses: peter-evans/find-comment@v2
+      #   id: fbc
+      #   with:
+      #     issue-number: ${{ github.event.pull_request.number }}
+      #     comment-author: 'github-actions[bot]'
+      #     body-includes: '<!-- id-build-comment -->'
       - name: Create comment
-        if: steps.fbc.outputs.comment-id == ''
+        # if: steps.fbc.outputs.comment-id == ''
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -208,19 +208,18 @@ jobs:
             - Container: ${{ env.IMAGE }}:${{ env.VERSION }}
             - Docs Preview: ${{ steps.verceldeploy.outputs.url }}
           reactions: rocket
-
-      - name: Update comment
-        if: steps.fbc.outputs.comment-id != ''
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          comment-id: ${{ steps.fbc.outputs.comment-id }}
-          body: |
-            <!-- id-build-comment -->
-            Artifacts built by CI:
-            - Container: ${{ env.IMAGE }}:${{ env.VERSION }}
-            - Docs Preview: ${{ steps.verceldeploy.outputs.url }}
-          reactions: hooray
-          edit-mode: replace
+      # - name: Update comment
+      #   if: steps.fbc.outputs.comment-id != ''
+      #   uses: peter-evans/create-or-update-comment@v3
+      #   with:
+      #     comment-id: ${{ steps.fbc.outputs.comment-id }}
+      #     body: |
+      #       <!-- id-build-comment -->
+      #       Artifacts built by CI:
+      #       - Container: ${{ env.IMAGE }}:${{ env.VERSION }}
+      #       - Docs Preview: ${{ steps.verceldeploy.outputs.url }}
+      #     reactions: hooray
+      #     edit-mode: replace
 
   # Build a container image on main branch, publishing the 'latest' to repository.
   publish-container-latest:
@@ -232,8 +231,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Download artifacts
@@ -278,8 +277,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Get version
@@ -315,8 +314,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: 'mtulio.okd_installer'
-          fetch-depth: 5
+          # path: 'mtulio.okd_installer'
+          # fetch-depth: 5
           submodules: recursive
 
       - name: Get version
@@ -348,7 +347,7 @@ jobs:
           podman login -u="${QUAY_USER}" -p="${QUAY_PASS}" quay.io
 
           echo "> Build container image:"
-          podman build -t ${IMAGE}:${VERSION} -f hack/Containerfile .
+          podman build --build-arg=QUAY_EXPIRATION=never -t ${IMAGE}:${VERSION} -f hack/Containerfile .
           podman tag ${IMAGE}:${VERSION} ${IMAGE}:${VERSION_BUILD}
 
           echo "> Publish container image:"

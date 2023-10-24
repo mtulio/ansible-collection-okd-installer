@@ -1,0 +1,24 @@
+---
+
+# https://docs.oracle.com/en-us/iaas/tools/oci-ansible-collection/4.12.0/collections/oracle/oci/oci_dns_zone_module.html#ansible-collections-oracle-oci-oci-dns-zone-module
+
+cloud_dns_zones:
+  # public
+  - name: "{{ cluster_state.dns.base_domain }}"
+    provider: oci
+    spec:
+      # scope: GLOBAL
+      # zone_type: PRIMARY
+      compartment_id: "{{ oci_compartment_id_dns | d(oci_compartment_id) }}"
+
+  # OCI is using subnet's zone.
+  # TODO: Need to check if will not conflict with custom private zone.
+  # Currently the cluster is resolving the DNS using the public zone.
+  # private
+  # - name: "{{ cluster_state.dns.cluster_domain }}"
+  #   provider: oci
+  #   view_name: "{{ cluster_state.infra_id }}-vcn"
+  #   spec:
+  #     scope: PRIVATE
+  #     zone_type: PRIMARY
+  #     compartment_id: "{{ oci_compartment_id_dns | d(oci_compartment_id) }}"

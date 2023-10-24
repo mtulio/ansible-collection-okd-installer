@@ -47,3 +47,6 @@
     that:
       - _stat_installer.stat.exists
     fail_msg: "Installer binary is not present on path '{{ bin_openshift_install }}'. Run install_clients playbook first"
+
+- name: Check Vars | Provider
+  include: "./check-vars-{{ provider }}.yaml"

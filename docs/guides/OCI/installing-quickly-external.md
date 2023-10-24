@@ -25,14 +25,30 @@ EOF
 source ~/.oci/env
 ```
 
+- If you are using python virtual env, like me ;D, set the interpreter path:
+
+```bash
+ANSIBLE_PYTHON_INTERPRETER=${VENV_PATH}/$VIRTUAL_ENV/bin/python3
+```
+
 ## Setup with Platform External type and CCM
 
 Create the vars file for okd-installer collection:
 
+!!! warning "Ensure variables are defined"
+    Make sure all variables is defined, otherwise you may get unexpected failures.
+    ```sh
+    echo -e "OCI_COMPARTMENT_ID=${OCI_COMPARTMENT_ID}"
+    echo -e "OCI_COMPARTMENT_ID_DNS=${OCI_COMPARTMENT_ID_DNS}"
+    echo -e "OCI_COMPARTMENT_ID_IMAGE=${OCI_COMPARTMENT_ID_IMAGE}"
+    ```
+
 ```bash
-# MCO patch without revendor (w/o disabling FG)
-CLUSTER_NAME=oci-e414rc2ad3v1
+CLUSTER_NAME=oci-e414rc7v1
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
+
+# if you are using python virtual env, like me ;D, set the interpreter path:
+ANSIBLE_PYTHON_INTERPRETER=${VENV_PATH}/$VIRTUAL_ENV/bin/python3
 
 cat <<EOF > ${VARS_FILE}
 provider: oci
@@ -48,11 +64,11 @@ oci_compartment_id_image: ${OCI_COMPARTMENT_ID_IMAGE}
 cluster_profile: ha
 destroy_bootstrap: no
 
-config_ssh_key: "$(cat ~/.ssh/openshift-dev.pub)"
+config_ssh_key: "$(cat ~/.ssh/id_rsa.pub)"
 config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
-config_cluster_version: 4.14.0-rc.2
-version: 4.14.0-rc.2
+config_cluster_version: 4.14.0-rc.7
+version: 4.14.0-rc.7
 
 # Platform External setup
 config_platform: external
@@ -61,7 +77,6 @@ config_platform_spec: '{"platformName":"oci"}'
 # Available manifest paches (runs after 'create manifest' stage)
 config_patches:
 - rm-capi-machines
-- mc_varlibetcd
 - mc-kubelet-providerid
 - deploy-oci-ccm
 #- deploy-oci-csi
@@ -85,16 +100,6 @@ os_mirror_to_oci:
   compartment_id: ${OCI_COMPARTMENT_ID_IMAGE}
   bucket: rhcos-images
   image_type: QCOW2
-
-# Experimental: increase the boot volume performance
-# controlplane_source_details:
-#   source_type: image
-#   boot_volume_size_in_gbs: 1200
-#   boot_volume_vpus_per_gb: 120
-
-# Mount control plane as a second volume
-# cfg_patch_mc_varlibetcd:
-#   device_path: /dev/sdb
 
 # spread nodes between "AZs"
 oci_availability_domains:

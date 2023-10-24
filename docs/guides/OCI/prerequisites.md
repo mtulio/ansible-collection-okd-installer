@@ -21,9 +21,10 @@ hash_behavior=merge
 [inventory]
 enable_plugins = yaml, ini
 
+# https://docs.ansible.com/ansible/latest/collections/ansible/posix/profile_tasks_callback.html
 [callback_profile_tasks]
-task_output_limit=1000
-sort_order=none
+task_output_limit=25
+sort_order=descending
 EOF
 ```
 

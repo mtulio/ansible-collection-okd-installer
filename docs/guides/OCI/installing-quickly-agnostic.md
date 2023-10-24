@@ -27,37 +27,41 @@ Install OCP/OKD Cluster on Oracle Cloud Infrastructure using agnostic installati
 
 ## Prerequisites
 
-Read [here](./oci-prerequisites.md)
+- okd-installer Collection with [OCI dependencies installed](./prerequisites.md):
+- Compartments used to launch the cluster created and exported to variable `${OCI_COMPARTMENT_ID}`
+- DNS Zone place the DNS zone and exported to variable `${OCI_COMPARTMENT_ID_DNS}`
+- Compartment used to store the RHCOS image exported to variable `${OCI_COMPARTMENT_ID_IMAGE}`
 
-## Installing OpenShift/OKD
-
-### Create the vars file
+Example:
 
 ```bash
 cat <<EOF > ~/.oci/env
-# Compartment where the cluster will be installed
+# Compartment that the cluster will be installed
 OCI_COMPARTMENT_ID="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
 
 # Compartment that the DNS Zone is created (based domain)
-# Only RR will be added
 OCI_COMPARTMENT_ID_DNS="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
 
 # Compartment that the OS Image will be created
 OCI_COMPARTMENT_ID_IMAGE="<CHANGE_ME:ocid1.compartment.oc1.UUID>"
 EOF
 source ~/.oci/env
+```
 
-cat <<EOF > ~/.openshift/env
-export OCP_CUSTOM_RELEASE="quay.io/mtulio/ocp-release:latest"
+- If you are using python virtual env, like me ;D, set the interpreter path:
 
-OCP_RELEASE_413="quay.io/mrbraga/ocp-release:4.13.0-rc.0-x86_64_platexternal-kcmo-mco-3cmo"
-EOF
-source ~/.openshift/env
+```bash
+ANSIBLE_PYTHON_INTERPRETER=${VENV_PATH}/$VIRTUAL_ENV/bin/python3
+```
 
-CLUSTER_NAME=oci-e414rc6ad3
+## Installing OpenShift/OKD
+
+### Create the vars file
+
+```bash
+CLUSTER_NAME=oci-n414rc6
 VARS_FILE=./vars-oci-ha_${CLUSTER_NAME}.yaml
 
-# if you are using python virtual env, like me ;D, set the interpreter path:
 ANSIBLE_PYTHON_INTERPRETER=${VENV_PATH}/$VIRTUAL_ENV/bin/python3
 
 cat <<EOF > ${VARS_FILE}
@@ -67,8 +71,6 @@ cluster_name: ${CLUSTER_NAME}
 config_cluster_region: us-ashburn-1
 config_base_domain: us-ashburn-1.splat-oci.devcluster.openshift.com
 
-#TODO: create compartment validations
-#TODO: allow create compartment from a parent
 oci_compartment_id: ${OCI_COMPARTMENT_ID}
 oci_compartment_id_dns: ${OCI_COMPARTMENT_ID_DNS}
 oci_compartment_id_image: ${OCI_COMPARTMENT_ID_IMAGE}
@@ -81,11 +83,6 @@ config_pull_secret_file: "${HOME}/.openshift/pull-secret-latest.json"
 
 config_cluster_version: 4.14.0-rc.6
 version: 4.14.0-rc.6
-# config_installer_environment:
-#   OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE: "quay.io/mrbraga/ocp-release:4.14.0-rc.0-x86_64_platexternal-kcmo-mco-3cmo"
-
-# Define the OS Image mirror
-# custom_image_id: rhcos-412.86.202212081411-0-openstack.x86_64
 
 os_mirror: yes
 os_mirror_from: stream_artifacts
@@ -100,45 +97,9 @@ os_mirror_to_oci:
   bucket: rhcos-images
   image_type: QCOW2
 
-## Apply patches to installer manifests (WIP)
-# TODO: we must keep the OCI CCM manifests patch more generic
-
 config_patches:
 - rm-capi-machines
-- mc-kubelet-providerid
-- deploy-oci-ccm
-- deploy-oci-csi
-- yaml_patch
-
-cfg_patch_yaml_patch_specs:
-    ## patch infra object to create External provider
-  - manifest: /manifests/cluster-infrastructure-02-config.yml
-    patch: '{"spec":{"platformSpec":{"type":"External","external":{"platformName":"oci"}}},"status":{"platform":"External","platformStatus":{"type":"External","external":{}}}}'
-
-cfg_patch_kubelet_providerid_script: |
-    PROVIDERID=\$(curl -H "Authorization: Bearer Oracle" -sL http://169.254.169.254/opc/v2/instance/ | jq -r .id);
-
-# using kube-system and downloading manifests from github
-oci_ccm_namespace: kube-system
-oci_ccm_version: v1.25.0
-
-# Customize instance type
-#compute_shape: "BM.Standard.E2.64"
-#compute_shape_config: {}
-
-# spread nodes between "AZs"
-oci_availability_domains:
-- gzqB:US-ASHBURN-AD-1
-- gzqB:US-ASHBURN-AD-2
-- gzqB:US-ASHBURN-AD-3
-
-oci_fault_domains:
-- FAULT-DOMAIN-1
-- FAULT-DOMAIN-2
-- FAULT-DOMAIN-3
-
 EOF
-
 ```
 
 ### Install the clients
